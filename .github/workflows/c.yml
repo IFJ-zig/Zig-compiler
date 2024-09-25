@@ -16,8 +16,8 @@ jobs:
           sparse-checkout: |
             .github
             src
-      - name: list
-        run: ls && pwd
+      - name: checkout
+        run: cd src
       - name: make
         run: make
       - name: make check
