@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout
-        run: cd src/
       - uses: actions/checkout@v4
       - name: configure
         run: ./configure
+      - name: checkout
+        run: cd src
       - name: make
         run: make
       - name: make check
