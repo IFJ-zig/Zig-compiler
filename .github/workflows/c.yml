@@ -17,6 +17,5 @@ jobs:
             .github
             src
       - name: Run make in src folder
-        working-directory: src
         run: |
           make
