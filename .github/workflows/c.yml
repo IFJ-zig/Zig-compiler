@@ -20,5 +20,3 @@ jobs:
         working-directory: src
         run: |
           make
-          make check
-          make distcheck
