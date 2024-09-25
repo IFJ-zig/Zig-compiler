@@ -18,6 +18,8 @@ jobs:
             src
       - name: checkout
         run: cd src
+      - name: list
+        run: ls && pwd
       - name: make
         run: make
       - name: make check
