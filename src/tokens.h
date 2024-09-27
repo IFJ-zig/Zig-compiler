@@ -9,24 +9,26 @@
 #include <stdlib.h> // malloc, free
 #include <stddef.h> //NULL
 #include <string.h> //strcat,cmp,cpy,len
-#include <time.h> //time
+
 
 typedef enum {num,   text, decim,    id,
             //čislo, text, desetiné, názvy
-            dtint,     dtstr,  dtdbl, dtnic, dtintn, dtstrn, dtdbln,
-            //integer, string, Double, nil,  int?,   str?,   double?
-            inres,   inrei, inred, inwrt, ini2d,  ind2i,
-            //reads, readi, readD, write, int2dbl,dbl2int
-            inlen,   inssub,    inord, inchr,
-            //length, substring, ord,   chr
-            kdyz, jinak, loop,  funk, back,   konst, prom,
-            //if, else,  while, func, return, let,   var
-            rovno, less, more, lequal, mequal, equal, nequal, choice,
-            //=,   <,    >,    <=,     >=,     ==,    !=,     ??
-            plus, minus, krat, deleno, nonnil,
-            //+,  -,     *,    /,      !
-            dvojt, line, next, rettyp, pass,
-            //:,     ,   \n,   ->,     _,
+            dtint, dtstr, dtflt, dtvoid, konst, prom, nic,
+            //i32, u8,    f64,   void,   const, var,  null
+            inord, inchr, inlen,  inssub,    inccat, inu2s,  inscmp,
+            //ord, chr,   length, substring, concat, string, strcmp
+            inres,     inrei,   inref,   inwrt, ini2f, inf2i,
+            //readstr, readi32, readf64, write, i2f,   f2i
+            kdyz, jinak, loop,  funk, back,  verejna, hlavni, inbild, inport,
+            //if, else,  while, fn,   return,pub,     main,   ifj,    import
+            dvojt, line, next, pass, tecka,
+            //:,    ,    ;,    _,    .
+            plus, minus, krat, deleno,
+            //+,  -,     *,    /
+            choice, zavin, popodm, hranzav,
+            //?,    @,     |,      []
+            rovno, less, more, lequal, mequal, equal, nequal,
+            //=,   <,    >,    <=,     >=,     ==,    !=,
             lzavor, pzavor, lblok, pblok, end
             //(,    ),      {,     },     konec
 }KeyWord;
