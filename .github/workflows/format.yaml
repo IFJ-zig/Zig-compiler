@@ -14,7 +14,7 @@ jobs:
       run: sudo apt-get install clang-format
 
     - name: Run clang-format
-      run: clang-format -i *.c *.h
+      run: clang-format -i src/*.c src/*.h
 
     - name: Check if formatting is correct
       run: git diff --exit-code
