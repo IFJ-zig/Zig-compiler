@@ -1,29 +1,15 @@
-# IFJ/IAL School Group Project (ChatGPT generated)
+# IFJ24 Project
 
 ## Project Overview
 
-This project is part of the **IFJ** (Formal Languages and Compilers) and **IAL** (Algorithms) courses and involves implementing a compiler using the Zig programming language (version 0.13). Our implementation will translate code into **IFJcode24**, a three-address, stack-based target code.
-
-We are a team of 4 students, tasked with creating this compiler over the course of the semester. The project includes both code implementation and comprehensive documentation, with each component contributing to the final grade.
+Compiler for imperative language Zig. Build using C.
 
 ## Team Members
 
-- **Student 1**: Responsible for [specific module/task].
-- **Student 2**: Responsible for [specific module/task].
-- **Student 3**: Responsible for [specific module/task].
-- **Student 4**: Responsible for [specific module/task].
-
-## Project Structure
-
-The project is built using **C**. **Zig** an imperative, statically typed language with type inference and immutable variables. It features local variables, data types such as `i32`, `f64`, and `[]u8` (but not for literals), and prefix `?` for null types.
-
-The compiler will handle:
-
-- User-defined and built-in functions.
-- Operations with `stdin/stdout`.
-- String handling and conversions.
-
-The final output is **IFJcode24**, a three-address stack-based code. The compilation will be done using **Visual Studio Code** with the [IFJcode24 extension](https://marketplace.visualstudio.com/items?itemName=okrejci.ippc-ifjc).
+- **xbohatd00**: Responsible for [specific module/task].
+- **xvozdaa00**: Responsible for [specific module/task].
+- **xhorakt00**: Responsible for [specific module/task].
+- **xpuchn02**: Responsible for Lexical analysis.
 
 ## Grading Breakdown
 
@@ -34,5 +20,11 @@ The final output is **IFJcode24**, a three-address stack-based code. The compila
 - **5 points** for additional activities (e.g., extensions, forum activity, bug reports, or competitions).
 - **5 points** for the final project defense.
   - An additional 5 points for **IAL** will be based on the defense.
+ 
+## Useful links
+
+- [IFJ E-Learning](https://moodle.vut.cz/course/view.php?id=280931)
+- [Zadání projektu (pdf)](https://www.fit.vut.cz/study/course/IFJ/private/projekt/ifj2024.pdf)
+- [IFJ Youtube stream](https://www.youtube.com/playlist?list=PL_eb8wrKJwYv5QeMHsmWNBKohVDK6yqHk)
 
 To be continued...
