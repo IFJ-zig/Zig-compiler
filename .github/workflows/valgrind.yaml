@@ -19,6 +19,7 @@ jobs:
 
     - name: Build project
       run: make
-
+    - name: List
+      run: ls && cd build && ls
     - name: Run valgrind to check for memory leaks
       run: valgrind --leak-check=full ./build/prekladac
