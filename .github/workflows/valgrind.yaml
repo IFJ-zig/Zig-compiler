@@ -22,4 +22,4 @@ jobs:
     - name: List
       run: ls && cd build && ls
     - name: Run valgrind to check for memory leaks
-      run: valgrind --leak-check=full ./build/prekladac
+      run: valgrind --leak-check=full ./prekladac
