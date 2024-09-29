@@ -27,4 +27,11 @@ Compiler for imperative language Zig. Build using C.
 - [Zadání projektu (pdf)](https://www.fit.vut.cz/study/course/IFJ/private/projekt/ifj2024.pdf)
 - [IFJ Youtube stream](https://www.youtube.com/playlist?list=PL_eb8wrKJwYv5QeMHsmWNBKohVDK6yqHk)
 
+## Documentation
+To generate doxygen documentation simply type 
+```console
+foo@bar:~/IFJ-Zig-compiler$ doxygen
+```
+
+
 To be continued...
