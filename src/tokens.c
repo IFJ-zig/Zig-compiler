@@ -11,16 +11,16 @@ void ListInit(List *L) {
 	L->last = NULL;
 }
 
-int LInsertLast(List *L, KeyWord key, int *a, double *b, char *c) {
+int LInsertLast(List *L, KeyWord key, int *i, double *f, char *s) {
 	//přidá token na konec, pokud je list prázdný, je přidaný i prvním
 	Token *new = (Token *)malloc(sizeof(Token));
 	if (new == NULL) {
 		return 1;
 	} else {
 		new->kw = key;
-		new->i = a;
-		new->f = b;
-		new->s = c;
+		new->i = i;
+		new->f = f;
+		new->s = s;
 		if (L->last != NULL) {
 			new->next = L->last->next;
 			L->last->next = new;
