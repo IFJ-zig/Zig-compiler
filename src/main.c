@@ -4,19 +4,25 @@
 *********************************************/
 #include "tokens.h"
 
-int main(){
-    List *pL;
-    if (!(pL= (List*)malloc(sizeof(List)))){return 99;}
-    ListInit(pL);
+int main() {
+	List *pL;
+	if (!(pL = (List *)malloc(sizeof(List)))) {
+		return 99;
+	}
+	ListInit(pL);
 
-    //Lexikální analýza
-    int err = Lexem_analyzer(pL);
-    if(err){LDestroy(pL);free(pL);return err;}
+	//Lexikální analýza
+	int err = Lexem_analyzer(pL);
+	if (err) {
+		LDestroy(pL);
+		free(pL);
+		return err;
+	}
 
-    //TODO další kontroly a generace kodu
+	//TODO další kontroly a generace kodu
 
-    LDestroy(pL);
-    free(pL);
+	LDestroy(pL);
+	free(pL);
 
-    return 0;
+	return 0;
 }
