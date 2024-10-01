@@ -32,37 +32,37 @@ int Lexem_analyzer(List *L) {
 				letter = getchar();
 				break;
 			case ':':
-				LInsertLast(L, dvojt, NULL, NULL, NULL);
+				LInsertLast(L, colon, NULL, NULL, NULL);
 				printf("dvojt ");
 				letter = getchar();
 				break;
 			case '(':
-				LInsertLast(L, lzavor, NULL, NULL, NULL);
+				LInsertLast(L, lbracket, NULL, NULL, NULL);
 				printf("lzavor ");
 				letter = getchar();
 				break;
 			case ')':
-				LInsertLast(L, pzavor, NULL, NULL, NULL);
+				LInsertLast(L, rbracket, NULL, NULL, NULL);
 				printf("pzavor ");
 				letter = getchar();
 				break;
 			case '{':
-				LInsertLast(L, lblok, NULL, NULL, NULL);
+				LInsertLast(L, lblock, NULL, NULL, NULL);
 				printf("lblok\n");
 				letter = getchar();
 				break;
 			case '}':
-				LInsertLast(L, pblok, NULL, NULL, NULL);
+				LInsertLast(L, rblock, NULL, NULL, NULL);
 				printf("pblok\n");
 				letter = getchar();
 				break;
 			case ',':
-				LInsertLast(L, line, NULL, NULL, NULL);
+				LInsertLast(L, comma, NULL, NULL, NULL);
 				printf("line ");
 				letter = getchar();
 				break;
 			case '.':
-				LInsertLast(L, tecka, NULL, NULL, NULL);
+				LInsertLast(L, dot, NULL, NULL, NULL);
 				printf("tecka ");
 				letter = getchar();
 				break;
@@ -77,29 +77,29 @@ int Lexem_analyzer(List *L) {
 				letter = getchar();
 				break;
 			case '*':
-				LInsertLast(L, krat, NULL, NULL, NULL);
+				LInsertLast(L, multiply, NULL, NULL, NULL);
 				printf("krat ");
 				letter = getchar();
 				break;
 			case '?':
-				LInsertLast(L, choice, NULL, NULL, NULL);
+				LInsertLast(L, question_mark, NULL, NULL, NULL);
 				printf("choice ");
 				letter = getchar();
 				break;
 			case '|':
-				LInsertLast(L, popodm, NULL, NULL, NULL);
+				LInsertLast(L, vertical_bar, NULL, NULL, NULL);
 				printf("popodm ");
 				letter = getchar();
 				break;
 			case '@':
-				LInsertLast(L, zavin, NULL, NULL, NULL);
+				LInsertLast(L, at, NULL, NULL, NULL);
 				printf("zavin ");
 				letter = getchar();
 				break;
 			case '[':
 				letter = getchar();
 				if (letter == ']') {
-					LInsertLast(L, hranzav, NULL, NULL, NULL);
+					LInsertLast(L, square_brackets, NULL, NULL, NULL);
 					printf("hranzav ");
 					letter = getchar();
 				} else {
@@ -143,7 +143,7 @@ int Lexem_analyzer(List *L) {
 			case '=':
 				letter = getchar();
 				if (letter != '=') {
-					LInsertLast(L, rovno, NULL, NULL, NULL);
+					LInsertLast(L, compare_equal, NULL, NULL, NULL);
 					printf("rovno ");
 				} else {
 					LInsertLast(L, equal, NULL, NULL, NULL);
@@ -160,7 +160,7 @@ int Lexem_analyzer(List *L) {
 						letter = getchar();
 					}
 				} else {
-					LInsertLast(L, deleno, NULL, NULL, NULL);
+					LInsertLast(L, division, NULL, NULL, NULL);
 					printf("deleno ");
 				}
 				break;
@@ -490,8 +490,8 @@ int Lexem_analyzer(List *L) {
 				if (letter == '_') {
 					letter = getchar();
 					if (!(letter >= 'a' && letter <= 'z') && !(letter >= 'A' && letter <= 'Z') && !(letter >= '0' && letter <= '9') && letter != '_') {
-						LInsertLast(L, pass, NULL, NULL, NULL);
-						printf("pass ");
+						LInsertLast(L, underscore, NULL, NULL, NULL);
+						printf("underscore ");
 						break;
 					} else {
 						strcat(lexem, "_");
@@ -525,7 +525,7 @@ int Lexem_analyzer(List *L) {
 							LInsertLast(L, inchr, NULL, NULL, NULL);
 							printf("inchr ");
 						} else if (!strcmp(lexem, "const")) {
-							LInsertLast(L, konst, NULL, NULL, NULL);
+							LInsertLast(L, constant, NULL, NULL, NULL);
 							printf("konst ");
 						} else if (!strcmp(lexem, "concat")) {
 							LInsertLast(L, inccat, NULL, NULL, NULL);
@@ -544,7 +544,7 @@ int Lexem_analyzer(List *L) {
 					case 'v':
 						//var void
 						if (!strcmp(lexem, "var")) {
-							LInsertLast(L, prom, NULL, NULL, NULL);
+							LInsertLast(L, variable, NULL, NULL, NULL);
 							printf("prom ");
 						} else if (!strcmp(lexem, "void")) {
 							LInsertLast(L, dtvoid, NULL, NULL, NULL);
@@ -626,8 +626,8 @@ int Lexem_analyzer(List *L) {
 								break;
 							case 'r':
 								if (!strcmp(lexem, "return")) {
-									LInsertLast(L, back, NULL, NULL, NULL);
-									printf("back ");
+									LInsertLast(L, _return, NULL, NULL, NULL);
+									printf("return ");
 								} else {
 									//id
 									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
@@ -654,8 +654,8 @@ int Lexem_analyzer(List *L) {
 					case 'p':
 						//pub
 						if (!strcmp(lexem, "pub")) {
-							LInsertLast(L, verejna, NULL, NULL, NULL);
-							printf("verejna ");
+							LInsertLast(L, _pub, NULL, NULL, NULL);
+							printf("_pub");
 						} else {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
@@ -686,8 +686,8 @@ int Lexem_analyzer(List *L) {
 					case 'm':
 						//main
 						if (!strcmp(lexem, "main")) {
-							LInsertLast(L, hlavni, NULL, NULL, NULL);
-							printf("hlavni ");
+							LInsertLast(L, _main, NULL, NULL, NULL);
+							printf("_main ");
 						} else {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
@@ -702,8 +702,8 @@ int Lexem_analyzer(List *L) {
 					case 'f':
 						//fn f64 f2i
 						if (!strcmp(lexem, "fn")) {
-							LInsertLast(L, funk, NULL, NULL, NULL);
-							printf("funk ");
+							LInsertLast(L, _fn, NULL, NULL, NULL);
+							printf("_fn ");
 						} else if (!strcmp(lexem, "f64")) {
 							LInsertLast(L, dtflt, NULL, NULL, NULL);
 							printf("dtflt ");
@@ -727,8 +727,8 @@ int Lexem_analyzer(List *L) {
 							LInsertLast(L, inwrt, NULL, NULL, NULL);
 							printf("inwrt ");
 						} else if (!strcmp(lexem, "while")) {
-							LInsertLast(L, loop, NULL, NULL, NULL);
-							printf("loop ");
+							LInsertLast(L, _while, NULL, NULL, NULL);
+							printf("_while ");
 						} else {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
@@ -743,8 +743,8 @@ int Lexem_analyzer(List *L) {
 					case 'e':
 						//else
 						if (!strcmp(lexem, "else")) {
-							LInsertLast(L, jinak, NULL, NULL, NULL);
-							printf("jinak ");
+							LInsertLast(L, _else, NULL, NULL, NULL);
+							printf("_else ");
 						} else {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
@@ -759,17 +759,17 @@ int Lexem_analyzer(List *L) {
 					case 'i':
 						//if i32 ifj import i2f
 						if (!strcmp(lexem, "if")) {
-							LInsertLast(L, kdyz, NULL, NULL, NULL);
-							printf("kdyz ");
+							LInsertLast(L, _if, NULL, NULL, NULL);
+							printf("_if ");
 						} else if (!strcmp(lexem, "i32")) {
 							LInsertLast(L, dtint, NULL, NULL, NULL);
 							printf("dtint ");
 						} else if (!strcmp(lexem, "ifj")) {
-							LInsertLast(L, inbild, NULL, NULL, NULL);
-							printf("inbild ");
+							LInsertLast(L, inbuild, NULL, NULL, NULL);
+							printf("inbuild ");
 						} else if (!strcmp(lexem, "import")) {
-							LInsertLast(L, inport, NULL, NULL, NULL);
-							printf("inport ");
+							LInsertLast(L, _import, NULL, NULL, NULL);
+							printf("import ");
 						} else if (!strcmp(lexem, "i2f")) {
 							LInsertLast(L, ini2f, NULL, NULL, NULL);
 							printf("ini2f ");
@@ -809,8 +809,8 @@ int Lexem_analyzer(List *L) {
 					case 'n':
 						//null
 						if (!strcmp(lexem, "null")) {
-							LInsertLast(L, nic, NULL, NULL, NULL);
-							printf("nic ");
+							LInsertLast(L, _null, NULL, NULL, NULL);
+							printf("_null ");
 						} else {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {

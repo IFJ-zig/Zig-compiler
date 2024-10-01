@@ -22,9 +22,9 @@ typedef enum
 	dtstr,
 	dtflt,
 	dtvoid,
-	konst,
-	prom,
-	nic,
+	constant,
+	variable,
+	_null,
 	//i32, u8,    f64,   void,   const, var,  null
 	inord,
 	inchr,
@@ -33,7 +33,7 @@ typedef enum
 	inccat,
 	inu2s,
 	inscmp,
-	//ord, chr,   length, substring, concat, string, strcmp
+	//ord, chr, length, substring, concat, string, strcmp
 	inres,
 	inrei,
 	inref,
@@ -41,44 +41,44 @@ typedef enum
 	ini2f,
 	inf2i,
 	//readstr, readi32, readf64, write, i2f,   f2i
-	kdyz,
-	jinak,
-	loop,
-	funk,
-	back,
-	verejna,
-	hlavni,
-	inbild,
-	inport,
+	_if,
+	_else,
+	_while,
+	_fn,
+	_return,
+	_pub,
+	_main,
+	inbuild,
+	_import,
 	//if, else,  while, fn,   return,pub,     main,   ifj,    import
-	dvojt,
-	line,
+	colon,
+	comma,
 	next,
-	pass,
-	tecka,
+	underscore,
+	dot,
 	//:,    ,    ;,    _,    .
 	plus,
 	minus,
-	krat,
-	deleno,
+	multiply,
+	division,
 	//+,  -,     *,    /
-	choice,
-	zavin,
-	popodm,
-	hranzav,
+	question_mark,
+	at,
+	vertical_bar,
+	square_brackets,
 	//?,    @,     |,      []
-	rovno,
+	equal,
 	less,
 	more,
 	lequal,
 	mequal,
-	equal,
+	compare_equal,
 	nequal,
 	//=,   <,    >,    <=,     >=,     ==,    !=,
-	lzavor,
-	pzavor,
-	lblok,
-	pblok,
+	lbracket,
+	rbracket,
+	lblock,
+	rblock,
 	end
 	//(,    ),      {,     },     konec
 } KeyWord;
@@ -133,4 +133,4 @@ void LDestroy(List *L);
 
 int Lexem_analyzer(List *L);
 
-#endif
+#endif // TOKENS_H
