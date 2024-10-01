@@ -11,7 +11,7 @@ BUILD_DIR       = build
 # Compiler settings
 CC              = gcc
 CFLAGS          = -std=gnu99 -Wall -Wextra -Werror
-LDFLAGS         = -o prekladac
+LDFLAGS         = -o prekladac.out
 
 # Find source files
 SOURCES         := $(shell find $(SOURCE_DIR) -type f -name '*.c')
