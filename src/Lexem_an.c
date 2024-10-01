@@ -23,6 +23,7 @@ int Lexem_analyzer(List *L) {
 			case ' ':
 			case '\n':
 			case '\t':
+			case '\r':
 				letter = getchar();
 				break;
 			//jednoznačné tokeny
@@ -363,8 +364,6 @@ int Lexem_analyzer(List *L) {
 					letter = getchar();
 				}
 				break;
-
-
 			case '0':
 				//nezačíná nulou
 				letter = getchar();
@@ -837,7 +836,7 @@ int Lexem_analyzer(List *L) {
 				break;
 			default:
 				//chyba lexemu
-				free(lexem);
+				free(lexem);//printf("%d", letter);
 				return 1;
 		}
 	}
