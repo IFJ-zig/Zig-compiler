@@ -14,7 +14,6 @@ int main() {
 	//Lexikální analýza
 	int err = Lexem_analyzer(pL);
 	if (err) {
-		printf("\nChyba %d\n", err);
 		LDestroy(pL);
 		free(pL);
 		return err;
@@ -24,6 +23,6 @@ int main() {
 
 	LDestroy(pL);
 	free(pL);
-	printf("Konec\n");
+
 	return 0;
 }
