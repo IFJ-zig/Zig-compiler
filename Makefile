@@ -11,7 +11,7 @@ BUILD_DIR       = build
 # Compiler settings
 CC              = gcc
 CFLAGS          = -std=gnu99 -Wall -Wextra -Werror
-LDFLAGS         = -o prekladac.out
+LDFLAGS         = -o ifj24.out
 
 # Find source files
 SOURCES         := $(shell find $(SOURCE_DIR) -type f -name '*.c')
@@ -37,4 +37,4 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
 
 # Cleanup
 clean:
-	rm -rf $(BUILD_DIR) prekladac
+	rm -rf $(BUILD_DIR) ifj24.out
