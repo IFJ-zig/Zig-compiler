@@ -28,7 +28,7 @@ int Lexem_analyzer(List *L) {
 			//jednoznačné tokeny
 			case ';':
 				LInsertLast(L, next, NULL, NULL, NULL);
-				puts("next");
+				printf("next\n");
 				letter = getchar();
 				break;
 			case ':':
@@ -48,12 +48,12 @@ int Lexem_analyzer(List *L) {
 				break;
 			case '{':
 				LInsertLast(L, lblok, NULL, NULL, NULL);
-				puts("lblok");
+				printf("lblok\n");
 				letter = getchar();
 				break;
 			case '}':
 				LInsertLast(L, pblok, NULL, NULL, NULL);
-				puts("pblok");
+				printf("pblok\n");
 				letter = getchar();
 				break;
 			case ',':
