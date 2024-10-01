@@ -1,6 +1,6 @@
 name: Memory Leak Check
 
-on: 
+on:
   push:
     branches: ["main"]
   pull_request:
@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install valgrind
-      run: sudo apt-get install valgrind
+      - name: Install valgrind
+        run: sudo apt-get install valgrind
 
-    - name: Build project
-      run: make
-    - name: List
-      run: ls && cd build && ls
-    - name: Run valgrind to check for memory leaks
-      run: valgrind --leak-check=full ./prekladac
+      - name: Build project
+        run: make
+      - name: List
+        run: ls && cd build && ls
+      - name: Run valgrind to check for memory leaks
+        run: valgrind --leak-check=full ./prekladac.out
