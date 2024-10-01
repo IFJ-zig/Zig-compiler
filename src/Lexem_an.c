@@ -33,37 +33,37 @@ int Lexem_analyzer(List *L) {
 				break;
 			case ':':
 				LInsertLast(L, colon, NULL, NULL, NULL);
-				printf("dvojt ");
+				printf("colon ");
 				letter = getchar();
 				break;
 			case '(':
 				LInsertLast(L, lbracket, NULL, NULL, NULL);
-				printf("lzavor ");
+				printf("lbracket ");
 				letter = getchar();
 				break;
 			case ')':
 				LInsertLast(L, rbracket, NULL, NULL, NULL);
-				printf("pzavor ");
+				printf("pbracket ");
 				letter = getchar();
 				break;
 			case '{':
 				LInsertLast(L, lblock, NULL, NULL, NULL);
-				printf("lblok\n");
+				printf("lblock\n");
 				letter = getchar();
 				break;
 			case '}':
 				LInsertLast(L, rblock, NULL, NULL, NULL);
-				printf("pblok\n");
+				printf("pblock\n");
 				letter = getchar();
 				break;
 			case ',':
 				LInsertLast(L, comma, NULL, NULL, NULL);
-				printf("line ");
+				printf("comma ");
 				letter = getchar();
 				break;
 			case '.':
 				LInsertLast(L, dot, NULL, NULL, NULL);
-				printf("tecka ");
+				printf("dot ");
 				letter = getchar();
 				break;
 			case '+':
@@ -100,7 +100,7 @@ int Lexem_analyzer(List *L) {
 				letter = getchar();
 				if (letter == ']') {
 					LInsertLast(L, square_brackets, NULL, NULL, NULL);
-					printf("hranzav ");
+					printf("square_brackets ");
 					letter = getchar();
 				} else {
 					free(lexem);
@@ -144,7 +144,7 @@ int Lexem_analyzer(List *L) {
 				letter = getchar();
 				if (letter != '=') {
 					LInsertLast(L, compare_equal, NULL, NULL, NULL);
-					printf("rovno ");
+					printf("compare_equal ");
 				} else {
 					LInsertLast(L, equal, NULL, NULL, NULL);
 					printf("equal ");
@@ -161,7 +161,7 @@ int Lexem_analyzer(List *L) {
 					}
 				} else {
 					LInsertLast(L, division, NULL, NULL, NULL);
-					printf("deleno ");
+					printf("division ");
 				}
 				break;
 			case '\\':
@@ -545,7 +545,7 @@ int Lexem_analyzer(List *L) {
 						//var void
 						if (!strcmp(lexem, "var")) {
 							LInsertLast(L, variable, NULL, NULL, NULL);
-							printf("prom ");
+							printf("variable ");
 						} else if (!strcmp(lexem, "void")) {
 							LInsertLast(L, dtvoid, NULL, NULL, NULL);
 							printf("dtvoid ");
