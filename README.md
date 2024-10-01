@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Compiler for imperative language Zig. Build using C.
+Compiler for imperative language Zig. Built using C.
 
 ## Team Members
 
