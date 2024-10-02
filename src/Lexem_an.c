@@ -836,7 +836,7 @@ int Lexem_analyzer(List *L) {
 				break;
 			default:
 				//chyba lexemu
-				free(lexem);//printf("%d", letter);
+				free(lexem); //printf("%d", letter);
 				return 1;
 		}
 	}
