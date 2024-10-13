@@ -6,7 +6,7 @@ Compiler for imperative language Zig. Built using C.
 
 ## Team Members
 
-- **xbohatd00**: Responsible for assembly code generator.
+- **xbohatd00**: Responsible for Assembly code generator.
 - **xvozdaa00**: Responsible for Syntactic analysis.
 - **xhorakt00**: Responsible for Semantic analysis.
 - **xpuchn02**: Responsible for Lexical analysis.
