@@ -3,11 +3,12 @@
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
 #include "tokens.h"
+#include "errors_enum.h"
 
 int main() {
 	List *pL;
 	if (!(pL = (List *)malloc(sizeof(List)))) {
-		return 99;
+		return INTERNAL_COMPILER_ERROR;
 	}
 	ListInit(pL);
 

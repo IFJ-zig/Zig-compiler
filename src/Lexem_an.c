@@ -3,6 +3,7 @@
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
 #include "tokens.h"
+#include "errors_enum.h"
 
 int Lexem_analyzer(List *L) {
 	//inicializace
@@ -11,7 +12,7 @@ int Lexem_analyzer(List *L) {
 	double *d;
 	//pokud nealokuje, vrátí chybu
 	if (!(lexem = (char *)malloc(sizeof(char) * 256))) {
-		return 99;
+		return INTERNAL_COMPILER_ERROR;
 	}
 	char letter = getchar();
 	lexem[0] = '\0';
@@ -105,7 +106,7 @@ int Lexem_analyzer(List *L) {
 					letter = getchar();
 				} else {
 					free(lexem);
-					return 1;
+					return LEXEM_ERROR;
 				}
 				break;
 			case '<':
@@ -138,7 +139,7 @@ int Lexem_analyzer(List *L) {
 					letter = getchar();
 				} else {
 					free(lexem);
-					return 1;
+					return LEXEM_ERROR;
 				}
 				break;
 			case '=':
@@ -171,7 +172,7 @@ int Lexem_analyzer(List *L) {
 					letter = getchar();
 					if (letter != '\\') {
 						free(lexem);
-						return 1;
+						return LEXEM_ERROR;
 					}
 					letter = getchar();
 					//vezme všechny znaky
@@ -232,18 +233,18 @@ int Lexem_analyzer(List *L) {
 										} else {
 											//chyba lexemu
 											free(lexem);
-											return 1;
+											return LEXEM_ERROR;
 										}
 									} else {
 										//chyba lexemu
 										free(lexem);
-										return 1;
+										return LEXEM_ERROR;
 									}
 									break;
 								default:
 									//chyba lexemu
 									free(lexem);
-									return 1;
+									return LEXEM_ERROR;
 							}
 						} else if (letter > 31) {
 							strncat(lexem, &letter, 1);
@@ -259,7 +260,7 @@ int Lexem_analyzer(List *L) {
 				} while (letter == '\\');
 				if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 					free(lexem);
-					return 99;
+					return INTERNAL_COMPILER_ERROR;
 				}
 				strcpy(p, lexem);
 				LInsertLast(L, text, NULL, NULL, p);
@@ -275,7 +276,7 @@ int Lexem_analyzer(List *L) {
 					//prázdný
 					if (!(p = (char *)malloc(sizeof(char)))) {
 						free(lexem);
-						return 99;
+						return INTERNAL_COMPILER_ERROR;
 					}
 					*p = '\0';
 					LInsertLast(L, text, NULL, NULL, p);
@@ -330,18 +331,18 @@ int Lexem_analyzer(List *L) {
 										} else {
 											//chyba lexemu
 											free(lexem);
-											return 1;
+											return LEXEM_ERROR;
 										}
 									} else {
 										//chyba lexemu
 										free(lexem);
-										return 1;
+										return LEXEM_ERROR;
 									}
 									break;
 								default:
 									//chyba lexemu
 									free(lexem);
-									return 1;
+									return LEXEM_ERROR;
 							}
 						} else if (letter > 31) {
 							strncat(lexem, &letter, 1);
@@ -351,11 +352,11 @@ int Lexem_analyzer(List *L) {
 					if (letter == EOF || letter == '\n') {
 						//chyba lexemu
 						free(lexem);
-						return 1;
+						return LEXEM_ERROR;
 					}
 					if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 						free(lexem);
-						return 99;
+						return INTERNAL_COMPILER_ERROR;
 					}
 					strcpy(p, lexem);
 					LInsertLast(L, text, NULL, NULL, p);
@@ -369,7 +370,7 @@ int Lexem_analyzer(List *L) {
 				letter = getchar();
 				if (letter >= '0' && letter <= '9') {
 					free(lexem);
-					return 1;
+					return LEXEM_ERROR;
 				}
 				strncat(lexem, "00", 1);
 			case '1' ... '9':
@@ -384,7 +385,7 @@ int Lexem_analyzer(List *L) {
 					letter = getchar();
 					if (!(letter >= '0' && letter <= '9')) {
 						free(lexem);
-						return 1;
+						return LEXEM_ERROR;
 					}
 					while (letter >= '0' && letter <= '9') {
 						strncat(lexem, &letter, 1);
@@ -400,7 +401,7 @@ int Lexem_analyzer(List *L) {
 						}
 						if (!(letter >= '0' && letter <= '9')) {
 							free(lexem);
-							return 1;
+							return LEXEM_ERROR;
 						}
 						while (letter >= '0' && letter <= '9') {
 							strncat(lexem, &letter, 1);
@@ -408,12 +409,12 @@ int Lexem_analyzer(List *L) {
 						}
 						if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 							free(lexem);
-							return 99;
+							return INTERNAL_COMPILER_ERROR;
 						}
 						strcpy(p, lexem);
 						if (!(d = (double *)malloc(sizeof(double)))) {
 							free(lexem);
-							return 99;
+							return INTERNAL_COMPILER_ERROR;
 						}
 						*d = atof(lexem);
 						LInsertLast(L, decim, NULL, d, p);
@@ -423,12 +424,12 @@ int Lexem_analyzer(List *L) {
 						//jen tečka
 						if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 							free(lexem);
-							return 99;
+							return INTERNAL_COMPILER_ERROR;
 						}
 						strcpy(p, lexem);
 						if (!(d = (double *)malloc(sizeof(double)))) {
 							free(lexem);
-							return 99;
+							return INTERNAL_COMPILER_ERROR;
 						}
 						*d = atof(lexem);
 						LInsertLast(L, decim, NULL, d, p);
@@ -445,7 +446,7 @@ int Lexem_analyzer(List *L) {
 					}
 					if (!(letter >= '0' && letter <= '9')) {
 						free(lexem);
-						return 1;
+						return LEXEM_ERROR;
 					}
 					while (letter >= '0' && letter <= '9') {
 						strncat(lexem, &letter, 1);
@@ -453,12 +454,12 @@ int Lexem_analyzer(List *L) {
 					}
 					if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 						free(lexem);
-						return 99;
+						return INTERNAL_COMPILER_ERROR;
 					}
 					strcpy(p, lexem);
 					if (!(d = (double *)malloc(sizeof(double)))) {
 						free(lexem);
-						return 99;
+						return INTERNAL_COMPILER_ERROR;
 					}
 					*d = atof(lexem);
 					LInsertLast(L, decim, NULL, d, p);
@@ -468,12 +469,12 @@ int Lexem_analyzer(List *L) {
 					//celá
 					if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 						free(lexem);
-						return 99;
+						return INTERNAL_COMPILER_ERROR;
 					}
 					strcpy(p, lexem);
 					if (!(n = (int *)malloc(sizeof(int)))) {
 						free(lexem);
-						return 99;
+						return INTERNAL_COMPILER_ERROR;
 					}
 					*n = atoi(lexem);
 					LInsertLast(L, num, n, NULL, p);
@@ -511,7 +512,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -533,7 +534,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -552,7 +553,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -568,7 +569,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -586,7 +587,7 @@ int Lexem_analyzer(List *L) {
 									//id
 									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
-										return 99;
+										return INTERNAL_COMPILER_ERROR;
 									}
 									strcpy(p, lexem);
 									LInsertLast(L, id, NULL, NULL, p);
@@ -601,7 +602,7 @@ int Lexem_analyzer(List *L) {
 									//id
 									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
-										return 99;
+										return INTERNAL_COMPILER_ERROR;
 									}
 									strcpy(p, lexem);
 									LInsertLast(L, id, NULL, NULL, p);
@@ -616,7 +617,7 @@ int Lexem_analyzer(List *L) {
 									//id
 									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
-										return 99;
+										return INTERNAL_COMPILER_ERROR;
 									}
 									strcpy(p, lexem);
 									LInsertLast(L, id, NULL, NULL, p);
@@ -631,7 +632,7 @@ int Lexem_analyzer(List *L) {
 									//id
 									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
-										return 99;
+										return INTERNAL_COMPILER_ERROR;
 									}
 									strcpy(p, lexem);
 									LInsertLast(L, id, NULL, NULL, p);
@@ -642,7 +643,7 @@ int Lexem_analyzer(List *L) {
 								//id
 								if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 									free(lexem);
-									return 99;
+									return INTERNAL_COMPILER_ERROR;
 								}
 								strcpy(p, lexem);
 								LInsertLast(L, id, NULL, NULL, p);
@@ -659,7 +660,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -675,7 +676,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -691,7 +692,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -713,7 +714,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -732,7 +733,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -748,7 +749,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -776,7 +777,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -798,7 +799,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -814,7 +815,7 @@ int Lexem_analyzer(List *L) {
 							//id
 							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
-								return 99;
+								return INTERNAL_COMPILER_ERROR;
 							}
 							strcpy(p, lexem);
 							LInsertLast(L, id, NULL, NULL, p);
@@ -825,7 +826,7 @@ int Lexem_analyzer(List *L) {
 						//id
 						if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 							free(lexem);
-							return 99;
+							return INTERNAL_COMPILER_ERROR;
 						}
 						strcpy(p, lexem);
 						LInsertLast(L, id, NULL, NULL, p);
@@ -837,7 +838,7 @@ int Lexem_analyzer(List *L) {
 			default:
 				//chyba lexemu
 				free(lexem); //printf("%d", letter);
-				return 1;
+				return LEXEM_ERROR;
 		}
 	}
 	//*p, *n, *d neuvolňuji, přešli do tokenu
