@@ -2,8 +2,8 @@
 * Projekt: Implementace překladače imperativního jazyka IFJ24
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
-#include "tokens.h"
 #include "errors_enum.h"
+#include "tokens.h"
 
 int Lexem_analyzer(List *L) {
 	//inicializace
