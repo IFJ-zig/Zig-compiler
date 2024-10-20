@@ -14,6 +14,7 @@ int Syntax_analyzer(List *L);
 int code();
 int program();
 int seekHeaders();
+int skipFunctionBody();
 
 
 #endif // SYNTAX_H
