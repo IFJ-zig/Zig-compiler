@@ -20,6 +20,14 @@ int Syntax_analyzer(List *L) {
 	return 0;
 };
 
+int seekHeaders() {
+	return 0;
+};
+
+int program() {
+	return 0;
+};
+
 int code() {
-	get_token();
+	return 0;
 }

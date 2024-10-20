@@ -9,6 +9,6 @@
 #include "tokens.h"
 
 int Syntax_analyzer(List *L);
-
+int code();
 
 #endif // SYNTAX_H
