@@ -2,8 +2,9 @@
 * Projekt: Implementace překladače imperativního jazyka IFJ24
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
-#include "tokens.h"
 #include "errors_enum.h"
+#include "syntax_an.h"
+#include "tokens.h"
 
 int main() {
 	List *pL;
@@ -21,6 +22,7 @@ int main() {
 	}
 
 	//TODO další kontroly a generace kodu
+	Syntax_analyzer(pL);
 
 	LDestroy(pL);
 	free(pL);
