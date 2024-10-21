@@ -6,10 +6,8 @@
 
 Token *token;
 List *tokenList;
-int idc = 0;
 
 int get_token() {
-	printf("Token: %d\n", idc++);
 	token = LGetAct(tokenList);
 	LActNext(tokenList);
 	return 0;
@@ -22,7 +20,6 @@ int syntax_analyzer(List *L) {
 	success = seekHeaders();
 	if (success != 0)
 		return success;
-	idc = 0;
 	LActFirst(tokenList);
 	success = program();
 	if (success != 0)
@@ -283,7 +280,7 @@ int data_type() {
 int return_type() {
 	get_token();
 	if (token->kw != dtint && token->kw != dtstr && token->kw != dtflt && token->kw != dtvoid) {
-		fprintf(stderr, "Error: Expected return type %d\n", token->kw);
+		fprintf(stderr, "Error: Expected return type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	return 0;
@@ -357,7 +354,7 @@ int if_else() {
 	}
 
 	if (token->kw != lblock) {
-		fprintf(stderr, "Error: Expected '{' after if condition %d\n", token->kw);
+		fprintf(stderr, "Error: Expected '{' after if condition\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	get_token();
