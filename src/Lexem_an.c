@@ -145,10 +145,10 @@ int Lexem_analyzer(List *L) {
 			case '=':
 				letter = getchar();
 				if (letter != '=') {
-					LInsertLast(L, compare_equal, NULL, NULL, NULL);
+					LInsertLast(L, equal, NULL, NULL, NULL);
 					printf("compare_equal ");
 				} else {
-					LInsertLast(L, equal, NULL, NULL, NULL);
+					LInsertLast(L, compare_equal, NULL, NULL, NULL);
 					printf("equal ");
 					letter = getchar();
 				}

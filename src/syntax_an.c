@@ -6,20 +6,23 @@
 
 Token *token;
 List *tokenList;
+int idc = 0;
 
 int get_token() {
+	printf("Token: %d\n", idc++);
 	token = LGetAct(tokenList);
 	LActNext(tokenList);
 	return 0;
 }
 
-int Syntax_analyzer(List *L) {
+int syntax_analyzer(List *L) {
 	tokenList = L;
 	LActFirst(tokenList);
 	int success;
 	success = seekHeaders();
 	if (success != 0)
 		return success;
+	idc = 0;
 	LActFirst(tokenList);
 	success = program();
 	if (success != 0)
@@ -75,7 +78,7 @@ int seekHeaders() {
 		get_token();
 
 		// TODO: AGAIN SOME SEMANTHIC CHECKS
-		success = skipFunctionBody();
+		success = skip_function_body();
 		if (success != 0)
 			return success;
 		get_token();
@@ -94,7 +97,7 @@ int program() {
 	// TODO: SOME CODE GENERATION STUFF
 	while (1) {
 		get_token();
-		if (token->kw == _pub && token->next->kw == _fn) {
+		if (token->kw == _pub) {
 			success = function_analysis();
 			if (success != 0)
 				return success;
@@ -110,7 +113,7 @@ int program() {
 	return 0;
 };
 
-int skipFunctionBody() {
+int skip_function_body() {
 	if (token->kw != lblock)
 		return SYNTACTIC_ANALYSIS_ERROR;
 	int braceCount = 0;
@@ -147,7 +150,7 @@ int checkImport() {
 	}
 
 	get_token();
-	if (token->kw != compare_equal) {
+	if (token->kw != equal) {
 		fprintf(stderr, "Error: Expected '=' after import identifier\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
@@ -215,7 +218,7 @@ int function_analysis() {
 	}
 	get_token();
 	while (token->kw != rblock) {
-		success = code();
+		success = code(true);
 		if (success != 0) {
 			return success;
 		}
@@ -267,6 +270,9 @@ int param_list() {
 
 int data_type() {
 	get_token();
+	if (token->kw == square_brackets) {
+		get_token();
+	}
 	if (token->kw != dtint && token->kw != dtstr && token->kw != dtflt) {
 		fprintf(stderr, "Error: Expected data type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -283,6 +289,230 @@ int return_type() {
 	return 0;
 }
 
-int code() {
+int code(bool tokenWasGiven) {
+	if (tokenWasGiven == false) {
+		get_token();
+	}
+
+	int success;
+	switch (token->kw) {
+		case constant:
+		case variable:
+			success = variable_definition();
+			if (success != 0)
+				return success;
+			break;
+		case id:
+			success = call_or_assignment();
+			if (success != 0)
+				return success;
+			break;
+		case _if:
+			success = if_else();
+			if (success != 0)
+				return success;
+			break;
+		case _while:
+			success = while_syntax();
+			if (success != 0)
+				return success;
+			break;
+		case _return:
+			success = return_syntax();
+			if (success != 0)
+				return success;
+			break;
+		case inbuild:
+			success = inbuild_function();
+			if (success != 0)
+				return success;
+			break;
+		default:
+			fprintf(stderr, "Error: Expected command but found: %d\n", token->kw);
+			return 1;
+	}
+
+	return 0;
+}
+
+int if_else() {
+	int success;
+	get_token();
+	if (token->kw != lbracket) {
+		fprintf(stderr, "Error: Expected '(' after if\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	// TODO: PLACEHOLDER FOR BOTTOM UP SYNTAX ANALYSIS
+	skip_expression();
+	get_token();
+	if (token->kw == vertical_bar) {
+		//TODO: SEMANTHIC CHECKS
+		get_token();
+		get_token();
+		if (token->kw != vertical_bar) {
+			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		get_token();
+	}
+
+	if (token->kw != lblock) {
+		fprintf(stderr, "Error: Expected '{' after if condition %d\n", token->kw);
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	get_token();
+	while (token->kw != rblock) {
+		success = code(true);
+		if (success != 0)
+			return success;
+		get_token();
+	}
+
+	get_token();
+	if (token->kw == _else) {
+		get_token();
+		if (token->kw != lblock) {
+			fprintf(stderr, "Error: Expected '{' after else\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		get_token();
+		while (token->kw != rblock) {
+			success = code(true);
+			if (success != 0)
+				return success;
+			get_token();
+		}
+	}
+
+	return 0;
+}
+
+int skip_expression() {
+	int success;
+	while (token->kw != rbracket) {
+		get_token();
+		if (token->kw == lbracket) {
+			success = skip_expression();
+			if (success != 0)
+				return success;
+		}
+	}
+	return 0;
+}
+
+int return_syntax() {
+	// TODO: SEMANTHIC CHECKS, BOTTOM UP EXPRESSION ANALYSIS AND CODE GENERATION
+
+	//skip placeholder
+	while (token->kw != next) {
+		get_token();
+	}
+	return 0;
+}
+
+int inbuild_function() {
+	int success;
+	get_token();
+	if (token->kw != dot) {
+		fprintf(stderr, "Error: Unexpected library usage\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	get_token();
+
+	switch (token->kw) {
+		case inord:
+		case inchr:
+		case inlen:
+		case inssub:
+		case inccat:
+		case inu2s:
+		case inscmp:
+		case inres:
+		case inrei:
+		case inref:
+		case inwrt:
+		case ini2f:
+		case inf2i:
+			success = skip_expression();
+			if (success != 0)
+				return success;
+			break;
+		default:
+			fprintf(stderr, "Error: Undefined library call\n");
+			break;
+	}
+	get_token();
+	if (token->kw != next) {
+		fprintf(stderr, "Error: Expected ';'\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	return 0;
+}
+
+int variable_definition() {
+	int success;
+	get_token();
+	if (token->kw != id) {
+		fprintf(stderr, "Error: Expected variable id\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	get_token();
+	if (token->kw == colon) {
+		success = data_type();
+		if (success != 0)
+			return success;
+		get_token();
+	}
+
+	if (token->kw != equal) {
+		fprintf(stderr, "Error: Expected '=' after variable type\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	// PLACEHOLDER FOR BOTTOM UP EXPRESSION ANALYSIS
+	while (token->kw != next) {
+		get_token();
+	}
+
+	return 0;
+};
+int call_or_assignment() {
+	// TODO: SEMANTHIC ANALYSIS
+	// I need semanthic analysis to define if id is a function or variable
+	while (token->kw != next) {
+		get_token();
+	}
+	return 0;
+};
+
+int while_syntax() {
+	int success;
+	get_token();
+	if (token->kw != lbracket) {
+		fprintf(stderr, "Error: Expected '(' after while\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	skip_expression();
+	get_token();
+	if (token->kw == vertical_bar) {
+		//TODO: SEMANTHIC CHECKS
+		get_token();
+		get_token();
+		if (token->kw != vertical_bar) {
+			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		get_token();
+	}
+	if (token->kw != lblock) {
+		fprintf(stderr, "Error: Expected '{' after while condition\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	get_token();
+	while (token->kw != rblock) {
+		success = code(true);
+		if (success != 0)
+			return success;
+		get_token();
+	}
 	return 0;
 }

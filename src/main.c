@@ -22,10 +22,13 @@ int main() {
 	}
 
 	//TODO další kontroly a generace kodu
-	Syntax_analyzer(pL);
+	err = syntax_analyzer(pL);
 
 	LDestroy(pL);
 	free(pL);
+	if (err) {
+		return err;
+	}
 
 	return 0;
 }
