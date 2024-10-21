@@ -16,6 +16,7 @@ int program();
 int seekHeaders();
 int skipFunctionBody();
 int checkImport();
+int function();
 
 
 #endif // SYNTAX_H

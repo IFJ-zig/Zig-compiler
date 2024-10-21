@@ -91,14 +91,25 @@ int program() {
 	if (success != 0)
 		return success;
 
+	// TODO: SOME CODE GENERATION STUFF
 	get_token();
+	while (1) {
+		get_token();
+		if (token->kw == _fn) {
+			success = function();
+			if (success != 0)
+				return success;
+		} else if (token->kw == end) {
+			fprintf(stderr, "\nCompilation successfully finished \n");
+			return 0;
+		} else {
+			fprintf(stderr, "Error: Expected function definition or end of program, but found %d\n", token->kw);
+			return 1;
+		}
+	}
+
 	return 0;
 };
-
-int code() {
-	return 0;
-}
-
 
 int skipFunctionBody() {
 	if (token->kw != lblock)
@@ -127,31 +138,38 @@ int skipFunctionBody() {
 int checkImport() {
 	get_token();
 	if (token->kw != constant) {
+		fprintf(stderr, "Error: Expected keyword 'constant' as start of an import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	get_token();
 	if (token->kw != inbuild) {
+		fprintf(stderr, "Error: Expected identifier `ifj` for import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
 	get_token();
 	if (token->kw != compare_equal) {
+		fprintf(stderr, "Error: Expected '=' after import identifier\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	get_token();
 	if (token->kw != at) {
+		fprintf(stderr, "Error: Expected '@' before import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	get_token();
 	if (token->kw != _import) {
+		fprintf(stderr, "Error: Expected keyword 'import' in import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	get_token();
 	if (token->kw != lbracket) {
+
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	get_token();
 	if (token->kw != text && strcmp(token->s, "ifj24.zig")) {
+		fprintf(stderr, "Error: Expected 'ifj24.zig' as name of the package\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	get_token();
@@ -160,6 +178,17 @@ int checkImport() {
 	}
 	get_token();
 	if (token->kw != next) {
+		fprintf(stderr, "Error: Expected ';'\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+
+	return 0;
+}
+
+int function() {
+	get_token();
+	if (token->kw != id && token->kw != _main) {
+		fprintf(stderr, "Error: Expected function id\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
