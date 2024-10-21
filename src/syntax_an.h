@@ -16,7 +16,10 @@ int program();
 int seekHeaders();
 int skipFunctionBody();
 int checkImport();
-int function();
-
+int function_analysis();
+int function_call();
+int return_type();
+int data_type();
+int param_list();
 
 #endif // SYNTAX_H

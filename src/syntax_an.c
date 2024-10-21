@@ -50,9 +50,9 @@ int seekHeaders() {
 		}
 		// TODO: SOME SEMANTHIC CHECKS
 		if (token->kw == _main) {
-			printf("ID: main\n");
+			fprintf(stderr, "ID: main\n");
 		} else {
-			printf("ID: %s\n", token->s);
+			fprintf(stderr, "ID: %s\n", token->s);
 		}
 
 		get_token();
@@ -81,7 +81,7 @@ int seekHeaders() {
 		get_token();
 	}
 	// TODO: CHECK IF MAIN FUNCTION IS DEFINED
-	printf("Headers OK\n");
+	fprintf(stderr, "Headers OK\n");
 	return 0;
 };
 
@@ -92,11 +92,10 @@ int program() {
 		return success;
 
 	// TODO: SOME CODE GENERATION STUFF
-	get_token();
 	while (1) {
 		get_token();
-		if (token->kw == _fn) {
-			success = function();
+		if (token->kw == _pub && token->next->kw == _fn) {
+			success = function_analysis();
 			if (success != 0)
 				return success;
 		} else if (token->kw == end) {
@@ -185,12 +184,105 @@ int checkImport() {
 	return 0;
 }
 
-int function() {
+int function_analysis() {
+	int success = 0;
+
+	get_token();
+	if (token->kw != _fn) {
+		fprintf(stderr, "Error: Expected fn keyword\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
 	get_token();
 	if (token->kw != id && token->kw != _main) {
 		fprintf(stderr, "Error: Expected function id\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
+	// TODO: SOME SEMANTHIC ANALYSIS STUFF HERE
+	fprintf(stderr, "Analysis ID: %s\n", token->s);
 
+	success = param_list();
+	if (success != 0)
+		return success;
+
+	success = return_type();
+	if (success != 0)
+		return success;
+
+	get_token();
+	if (token->kw != lblock) {
+		fprintf(stderr, "Error: Expected '{' after function definition\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	get_token();
+	while (token->kw != rblock) {
+		success = code();
+		if (success != 0) {
+			return success;
+		}
+		get_token();
+	}
+
+
+	// TOD: SEMANTHIC CHECKS FOR RETURN STATEMENT
+
+	return 0;
+}
+
+int param_list() {
+	int success;
+	get_token();
+	if (token->kw != lbracket) {
+		fprintf(stderr, "Error: Expected parameter list after function id\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+
+	while (token->kw != rbracket) {
+		printf("PARAM LIST\n");
+		get_token();
+		if (token->kw == rbracket) {
+			break;
+		}
+		if (token->kw != id) {
+			fprintf(stderr, "Error: Expected parameter id %d\n", token->kw);
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		get_token();
+		if (token->kw != colon) {
+			fprintf(stderr, "Error: Expected ':' after parameter id\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+
+		success = data_type();
+		if (success != 0)
+			return success;
+		get_token();
+		if (token->kw != comma && token->kw != rbracket) {
+			fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+	}
+
+	return 0;
+}
+
+int data_type() {
+	get_token();
+	if (token->kw != dtint && token->kw != dtstr && token->kw != dtflt) {
+		fprintf(stderr, "Error: Expected data type\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	return 0;
+}
+
+int return_type() {
+	get_token();
+	if (token->kw != dtint && token->kw != dtstr && token->kw != dtflt && token->kw != dtvoid) {
+		fprintf(stderr, "Error: Expected return type %d\n", token->kw);
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	return 0;
+}
+
+int code() {
 	return 0;
 }
