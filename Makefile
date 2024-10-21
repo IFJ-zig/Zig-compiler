@@ -1,7 +1,7 @@
 #############################################################
 # Makefile
 # Projekt: Implementace překladače imperativního jazyka IFJ24
-# Tvůrci: Ivo Puchnar, xpuchn02
+# Tvůrci: Adam Vožda, xvozdaa00
 #############################################################
 
 # Directories
