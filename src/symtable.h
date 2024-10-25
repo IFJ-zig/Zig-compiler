@@ -16,7 +16,12 @@
 
 // Tabulka:
 struct htab;    // neúplná deklarace struktury - uživatel nevidí obsah
-typedef struct htab htab_t;     // typedef podle zadání
+typedef struct htab {
+    size_t size;
+    size_t arr_size;
+    struct htab_itm **arr_ptr;
+} htab_t;
+
 
 // Typy:
 typedef const char * htab_key_t;        // typ klíče
