@@ -61,6 +61,7 @@ size_t htab_hash_function(htab_key_t str);
 
 // Initializace symtable:
 htabs_l *symtable_init(htabs_l *list);
+void htab_insert(htabs_l *list, htab_t *t);
 
 // Funkce pro práci s tabulkou:
 htab_t *htab_init(const size_t n, int depth);              // konstruktor tabulky

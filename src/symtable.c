@@ -3,6 +3,15 @@
 * Tvůrci: Tadeáš Horák, xhorakt00
 *********************************************/
 
+//This file is for keeping track of variable names, function names etc
+//It does so by creating a DLL list with multiple hash tables sorted by their depth
+//I believe this would be a good enough system to use since we don't really expect
+//anyone to go too much into depth as that is not a recommended programming practice
+
+//This system could by simplyfied by only keeping track of the previous (less immersed) level
+//since when we go to a previous level we can immediatelly delete the more immersed table
+//because we won't be going back to it, however, keeping it like this makes it simpler for me
+
 #include "symtable.h"
 #include "errors_enum.h"
 
@@ -14,6 +23,7 @@
 
 //remove me, im just for testing!
 int main(){
+    htabs_l *tables = malloc(sizeof(struct htabs));
     htab_t *t = htab_init(HASH_TABLE_SIZE, 0);
     char *symbol = "counter";
     htab_data_t *pair = htab_find(t, symbol);
@@ -59,6 +69,43 @@ htab_t *htab_init(const size_t n, int depth){
     return tab;
 }
 
+//This function inserts the newly created hash table into a list of hash tables sorted by their depth
+void htab_insert(htabs_l *list, htab_t *t){
+    if(list->first == NULL){
+        list->first = t;
+        list->last = t;
+        list->tablesCount++;
+    }
+    htab_t *lt = list->first;
+    int depth = lt->depth;
+    while(depth < t->depth && lt->next != NULL){
+        lt = lt->next;
+        depth = lt->depth;
+    }
+    if(depth == t->depth)
+        fprintf(stderr, "Error trying to insert a table that already exists!\n");
+
+    if(depth > t->depth){   //Insert before
+        t->next = lt;
+        t->previous = lt->previous;
+        if(lt->previous == NULL)
+            list->first = t;
+        else
+            lt->previous->next = t;
+        lt->previous = t;
+    }
+    if(depth < t->depth){    //Insert after
+        t->next = lt->next;
+        t->previous = lt;
+        if(lt->previous == NULL)
+            list->last = t;
+        else
+            lt->next->previous = t;
+        lt->previous = t;
+    }
+    list->tablesCount++;
+}
+
 void htab_free(htab_t * t){
     htab_clear(t);
     free(t->arr_ptr);
@@ -78,30 +125,6 @@ void htab_clear(htab_t * t){
         }
         t->arr_ptr[i]=NULL;
     }
-}
-
-//Erases one entry in hash table
-bool htab_erase(htab_t * t, htab_key_t key){
-    size_t hash = htab_hash_function(key);
-    int index = hash % t->arr_size;
-    htab_itm_t *previtm = NULL;
-    htab_itm_t *itm = t->arr_ptr[index];
-
-    while(itm!=NULL){
-        if(!strcmp(key, itm->data.key)){    //Search for the key
-            if(previtm==NULL)
-                t->arr_ptr[index] = itm->next;
-            else
-                previtm->next = itm->next;
-            free((char *)itm->data.key);    //is set to const char*, need to cast away constness
-            free(itm);
-            t->size--;
-            return true;
-        }
-        previtm=itm;
-        itm=itm->next;  //Advance to next item in list
-    }
-    return false;
 }
 
 htab_data_t *htab_find(const htab_t * t, htab_key_t key){
