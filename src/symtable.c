@@ -82,9 +82,7 @@ void htab_insert(htabs_l *list, htab_t *t){
     }
     htab_t *lt = list->first;
     int depth = lt->depth;
-    printf("out lt=%d dep=%d\n", lt->depth, t->depth);
     while(depth < t->depth && lt->next != NULL){
-        printf("lt=%d dep=%d\n", lt->depth, t->depth);
         lt = lt->next;
         depth = lt->depth;
     }
