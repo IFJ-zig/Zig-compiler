@@ -12,6 +12,8 @@
 //since when we go to a previous level we can immediatelly delete the more immersed table
 //because we won't be going back to it, however, keeping it like this makes it simpler for me
 
+//TODO: htab_removeLast and also optimize this
+
 #include "symtable.h"
 #include "errors_enum.h"
 
@@ -19,20 +21,20 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define HASH_TABLE_SIZE 251  //Should be 1.3x times if expected entries and it should be a prime, 251 is just a guess
+#define HASH_TABLE_SIZE 251  //Should be 1.3x the amount of expected entries and it should be a prime, 251 is just a guess
 
 //remove me, im just for testing!
 int main(){
-    htabs_l *tables = malloc(sizeof(struct htabs));
+    htabs_l *tables = symtable_init();
     htab_t *t = htab_init(HASH_TABLE_SIZE, 0);
+    htab_insert(tables, t);
     char *symbol = "counter";
-    htab_data_t *pair = htab_find(t, symbol);
-    if(pair == NULL)
-        printf("it was not found, this is expected behaviour\n");
     htab_create(t, symbol);
-    pair = htab_find(t, symbol);
-    if(pair != NULL)
-        printf("it was found, this is expected behaviour\n");
+    htab_t *t1 = htab_init(HASH_TABLE_SIZE, 1);
+    htab_insert(tables, t1);
+    htab_t *t2 = htab_init(HASH_TABLE_SIZE, 2);
+    htab_insert(tables, t2);
+    printf("%d\n", tables->last->depth);
 }
 
 
@@ -44,11 +46,12 @@ size_t htab_hash_function(const char *str) {
     return h;
 }
 
-htabs_l *symtable_init(htabs_l *list){
-    list->active = NULL;
+htabs_l *symtable_init(){
+    htabs_l *list = malloc(sizeof(struct htabs));
     list->first = NULL;
     list->last = NULL;
     list->tablesCount = 0;
+    return list;
 }
 
 //Initializes the hash table
@@ -75,10 +78,13 @@ void htab_insert(htabs_l *list, htab_t *t){
         list->first = t;
         list->last = t;
         list->tablesCount++;
+        return;
     }
     htab_t *lt = list->first;
     int depth = lt->depth;
+    printf("out lt=%d dep=%d\n", lt->depth, t->depth);
     while(depth < t->depth && lt->next != NULL){
+        printf("lt=%d dep=%d\n", lt->depth, t->depth);
         lt = lt->next;
         depth = lt->depth;
     }
@@ -97,11 +103,11 @@ void htab_insert(htabs_l *list, htab_t *t){
     if(depth < t->depth){    //Insert after
         t->next = lt->next;
         t->previous = lt;
-        if(lt->previous == NULL)
+        if(lt->next == NULL)
             list->last = t;
         else
             lt->next->previous = t;
-        lt->previous = t;
+        lt->next = t;
     }
     list->tablesCount++;
 }

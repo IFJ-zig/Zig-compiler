@@ -50,7 +50,6 @@ typedef struct htab_itm {
 typedef struct htabs {
     struct htab *first;
     struct htab *last;
-    struct htab *active;
     int tablesCount;
 } htabs_l;
 
@@ -60,7 +59,9 @@ typedef struct htabs {
 size_t htab_hash_function(htab_key_t str);
 
 // Initializace symtable:
-htabs_l *symtable_init(htabs_l *list);
+htabs_l *symtable_init();
+
+//  Vložení tabulky do listu
 void htab_insert(htabs_l *list, htab_t *t);
 
 // Funkce pro práci s tabulkou:
@@ -71,16 +72,8 @@ size_t htab_bucket_count(const htab_t * t);     // velikost pole
 htab_data_t * htab_find(const htab_t * t, htab_key_t key);  // hledání
 htab_data_t * htab_create(htab_t * t, htab_key_t key);
 
-bool htab_erase(htab_t * t, htab_key_t key);    // ruší zadaný záznam
-
-// for_each: projde všechny záznamy a zavolá na ně funkci f
-// Pozor: f nesmí měnit klíč .key ani přidávat/rušit položky
-void htab_for_each(const htab_t * t, void (*f)(htab_data_t *data));
 
 void htab_clear(htab_t * t);    // ruší všechny záznamy
 void htab_free(htab_t * t);     // destruktor tabulky
-
-// výpočet a tisk statistik délky seznamů (min,max,avg) do stderr:
-void htab_statistics(const htab_t * t);
 
 #endif // HTAB_H__
