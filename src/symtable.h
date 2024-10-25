@@ -19,7 +19,7 @@ typedef const char * htab_key_t;        // typ klíče
 typedef int htab_value_t;               // typ hodnoty
 
 typedef enum {
-    INT, FLOAT, STRING, BOOL
+    INT, FLOAT, STRING, BOOL, FUNCTION
 } varType;
 
 // Data v tabulce:
