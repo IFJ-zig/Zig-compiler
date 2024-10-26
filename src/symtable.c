@@ -23,20 +23,6 @@
 
 #define HASH_TABLE_SIZE 251  //Should be 1.3x the amount of expected entries and it should be a prime, 251 is just a guess
 
-//remove me, im just for testing!
-int main(){
-    htabs_l *tables = symtable_init();
-    htab_t *t = htab_init(HASH_TABLE_SIZE, 0);
-    htab_insert(tables, t);
-    char *symbol = "counter";
-    htab_create(t, symbol);
-    htab_t *t1 = htab_init(HASH_TABLE_SIZE, 1);
-    htab_insert(tables, t1);
-    htab_t *t2 = htab_init(HASH_TABLE_SIZE, 2);
-    htab_insert(tables, t2);
-    printf("%d\n", tables->last->depth);
-}
-
 
 size_t htab_hash_function(const char *str) {
     uint32_t h=0;     // musí mít 32 bitů
@@ -180,4 +166,16 @@ htab_data_t *htab_create(htab_t *t, htab_key_t key){
         t->size++;
         return &newitm->data;
     }
+}
+
+void htab_removeDepth(htabs_l *list, int depth){
+    htab_t *toBeRemoved = list->last;
+    while (toBeRemoved != NULL && toBeRemoved->depth >= depth)
+    {
+        list->last = toBeRemoved->previous;
+        htab_free(toBeRemoved);
+        toBeRemoved = list->last;
+        list->tablesCount--;
+    }
+    
 }

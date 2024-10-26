@@ -63,15 +63,13 @@ htabs_l *symtable_init();
 
 //  Vložení tabulky do listu
 void htab_insert(htabs_l *list, htab_t *t);
+void htab_removeDepth(htabs_l *list, int depth);    //Removes all tables of certain depth and more
 
 // Funkce pro práci s tabulkou:
 htab_t *htab_init(const size_t n, int depth);              // konstruktor tabulky
-size_t htab_size(const htab_t * t);             // počet záznamů v tabulce
-size_t htab_bucket_count(const htab_t * t);     // velikost pole
 
 htab_data_t * htab_find(const htab_t * t, htab_key_t key);  // hledání
 htab_data_t * htab_create(htab_t * t, htab_key_t key);
-
 
 void htab_clear(htab_t * t);    // ruší všechny záznamy
 void htab_free(htab_t * t);     // destruktor tabulky
