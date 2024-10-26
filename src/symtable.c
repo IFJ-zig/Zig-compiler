@@ -34,6 +34,10 @@ size_t htab_hash_function(const char *str) {
 
 htabs_l *symtable_init(){
     htabs_l *list = malloc(sizeof(struct htabs));
+    if(list == NULL){
+        fprintf(stderr, "Failed to allocate memory for hash tables list\n");
+        exit(INTERNAL_COMPILER_ERROR);
+    }
     list->first = NULL;
     list->last = NULL;
     list->tablesCount = 0;
