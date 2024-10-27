@@ -274,3 +274,27 @@ int getValuePrecedentTable(int tokenStack, int tokenInput) // Translates your to
 	}
 	return (int)GV_precedentTable[(TABLE_SIZE * i) + j];
 }
+
+//_________________________________________________________________________
+//________________________Grammar definition_______________________________
+//_________________________________________________________________________
+
+//Our grammar
+/*
+* 1: E->E+E
+* 2: E->E*E
+* 3: E->(E) yes
+* 4: E->id yes
+* 5: E->int yes
+* 6: E->float yes
+* 7: E->string yes
+* 8: E->E-E
+* 9: E->E/E
+* 10: E->E>E
+* 11: E->E<E
+* 12: E->E!=E
+* 13: E->E>=E
+* 14: E->E<=E
+* 15: E->E==E
+* 15: E->-E
+*/
