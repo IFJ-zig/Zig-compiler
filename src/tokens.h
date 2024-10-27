@@ -79,8 +79,14 @@ typedef enum
 	rbracket,
 	lblock,
 	rblock,
-	end
+	end,
 	//(,    ),      {,     },     konec
+
+	//precendet analysis tokens
+	nonterminal_token,
+	precedent_less_token,
+	error_token,
+	illegal_token,
 } KeyWord;
 
 typedef struct SToken
@@ -90,6 +96,8 @@ typedef struct SToken
 	double *f;
 	char *s;
 	struct SToken *next;
+	size_t sSize;
+	size_t sCurrentIndex;
 } Token;
 
 typedef struct SList
