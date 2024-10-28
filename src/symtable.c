@@ -45,15 +45,15 @@ htabs_l *symtable_init(){
 }
 
 //Initializes the hash table
-htab_t *htab_init(const size_t n, int depth){
+htab_t *htab_init(int depth){
     htab_t *tab = malloc(sizeof(htab_t));
     if(tab == NULL){
         fprintf(stderr, "Failed to allocate memory for hash table!\n");
         exit(INTERNAL_COMPILER_ERROR);
     }
     tab->size = 0;
-    tab->arr_size = n;
-    tab->arr_ptr = calloc(n, sizeof(htab_itm_t*));
+    tab->arr_size = HASH_TABLE_SIZE;
+    tab->arr_ptr = calloc(HASH_TABLE_SIZE, sizeof(htab_itm_t*));
     tab->depth = depth;
     if(tab->arr_ptr == NULL){
         fprintf(stderr, "Failed to allocate memory while initializing hash table!\n");
@@ -209,4 +209,11 @@ void htab_insertLast(htabs_l *list, htab_t *t){
         prevLast->next = t;
     }
     list->tablesCount++;
+}
+
+int getCurrentDepth(htabs_l *list){
+    if(list->last == NULL)
+        return 0;
+    else
+        return list->last->depth;
 }

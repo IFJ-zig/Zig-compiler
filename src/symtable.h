@@ -68,12 +68,14 @@ void htab_removeLast(htabs_l *list);
 void htab_insertLast(htabs_l *list, htab_t *t);
 
 // Funkce pro práci s tabulkou:
-htab_t *htab_init(const size_t n, int depth);              // konstruktor tabulky
+htab_t *htab_init(int depth);              // konstruktor tabulky
 
 symbol_t * htab_find(const htab_t * t, htab_key_t key);  // hledání
 symbol_t * htab_define(htab_t * t, htab_key_t key);
 
 void htab_clear(htab_t * t);    // ruší všechny záznamy
 void htab_free(htab_t * t);     // destruktor tabulky
+
+int getCurrentDepth(htabs_l *list);
 
 #endif // HTAB_H__
