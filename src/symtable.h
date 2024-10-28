@@ -23,13 +23,13 @@ typedef enum {
 } varType;
 
 // Data v tabulce:
-typedef struct htab_data {
+typedef struct symbol {
     htab_key_t    key;          // klíč
     htab_value_t  value;        // asociovaná hodnota
     int depth;
     varType type;
     bool isDefined;
-} htab_data_t;                  // typedef podle zadání
+} symbol_t;                  // typedef podle zadání
 
 // Tabulka:
 typedef struct htab {
@@ -42,7 +42,7 @@ typedef struct htab {
 } htab_t;
 
 typedef struct htab_itm {
-    htab_data_t data;
+    symbol_t symbol;
     struct htab_itm *next;
 } htab_itm_t;
 
@@ -63,13 +63,15 @@ htabs_l *symtable_init();
 
 //  Vložení tabulky do listu
 void htab_insert(htabs_l *list, htab_t *t);
-void htab_removeDepth(htabs_l *list, int depth);    //Removes all tables of certain depth and more
+void htab_removeDepth(htabs_l *list, int depth);    //Removes all tables of certain depth and more, dont use this ill delete it
+void htab_removeLast(htabs_l *list);
+void htab_insertLast(htabs_l *list, htab_t *t);
 
 // Funkce pro práci s tabulkou:
 htab_t *htab_init(const size_t n, int depth);              // konstruktor tabulky
 
-htab_data_t * htab_find(const htab_t * t, htab_key_t key);  // hledání
-htab_data_t * htab_create(htab_t * t, htab_key_t key);
+symbol_t * htab_find(const htab_t * t, htab_key_t key);  // hledání
+symbol_t * htab_define(htab_t * t, htab_key_t key);
 
 void htab_clear(htab_t * t);    // ruší všechny záznamy
 void htab_free(htab_t * t);     // destruktor tabulky

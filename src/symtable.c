@@ -63,7 +63,7 @@ htab_t *htab_init(const size_t n, int depth){
 }
 
 //This function inserts the newly created hash table into a list of hash tables sorted by their depth
-void htab_insert(htabs_l *list, htab_t *t){
+void htab_insert(htabs_l *list, htab_t *t){//actually this function is useless, dont use it, just use insertlast, we'll treat it as a stack
     if(list->first == NULL){
         list->first = t;
         list->last = t;
@@ -114,28 +114,28 @@ void htab_clear(htab_t * t){
         while(itm!=NULL){
             previtm=itm;
             itm=itm->next;
-            free((char *)previtm->data.key);    //is set to const char*, need to cast away constness
+            free((char *)previtm->symbol.key);    //is set to const char*, need to cast away constness
             free(previtm);
         }
         t->arr_ptr[i]=NULL;
     }
 }
 
-htab_data_t *htab_find(const htab_t * t, htab_key_t key){
+symbol_t *htab_find(const htab_t * t, htab_key_t key){
     size_t hash = htab_hash_function(key);
     int index = hash % t->arr_size;
     htab_itm_t *itm = t->arr_ptr[index];
     while(itm!=NULL){
-        if(!strcmp(key, itm->data.key))
-            return &itm->data;
+        if(!strcmp(key, itm->symbol.key))
+            return &itm->symbol;
         itm=itm->next;
     }
     return NULL;
 }
 
 //This function will add an entry in the hash table, if it already exists, it will return the existing entry
-htab_data_t *htab_create(htab_t *t, htab_key_t key){
-    htab_data_t *data = htab_find(t, key);
+symbol_t *htab_define(htab_t *t, htab_key_t key){
+    symbol_t *data = htab_find(t, key);
     if(data!=NULL){
         return data;
     }
@@ -166,9 +166,9 @@ htab_data_t *htab_create(htab_t *t, htab_key_t key){
             exit(INTERNAL_COMPILER_ERROR);
         }
         strcpy(keyString, key);
-        newitm->data.key=keyString;
+        newitm->symbol.key=keyString;
         t->size++;
-        return &newitm->data;
+        return &newitm->symbol;
     }
 }
 
@@ -181,5 +181,32 @@ void htab_removeDepth(htabs_l *list, int depth){
         toBeRemoved = list->last;
         list->tablesCount--;
     }
-    
+}
+
+void htab_removeLast(htabs_l *list){
+    htab_t *toBeRemoved = list->last;
+    if(toBeRemoved != NULL){
+        list->last = toBeRemoved->previous;
+        if(toBeRemoved->previous == NULL)
+            list->first = NULL;
+        htab_free(toBeRemoved);
+        list->tablesCount--;
+    }
+}
+
+void htab_insertLast(htabs_l *list, htab_t *t){
+    if(list->last == NULL){
+        list->first = t;
+        list->last = t;
+    }
+    else{
+        htab_t *prevLast = list->last;
+        if(prevLast->depth >= t->depth)
+            fprintf(stderr, "Warning! Possible insertion of table in incorrect order\n");
+        list->last = t;
+        t->previous = prevLast;
+        t->next = NULL;
+        prevLast->next = t;
+    }
+    list->tablesCount++;
 }

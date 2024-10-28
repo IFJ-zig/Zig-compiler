@@ -13,15 +13,13 @@
 #include "symtable.h"
 
 //Create a new symbol, returns 0 on success or REDEFINITION_ERROR is symbol of same name in scope already exists
-int defineSymbol(char *name, int depth, char *value, varType type);
+int defineSymbol(char *name, char *value, varType type);
 
-bool assignSymbol(char *name, int depth, char *value, varType type);
-bool symbolExists(char *name, int depth);
+bool assignSymbol(char *name, char *value, varType type);
+bool symbolExists(char *name);
 
-/*
 void enterScope(); //A function for going into bigger depth so syntax analyzer doesn't need to keep track of depth itself
 void exitScope();
-*/
 
 
 
