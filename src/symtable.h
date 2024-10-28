@@ -62,8 +62,6 @@ size_t htab_hash_function(htab_key_t str);
 htabs_l *symtable_init();
 
 //  Vložení tabulky do listu
-void htab_insert(htabs_l *list, htab_t *t);
-void htab_removeDepth(htabs_l *list, int depth);    //Removes all tables of certain depth and more, dont use this ill delete it
 void htab_removeLast(htabs_l *list);
 void htab_insertLast(htabs_l *list, htab_t *t);
 

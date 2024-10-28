@@ -62,43 +62,6 @@ htab_t *htab_init(int depth){
     return tab;
 }
 
-//This function inserts the newly created hash table into a list of hash tables sorted by their depth
-void htab_insert(htabs_l *list, htab_t *t){//actually this function is useless, dont use it, just use insertlast, we'll treat it as a stack
-    if(list->first == NULL){
-        list->first = t;
-        list->last = t;
-        list->tablesCount++;
-        return;
-    }
-    htab_t *lt = list->first;
-    int depth = lt->depth;
-    while(depth < t->depth && lt->next != NULL){
-        lt = lt->next;
-        depth = lt->depth;
-    }
-    if(depth == t->depth)
-        fprintf(stderr, "Error trying to insert a table that already exists!\n");
-
-    if(depth > t->depth){   //Insert before
-        t->next = lt;
-        t->previous = lt->previous;
-        if(lt->previous == NULL)
-            list->first = t;
-        else
-            lt->previous->next = t;
-        lt->previous = t;
-    }
-    if(depth < t->depth){    //Insert after
-        t->next = lt->next;
-        t->previous = lt;
-        if(lt->next == NULL)
-            list->last = t;
-        else
-            lt->next->previous = t;
-        lt->next = t;
-    }
-    list->tablesCount++;
-}
 
 void htab_free(htab_t * t){
     htab_clear(t);
@@ -169,17 +132,6 @@ symbol_t *htab_define(htab_t *t, htab_key_t key){
         newitm->symbol.key=keyString;
         t->size++;
         return &newitm->symbol;
-    }
-}
-
-void htab_removeDepth(htabs_l *list, int depth){
-    htab_t *toBeRemoved = list->last;
-    while (toBeRemoved != NULL && toBeRemoved->depth >= depth)
-    {
-        list->last = toBeRemoved->previous;
-        htab_free(toBeRemoved);
-        toBeRemoved = list->last;
-        list->tablesCount--;
     }
 }
 
