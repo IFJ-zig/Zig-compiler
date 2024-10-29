@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h> //strcat,cmp,cpy,len
 
+#include "errors_enum.h"
 #include "tokens.h"
 
 typedef struct StackItem // Item of stack

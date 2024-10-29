@@ -86,7 +86,7 @@ typedef enum
 	nonterminal_token,
 	precedent_less_token,
 	error_token,
-	illegal_token,
+	illegal_token
 } KeyWord;
 
 typedef struct SToken
