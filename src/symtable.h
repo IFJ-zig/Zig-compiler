@@ -16,7 +16,6 @@
 
 // Typy:
 typedef const char * htab_key_t;        // typ klíče
-typedef int htab_value_t;               // typ hodnoty
 
 typedef enum {
     INT, FLOAT, STRING, BOOL, FUNCTION
@@ -25,7 +24,9 @@ typedef enum {
 // Data v tabulce:
 typedef struct symbol {
     htab_key_t    key;          // klíč
-    htab_value_t  value;        // asociovaná hodnota
+    int intVal;
+    float floatVal;
+    char *charVal;
     int depth;
     varType type;
     varType returnType;

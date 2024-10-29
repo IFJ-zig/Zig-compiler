@@ -9,7 +9,7 @@ static htabs_l *list;
 
 void semanticInit(){
     list = symtable_init();
-    EnterScope(list);
+    enterScope(list);
 }
 
 void enterScope(){
@@ -27,7 +27,9 @@ int defineSymbol(char *name, char *value, varType type){
         return REDEFINITION_ERROR;
     symbol = htab_define(list->last, name);
     symbol->type = type;
-    symbol->value = value;
+    //symbol->value = value;
+    value = value; //just so compiler doesnt freak out, don't worry ill delete this
+    return 0;
 }
 
 symbol_t *getSymbol(char *name){
