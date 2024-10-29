@@ -19,6 +19,9 @@ int defineSymbol(char *name, char *value, varType type);
 
 bool assignSymbol(char *name, char *value);
 symbol_t *getSymbol(char *name);
+bool isValidParamType(KeyWord kw);
+
+void processParam(Token paramName, Token paramType);
 
 void enterScope(); //A function for going into bigger depth so syntax analyzer doesn't need to keep track of depth itself
 void exitScope();

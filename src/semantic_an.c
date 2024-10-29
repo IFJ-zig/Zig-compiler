@@ -39,3 +39,26 @@ symbol_t *getSymbol(char *name){
     }
     return symbol;
 }
+
+//Entering function, get 3 tokens from which extract paramName and paramType, this functions expects to already be shifted into the function scope
+void processParam(Token paramName, Token paramType){
+	if(!isValidParamType(paramType.kw)){
+		fprintf(stderr, "Error: %s is not a valid parameter type\n", paramType.s);
+        exit(PARAM_ERROR);
+    }
+    varType type;
+    if(paramType.kw == dtint)
+        type = INT;
+    if(paramType.kw == dtflt)
+        type = FLOAT;
+    if(paramType.kw == dtstr)
+        type = STRING;
+    defineSymbol(paramName.s, NULL, type);
+}
+
+bool isValidParamType(KeyWord kw){
+    if(kw == dtint || kw == dtstr || kw == dtflt)
+        return true;
+    return false;
+
+}

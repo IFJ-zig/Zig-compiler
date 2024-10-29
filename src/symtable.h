@@ -28,6 +28,7 @@ typedef struct symbol {
     htab_value_t  value;        // asociovaná hodnota
     int depth;
     varType type;
+    varType returnType;
     bool isDefined;
 } symbol_t;                  // typedef podle zadání
 
