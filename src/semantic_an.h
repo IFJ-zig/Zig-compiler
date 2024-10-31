@@ -17,7 +17,7 @@ void semanticInit();
 //Create a new symbol, returns 0 on success or REDEFINITION_ERROR is symbol of same name in scope already exists
 int defineSymbol(char *name, varType type);
 
-bool assignSymbol(char *name, char *value);
+bool assignSymbol(char *name, char *value, KeyWord kw);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
 

@@ -40,6 +40,27 @@ symbol_t *getSymbol(char *name){
     return symbol;
 }
 
+bool assignSymbol(char *name, char *value, KeyWord kw){
+    value = value;  //just so compiler shuts up
+                    //i dont think we need to track the actual value of symbols since we're not building the AST
+                    //keeping track now might make codegen easier but who gaf?
+    symbol_t *symbol = getSymbol(name);
+    if(symbol == NULL)
+        return false;   //Symbol does not exist
+    if(symbol->type == INT){
+        if(kw == dtint)
+            return true;
+    }
+    else if(symbol->type == FLOAT){
+        if(kw == dtflt || kw == dtint)
+            return true;
+    }
+    else if(symbol->type == STRING)
+        if(kw == dtstr)
+            return true;
+    return false;
+}
+
 //Entering function, get 3 tokens from which extract paramName and paramType, this functions expects to already be shifted into the function scope
 void processParam(Token paramName, Token paramType){
 	if(!isValidParamType(paramType.kw)){
@@ -53,7 +74,7 @@ void processParam(Token paramName, Token paramType){
         type = FLOAT;
     if(paramType.kw == dtstr)
         type = STRING;
-    defineSymbol(paramName.s, NULL, type);
+    defineSymbol(paramName.s, type);
 }
 
 bool isValidParamType(KeyWord kw){
