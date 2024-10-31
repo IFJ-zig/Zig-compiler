@@ -21,14 +21,12 @@ void exitScope(){
     htab_removeLast(list);
 }
 
-int defineSymbol(char *name, char *value, varType type){
+int defineSymbol(char *name, varType type){
     symbol_t *symbol = htab_find(list->last, name);
     if(symbol != NULL)
         return REDEFINITION_ERROR;
     symbol = htab_define(list->last, name);
     symbol->type = type;
-    //symbol->value = value;
-    value = value; //just so compiler doesnt freak out, don't worry ill delete this
     return 0;
 }
 
@@ -62,5 +60,4 @@ bool isValidParamType(KeyWord kw){
     if(kw == dtint || kw == dtstr || kw == dtflt)
         return true;
     return false;
-
 }
