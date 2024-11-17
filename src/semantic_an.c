@@ -27,6 +27,7 @@ int defineSymbol(char *name, varType type){
         return REDEFINITION_ERROR;
     symbol = htab_define(list->last, name);
     symbol->type = type;
+    symbol->isDefined = false;
     return 0;
 }
 
@@ -47,6 +48,7 @@ bool assignSymbol(char *name, char *value, KeyWord kw){
     symbol_t *symbol = getSymbol(name);
     if(symbol == NULL)
         return false;   //Symbol does not exist
+    symbol->isDefined = true;
     if(symbol->type == INT){
         if(kw == dtint)
             return true;
