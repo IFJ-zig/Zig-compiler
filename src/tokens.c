@@ -3,9 +3,8 @@
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
 #include "tokens.h"
-
 #include "errors_enum.h"
-
+/*
 void ListInit(List *L) {
 	//nastaví pointry na null
 	L->first = NULL;
@@ -13,16 +12,16 @@ void ListInit(List *L) {
 	L->last = NULL;
 }
 
-int LInsertLast(List *L, KeyWord key, int *i, double *f, char *s) {
+Token LInsertLast(KeyWord key, int i, double f, char *s) {
 	//přidá token na konec, pokud je list prázdný, je přidaný i prvním
-	Token *new = (Token *)malloc(sizeof(Token));
+	Token new = {key, i, f, *s}(Token *)malloc(sizeof(Token));
 	if (new == NULL) {
 		return LEXEM_ERROR;
 	} else {
-		new->kw = key;
-		new->i = i;
-		new->f = f;
-		new->s = s;
+		new.kw = key;
+		new.i = i;
+		new.f = f;
+		new.s = *s;
 		if (L->last != NULL) {
 			new->next = L->last->next;
 			L->last->next = new;
@@ -33,7 +32,7 @@ int LInsertLast(List *L, KeyWord key, int *i, double *f, char *s) {
 			L->last = new;
 		}
 	}
-	return 0;
+	return new;
 }
 
 void LActFirst(List *L) {
@@ -60,37 +59,37 @@ Token *LGetAct(List *L) {
 
 KeyWord LGetKeyWFirst(List *L) {
 	return L->first->kw;
+}*/
+
+KeyWord LGetKeyWAct(/*List *L*/Token T) {
+	return /*L->active->*/T.kw;
 }
 
-KeyWord LGetKeyWAct(List *L) {
-	return L->active->kw;
-}
-
-int *LGetNumFirst(List *L) {
+/*int *LGetNumFirst(List *L) {
 	return L->first->i;
+}*/
+
+int LGetNumAct(/*List *L*/Token T) {
+	return /*L->active->*/T.i;
 }
 
-int *LGetNumAct(List *L) {
-	return L->active->i;
-}
-
-double *LGetFloatFirst(List *L) {
+/*double *LGetFloatFirst(List *L) {
 	return L->first->f;
+}*/
+
+double LGetFloatAct(/*List *L*/Token T) {
+	return /*L->active->*/T.f;
 }
 
-double *LGetFloatAct(List *L) {
-	return L->active->f;
-}
-
-char *LGetStrFirst(List *L) {
+/*char *LGetStrFirst(List *L) {
 	return L->first->s;
+}*/
+
+char *LGetStrAct(/*List *L*/Token *T) {
+	return /*L->active->*/T->s;
 }
 
-char *LGetStrAct(List *L) {
-	return L->active->s;
-}
-
-void LDeleteFirst(List *L) {
+/*void LDeleteFirst(List *L) {
 	//uvolní token a případné parametry
 	if (L->first != NULL) {
 		if (L->first == L->active) {
@@ -121,4 +120,4 @@ void LDestroy(List *L) {
 		L->first = L->active;
 	}
 	L->last = NULL;
-}
+}*/

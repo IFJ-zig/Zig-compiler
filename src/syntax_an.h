@@ -11,7 +11,7 @@
 #include "errors_enum.h"
 #include "tokens.h"
 
-int syntax_analyzer(List *L);
+int syntax_analyzer(/*List *L*/);
 int code(bool tokenWasGiven);
 int program();
 int seekHeaders();

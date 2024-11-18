@@ -5,15 +5,16 @@
 #include "errors_enum.h"
 #include "tokens.h"
 
-int Lexem_analyzer(List *L) {
+Token get_token/*Lexem_analyzer*/(/*List *L*/) {
 	//inicializace
-	char *lexem, *p;
-	int *n;
-	double *d;
+	char lexem[256];
+	int n;
+	double d;
+	Token new = {next, 0, 0, ""};
 	//pokud nealokuje, vrátí chybu
-	if (!(lexem = (char *)malloc(sizeof(char) * 256))) {
+	/*if (!(lexem = (char *)malloc(sizeof(char) * 256))) {
 		return INTERNAL_COMPILER_ERROR;
-	}
+	}*/
 	char letter = getchar();
 	lexem[0] = '\0';
 
@@ -29,128 +30,179 @@ int Lexem_analyzer(List *L) {
 				break;
 			//jednoznačné tokeny
 			case ';':
-				LInsertLast(L, next, NULL, NULL, NULL);
+				//LInsertLast(L, next, NULL, NULL, NULL);
+				//new = {next, 0, 0, ""};
 				printf("next\n");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case ':':
-				LInsertLast(L, colon, NULL, NULL, NULL);
+				//LInsertLast(L, colon, NULL, NULL, NULL);
+				new.kw = colon;
 				printf("colon ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '(':
-				LInsertLast(L, lbracket, NULL, NULL, NULL);
+				//LInsertLast(L, lbracket, NULL, NULL, NULL);
+				new.kw = lbracket;
 				printf("lbracket ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case ')':
-				LInsertLast(L, rbracket, NULL, NULL, NULL);
+				//LInsertLast(L, rbracket, NULL, NULL, NULL);
+				new.kw = rbracket;
 				printf("pbracket ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '{':
-				LInsertLast(L, lblock, NULL, NULL, NULL);
+				//LInsertLast(L, lblock, NULL, NULL, NULL);
+				new.kw = lblock;
 				printf("lblock\n");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '}':
-				LInsertLast(L, rblock, NULL, NULL, NULL);
+				//LInsertLast(L, rblock, NULL, NULL, NULL);
+				new.kw = rblock;
 				printf("pblock\n");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case ',':
-				LInsertLast(L, comma, NULL, NULL, NULL);
+				//LInsertLast(L, comma, NULL, NULL, NULL);
+				new.kw = comma;
 				printf("comma ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '.':
-				LInsertLast(L, dot, NULL, NULL, NULL);
+				//LInsertLast(L, dot, NULL, NULL, NULL);
+				new.kw = dot;
 				printf("dot ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '+':
-				LInsertLast(L, plus, NULL, NULL, NULL);
+				//LInsertLast(L, plus, NULL, NULL, NULL);
+				new.kw = plus;
 				printf("plus ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '-':
-				LInsertLast(L, minus, NULL, NULL, NULL);
+				//LInsertLast(L, minus, NULL, NULL, NULL);
+				new.kw = minus;
 				printf("minus ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '*':
-				LInsertLast(L, multiply, NULL, NULL, NULL);
+				//LInsertLast(L, multiply, NULL, NULL, NULL);
+				new.kw = multiply;
 				printf("krat ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '?':
-				LInsertLast(L, question_mark, NULL, NULL, NULL);
-				printf("optional ");
-				letter = getchar();
+				//LInsertLast(L, question_mark, NULL, NULL, NULL);
+				new.kw = question_mark;
+				printf("choice ");
+				return new;
+				//letter = getchar();
 				break;
 			case '|':
-				LInsertLast(L, vertical_bar, NULL, NULL, NULL);
+				//LInsertLast(L, vertical_bar, NULL, NULL, NULL);
+				new.kw = vertical_bar;
 				printf("popodm ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '@':
-				LInsertLast(L, at, NULL, NULL, NULL);
+				//LInsertLast(L, at, NULL, NULL, NULL);
+				new.kw = at;
 				printf("zavin ");
-				letter = getchar();
+				return new;
+				//letter = getchar();
 				break;
 			case '[':
 				letter = getchar();
 				if (letter == ']') {
-					LInsertLast(L, square_brackets, NULL, NULL, NULL);
+					//LInsertLast(L, square_brackets, NULL, NULL, NULL);
+					new.kw = square_brackets;
 					printf("square_brackets ");
-					letter = getchar();
+					return new;
+					//letter = getchar();
 				} else {
-					free(lexem);
-					return LEXEM_ERROR;
+					//free(lexem);
+					new.kw = LEXEM;
+					new.i = LEXEM_ERROR;
+					return new;
 				}
 				break;
 			case '<':
 				letter = getchar();
 				if (letter == '=') {
-					LInsertLast(L, lequal, NULL, NULL, NULL);
+					//LInsertLast(L, lequal, NULL, NULL, NULL);
+					new.kw = lequal;
 					printf("lequal ");
-					letter = getchar();
+					return new;
+					//letter = getchar();
 				} else {
-					LInsertLast(L, less, NULL, NULL, NULL);
+					//LInsertLast(L, less, NULL, NULL, NULL);
+					new.kw = less;
 					printf("less ");
+					ungetc(letter, stdin);
+					return new;
 				}
 				break;
 			case '>':
 				letter = getchar();
 				if (letter == '=') {
-					LInsertLast(L, mequal, NULL, NULL, NULL);
+					//LInsertLast(L, mequal, NULL, NULL, NULL);
+					new.kw = mequal;
 					printf("mequal ");
-					letter = getchar();
+					return new;
+					//letter = getchar();
 				} else {
-					LInsertLast(L, more, NULL, NULL, NULL);
+					//LInsertLast(L, more, NULL, NULL, NULL);
+					new.kw = more;
 					printf("more ");
+					ungetc(letter, stdin);
+					return new;
 				}
 				break;
 			case '!':
 				letter = getchar();
 				if (letter == '=') {
-					LInsertLast(L, nequal, NULL, NULL, NULL);
+					//LInsertLast(L, nequal, NULL, NULL, NULL);
+					new.kw = nequal;
 					printf("nequal ");
-					letter = getchar();
+					return new;
+					//letter = getchar();
 				} else {
-					free(lexem);
-					return LEXEM_ERROR;
+					//free(lexem);
+					new.kw = LEXEM;
+					new.i = LEXEM_ERROR;
+					return new;
 				}
 				break;
 			case '=':
 				letter = getchar();
 				if (letter != '=') {
-					LInsertLast(L, equal, NULL, NULL, NULL);
+					//LInsertLast(L, equal, NULL, NULL, NULL);
+					new.kw = equal;
 					printf("compare_equal ");
+					ungetc(letter, stdin);
+					return new;
 				} else {
-					LInsertLast(L, compare_equal, NULL, NULL, NULL);
+					//LInsertLast(L, compare_equal, NULL, NULL, NULL);
+					new.kw = compare_equal;
 					printf("equal ");
-					letter = getchar();
+					return new;
+					//letter = getchar();
 				}
 				break;
 			case '/':
@@ -162,8 +214,11 @@ int Lexem_analyzer(List *L) {
 						letter = getchar();
 					}
 				} else {
-					LInsertLast(L, division, NULL, NULL, NULL);
+					//LInsertLast(L, division, NULL, NULL, NULL);
+					new.kw = division;
 					printf("division ");
+					ungetc(letter, stdin);
+					return new;
 				}
 				break;
 			case '\\':
@@ -171,8 +226,10 @@ int Lexem_analyzer(List *L) {
 				do {
 					letter = getchar();
 					if (letter != '\\') {
-						free(lexem);
-						return LEXEM_ERROR;
+						//free(lexem);
+						new.kw = LEXEM;
+						new.i = LEXEM_ERROR;
+						return new;
 					}
 					letter = getchar();
 					//vezme všechny znaky
@@ -232,19 +289,25 @@ int Lexem_analyzer(List *L) {
 											letter = getchar();
 										} else {
 											//chyba lexemu
-											free(lexem);
-											return LEXEM_ERROR;
+											//free(lexem);
+											new.kw = LEXEM;
+											new.i = LEXEM_ERROR;
+											return new;
 										}
 									} else {
 										//chyba lexemu
-										free(lexem);
-										return LEXEM_ERROR;
+										//free(lexem);
+										new.kw = LEXEM;
+										new.i = LEXEM_ERROR;
+										return new;
 									}
 									break;
 								default:
 									//chyba lexemu
-									free(lexem);
-									return LEXEM_ERROR;
+									//free(lexem);
+									new.kw = LEXEM;
+									new.i = LEXEM_ERROR;
+									return new;
 							}
 						} else if (letter > 31) {
 							strncat(lexem, &letter, 1);
@@ -258,14 +321,17 @@ int Lexem_analyzer(List *L) {
 						letter = getchar();
 					}
 				} while (letter == '\\');
-				if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+				/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 					free(lexem);
 					return INTERNAL_COMPILER_ERROR;
-				}
-				strcpy(p, lexem);
-				LInsertLast(L, text, NULL, NULL, p);
-				printf("text_%s ", p);
-				lexem[0] = '\0';
+				}*/
+				new.kw = text;
+				strcpy(new.s, lexem);
+				//LInsertLast(L, text, NULL, NULL, p);
+				printf("text_%s ", LGetStrAct(&new));
+				ungetc(letter, stdin);
+				return new;
+				//lexem[0] = '\0';
 				break;
 			case '"':
 				//string
@@ -274,14 +340,16 @@ int Lexem_analyzer(List *L) {
 					//druhý
 					letter = getchar();
 					//prázdný
-					if (!(p = (char *)malloc(sizeof(char)))) {
+					/*if (!(p = (char *)malloc(sizeof(char)))) {
 						free(lexem);
 						return INTERNAL_COMPILER_ERROR;
 					}
 					*p = '\0';
-					LInsertLast(L, text, NULL, NULL, p);
-					printf("text_%s ", p);
-					//}
+					LInsertLast(L, text, NULL, NULL, p);*/
+					new.kw = text;
+					printf("text_%s ", LGetStrAct(&new));
+					ungetc(letter, stdin);
+					return new;
 				} else {
 					//jednoduchý
 					while (letter != '"' && letter != EOF && letter != '\n') {
@@ -330,19 +398,25 @@ int Lexem_analyzer(List *L) {
 											letter = getchar();
 										} else {
 											//chyba lexemu
-											free(lexem);
-											return LEXEM_ERROR;
+											//free(lexem);
+											new.kw = LEXEM;
+											new.i = LEXEM_ERROR;
+											return new;
 										}
 									} else {
 										//chyba lexemu
-										free(lexem);
-										return LEXEM_ERROR;
+										//free(lexem);
+										new.kw = LEXEM;
+										new.i = LEXEM_ERROR;
+										return new;
 									}
 									break;
 								default:
 									//chyba lexemu
-									free(lexem);
-									return LEXEM_ERROR;
+									//free(lexem);
+									new.kw = LEXEM;
+									new.i = LEXEM_ERROR;
+									return new;
 							}
 						} else if (letter > 31) {
 							strncat(lexem, &letter, 1);
@@ -351,26 +425,32 @@ int Lexem_analyzer(List *L) {
 					}
 					if (letter == EOF || letter == '\n') {
 						//chyba lexemu
-						free(lexem);
-						return LEXEM_ERROR;
+						//free(lexem);
+						new.kw = LEXEM;
+						new.i = LEXEM_ERROR;
+						return new;
 					}
-					if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+					/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 						free(lexem);
 						return INTERNAL_COMPILER_ERROR;
-					}
-					strcpy(p, lexem);
-					LInsertLast(L, text, NULL, NULL, p);
-					printf("text_%s ", p);
-					lexem[0] = '\0';
-					letter = getchar();
+					}*/
+					new.kw = text;
+					strcpy(new.s, lexem);
+					printf("text_%s ", LGetStrAct(&new));
+					return new;
+					//LInsertLast(L, text, NULL, NULL, p);
+					//lexem[0] = '\0';
+					//letter = getchar();
 				}
 				break;
 			case '0':
 				//nezačíná nulou
 				letter = getchar();
 				if (letter >= '0' && letter <= '9') {
-					free(lexem);
-					return LEXEM_ERROR;
+					//free(lexem);
+					new.kw = LEXEM;
+					new.i = LEXEM_ERROR;
+					return new;
 				}
 				strncat(lexem, "00", 1);
 			case '1' ... '9':
@@ -384,8 +464,10 @@ int Lexem_analyzer(List *L) {
 					strncat(lexem, &letter, 1);
 					letter = getchar();
 					if (!(letter >= '0' && letter <= '9')) {
-						free(lexem);
-						return LEXEM_ERROR;
+						//free(lexem);
+						new.kw = LEXEM;
+						new.i = LEXEM_ERROR;
+						return new;
 					}
 					while (letter >= '0' && letter <= '9') {
 						strncat(lexem, &letter, 1);
@@ -400,29 +482,34 @@ int Lexem_analyzer(List *L) {
 							letter = getchar();
 						}
 						if (!(letter >= '0' && letter <= '9')) {
-							free(lexem);
-							return LEXEM_ERROR;
+							//free(lexem);
+							new.kw = LEXEM;
+							new.i = LEXEM_ERROR;
+							return new;
 						}
 						while (letter >= '0' && letter <= '9') {
 							strncat(lexem, &letter, 1);
 							letter = getchar();
 						}
-						if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+						/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 							free(lexem);
 							return INTERNAL_COMPILER_ERROR;
-						}
-						strcpy(p, lexem);
-						if (!(d = (double *)malloc(sizeof(double)))) {
+						}*/
+						/*if (!(d = (double *)malloc(sizeof(double)))) {
 							free(lexem);
 							return INTERNAL_COMPILER_ERROR;
-						}
-						*d = atof(lexem);
-						LInsertLast(L, decim, NULL, d, p);
-						printf("decim_%s_%f ", p, *d);
-						lexem[0] = '\0';
+						}*/
+						d = atof(lexem);
+						//LInsertLast(L, decim, NULL, d, p);
+						//lexem[0] = '\0';
+						new.kw = decim;
+						new.f = d;
+						strcpy(new.s, lexem);
+						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+						return new;
 					} else {
 						//jen tečka
-						if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+						/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 							free(lexem);
 							return INTERNAL_COMPILER_ERROR;
 						}
@@ -430,11 +517,15 @@ int Lexem_analyzer(List *L) {
 						if (!(d = (double *)malloc(sizeof(double)))) {
 							free(lexem);
 							return INTERNAL_COMPILER_ERROR;
-						}
-						*d = atof(lexem);
-						LInsertLast(L, decim, NULL, d, p);
-						printf("decim_%s_%f ", p, *d);
-						lexem[0] = '\0';
+						}*/
+						d = atof(lexem);
+						//LInsertLast(L, decim, NULL, d, p);
+						new.kw = decim;
+						new.f = d;
+						strcpy(new.s, lexem);
+						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+						return new;
+						//lexem[0] = '\0';
 					}
 				} else if (letter == 'e' || letter == 'E') {
 					//exponent
@@ -445,14 +536,16 @@ int Lexem_analyzer(List *L) {
 						letter = getchar();
 					}
 					if (!(letter >= '0' && letter <= '9')) {
-						free(lexem);
-						return LEXEM_ERROR;
+						//free(lexem);
+						new.kw = LEXEM;
+						new.i = LEXEM_ERROR;
+						return new;
 					}
 					while (letter >= '0' && letter <= '9') {
 						strncat(lexem, &letter, 1);
 						letter = getchar();
 					}
-					if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+					/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 						free(lexem);
 						return INTERNAL_COMPILER_ERROR;
 					}
@@ -460,14 +553,18 @@ int Lexem_analyzer(List *L) {
 					if (!(d = (double *)malloc(sizeof(double)))) {
 						free(lexem);
 						return INTERNAL_COMPILER_ERROR;
-					}
-					*d = atof(lexem);
-					LInsertLast(L, decim, NULL, d, p);
-					printf("decim_%s_%f ", p, *d);
-					lexem[0] = '\0';
+					}*/
+					d = atof(lexem);
+					//LInsertLast(L, decim, NULL, d, p);
+					new.kw = decim;
+					new.f = d;
+					strcpy(new.s, lexem);
+					printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+					return new;
+					//lexem[0] = '\0';
 				} else {
 					//celá
-					if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+					/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 						free(lexem);
 						return INTERNAL_COMPILER_ERROR;
 					}
@@ -475,11 +572,16 @@ int Lexem_analyzer(List *L) {
 					if (!(n = (int *)malloc(sizeof(int)))) {
 						free(lexem);
 						return INTERNAL_COMPILER_ERROR;
-					}
-					*n = atoi(lexem);
-					LInsertLast(L, num, n, NULL, p);
-					printf("num_%s_%d ", p, *n);
-					lexem[0] = '\0';
+					}*/
+					n = atoi(lexem);
+					//LInsertLast(L, num, n, NULL, p);
+					//printf("num_%s_%d ", p, *n);
+					new.kw = num;
+					new.i = n;
+					strcpy(new.s, lexem);
+					printf("num_%s_%d ", LGetStrAct(&new), LGetNumAct(new));
+					return new;
+					//lexem[0] = '\0';
 				}
 				break;
 			case 'a' ... 'z':
@@ -490,8 +592,11 @@ int Lexem_analyzer(List *L) {
 				if (letter == '_') {
 					letter = getchar();
 					if (!(letter >= 'a' && letter <= 'z') && !(letter >= 'A' && letter <= 'Z') && !(letter >= '0' && letter <= '9') && letter != '_') {
-						LInsertLast(L, underscore, NULL, NULL, NULL);
+						//LInsertLast(L, underscore, NULL, NULL, NULL);
+						new.kw = underscore;
 						printf("underscore ");
+						ungetc(letter, stdin);
+						return new;
 						break;
 					} else {
 						strcat(lexem, "_");
@@ -506,74 +611,107 @@ int Lexem_analyzer(List *L) {
 					case 'o':
 						//ord
 						if (!strcmp(lexem, "ord")) {
-							LInsertLast(L, inord, NULL, NULL, NULL);
+							//LInsertLast(L, inord, NULL, NULL, NULL);
+							new.kw = inord;
 							printf("inord ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							//LInsertLast(L, id, NULL, NULL, p);
+							new.kw = id;
+							strcpy(new.s, lexem);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'c':
 						//const concat chr
 						if (!strcmp(lexem, "chr")) {
-							LInsertLast(L, inchr, NULL, NULL, NULL);
+							//LInsertLast(L, inchr, NULL, NULL, NULL);
+							new.kw = inchr;
 							printf("inchr ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "const")) {
-							LInsertLast(L, constant, NULL, NULL, NULL);
+							//LInsertLast(L, constant, NULL, NULL, NULL);
+							new.kw = constant;
 							printf("konst ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "concat")) {
-							LInsertLast(L, inccat, NULL, NULL, NULL);
+							//LInsertLast(L, inccat, NULL, NULL, NULL);
+							new.kw = inccat;
 							printf("inccat ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'v':
 						//var void
 						if (!strcmp(lexem, "var")) {
-							LInsertLast(L, variable, NULL, NULL, NULL);
+							//LInsertLast(L, variable, NULL, NULL, NULL);
+							new.kw = variable;
 							printf("variable ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "void")) {
-							LInsertLast(L, dtvoid, NULL, NULL, NULL);
+							//LInsertLast(L, dtvoid, NULL, NULL, NULL);
+							new.kw = dtvoid;
 							printf("dtvoid ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'l':
 						//length
 						if (!strcmp(lexem, "length")) {
-							LInsertLast(L, inlen, NULL, NULL, NULL);
+							//LInsertLast(L, inlen, NULL, NULL, NULL);
+							new.kw = inlen;
 							printf("inlen ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'r':
@@ -581,268 +719,424 @@ int Lexem_analyzer(List *L) {
 						switch (lexem[4]) {
 							case 's':
 								if (!strcmp(lexem, "readstr")) {
-									LInsertLast(L, inres, NULL, NULL, NULL);
+									//LInsertLast(L, inres, NULL, NULL, NULL);
+									new.kw = inres;
 									printf("inres ");
+									ungetc(letter, stdin);
+									return new;
 								} else {
 									//id
-									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+									/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
 										return INTERNAL_COMPILER_ERROR;
-									}
-									strcpy(p, lexem);
-									LInsertLast(L, id, NULL, NULL, p);
-									printf("id_%s ", p);
+									}*/
+									new.kw = id;
+									strcpy(new.s, lexem);
+									//LInsertLast(L, id, NULL, NULL, p);
+									printf("id_%s ", LGetStrAct(&new));
+									ungetc(letter, stdin);
+									return new;
 								}
 								break;
 							case 'i':
 								if (!strcmp(lexem, "readi32")) {
-									LInsertLast(L, inrei, NULL, NULL, NULL);
+									//LInsertLast(L, inrei, NULL, NULL, NULL);
+									new.kw = inrei;
 									printf("inrei ");
+									ungetc(letter, stdin);
+									return new;
 								} else {
 									//id
-									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+									/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
 										return INTERNAL_COMPILER_ERROR;
-									}
-									strcpy(p, lexem);
-									LInsertLast(L, id, NULL, NULL, p);
-									printf("id_%s ", p);
+									}*/
+									new.kw = id;
+									strcpy(new.s, lexem);
+									//LInsertLast(L, id, NULL, NULL, p);
+									printf("id_%s ", LGetStrAct(&new));
+									ungetc(letter, stdin);
+									return new;
 								}
 								break;
 							case 'f':
 								if (!strcmp(lexem, "readf64")) {
-									LInsertLast(L, inref, NULL, NULL, NULL);
+									//LInsertLast(L, inref, NULL, NULL, NULL);
+									new.kw = inref;
 									printf("inref ");
+									ungetc(letter, stdin);
+									return new;
 								} else {
 									//id
-									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+									/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
 										return INTERNAL_COMPILER_ERROR;
-									}
-									strcpy(p, lexem);
-									LInsertLast(L, id, NULL, NULL, p);
-									printf("id_%s ", p);
+									}*/
+									new.kw = id;
+									strcpy(new.s, lexem);
+									//LInsertLast(L, id, NULL, NULL, p);
+									printf("id_%s ", LGetStrAct(&new));
+									ungetc(letter, stdin);
+									return new;
 								}
 								break;
 							case 'r':
 								if (!strcmp(lexem, "return")) {
-									LInsertLast(L, _return, NULL, NULL, NULL);
-									printf("return ");
+									//LInsertLast(L, _return, NULL, NULL, NULL);
+									new.kw = _return;
+									printf("_return ");
+									ungetc(letter, stdin);
+									return new;
 								} else {
 									//id
-									if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+									/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 										free(lexem);
 										return INTERNAL_COMPILER_ERROR;
-									}
-									strcpy(p, lexem);
-									LInsertLast(L, id, NULL, NULL, p);
-									printf("id_%s ", p);
+									}*/
+									new.kw = id;
+									strcpy(new.s, lexem);
+									//LInsertLast(L, id, NULL, NULL, p);
+									printf("id_%s ", LGetStrAct(&new));
+									ungetc(letter, stdin);
+									return new;
 								}
 								break;
 							default:
 								//id
-								if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+								/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 									free(lexem);
 									return INTERNAL_COMPILER_ERROR;
-								}
-								strcpy(p, lexem);
-								LInsertLast(L, id, NULL, NULL, p);
-								printf("id_%s ", p);
+								}*/
+									new.kw = id;
+								strcpy(new.s, lexem);
+								//LInsertLast(L, id, NULL, NULL, p);
+								printf("id_%s ", LGetStrAct(&new));
+								ungetc(letter, stdin);
+								return new;
 								break;
 						}
 						break;
 					case 'p':
 						//pub
 						if (!strcmp(lexem, "pub")) {
-							LInsertLast(L, _pub, NULL, NULL, NULL);
-							printf("_pub");
+							//LInsertLast(L, _pub, NULL, NULL, NULL);
+							new.kw = _pub;
+							printf("_pub ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'u':
 						//u8
 						if (!strcmp(lexem, "u8")) {
-							LInsertLast(L, dtstr, NULL, NULL, NULL);
+							//LInsertLast(L, dtstr, NULL, NULL, NULL);
+							new.kw = dtstr;
 							printf("dtstr ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'm':
 						//main
 						if (!strcmp(lexem, "main")) {
-							LInsertLast(L, _main, NULL, NULL, NULL);
+							//LInsertLast(L, _main, NULL, NULL, NULL);
+							new.kw = _main;
 							printf("_main ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'f':
 						//fn f64 f2i
 						if (!strcmp(lexem, "fn")) {
-							LInsertLast(L, _fn, NULL, NULL, NULL);
+							//LInsertLast(L, _fn, NULL, NULL, NULL);
+							new.kw = _fn;
 							printf("_fn ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "f64")) {
-							LInsertLast(L, dtflt, NULL, NULL, NULL);
+							//LInsertLast(L, dtflt, NULL, NULL, NULL);
+							new.kw = dtflt;
 							printf("dtflt ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "f2i")) {
-							LInsertLast(L, inf2i, NULL, NULL, NULL);
+							//LInsertLast(L, inf2i, NULL, NULL, NULL);
+							new.kw = inf2i;
 							printf("inf2i ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'w':
 						//while write
 						if (!strcmp(lexem, "write")) {
-							LInsertLast(L, inwrt, NULL, NULL, NULL);
+							//LInsertLast(L, inwrt, NULL, NULL, NULL);
+							new.kw = inwrt;
 							printf("inwrt ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "while")) {
-							LInsertLast(L, _while, NULL, NULL, NULL);
+							//LInsertLast(L, _while, NULL, NULL, NULL);
+							new.kw = _while;
 							printf("_while ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'e':
 						//else
 						if (!strcmp(lexem, "else")) {
-							LInsertLast(L, _else, NULL, NULL, NULL);
+							//LInsertLast(L, _else, NULL, NULL, NULL);
+							new.kw = _else;
 							printf("_else ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'i':
 						//if i32 ifj import i2f
 						if (!strcmp(lexem, "if")) {
-							LInsertLast(L, _if, NULL, NULL, NULL);
+							//LInsertLast(L, _if, NULL, NULL, NULL);
+							new.kw = _if;
 							printf("_if ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "i32")) {
-							LInsertLast(L, dtint, NULL, NULL, NULL);
+							//LInsertLast(L, dtint, NULL, NULL, NULL);
+							new.kw = dtint;
 							printf("dtint ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "ifj")) {
-							LInsertLast(L, inbuild, NULL, NULL, NULL);
+							//LInsertLast(L, inbuild, NULL, NULL, NULL);
+							new.kw = inbuild;
 							printf("inbuild ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "import")) {
-							LInsertLast(L, _import, NULL, NULL, NULL);
-							printf("import ");
+							//LInsertLast(L, _import, NULL, NULL, NULL);
+							new.kw = _import;
+							printf("_import ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "i2f")) {
-							LInsertLast(L, ini2f, NULL, NULL, NULL);
+							//LInsertLast(L, ini2f, NULL, NULL, NULL);
+							new.kw = ini2f;
 							printf("ini2f ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 's':
 						//string substring strcmp
 						if (!strcmp(lexem, "substring")) {
-							LInsertLast(L, inssub, NULL, NULL, NULL);
+							//LInsertLast(L, inssub, NULL, NULL, NULL);
+							new.kw = inssub;
 							printf("inssub ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "string")) {
-							LInsertLast(L, inu2s, NULL, NULL, NULL);
+							//LInsertLast(L, inu2s, NULL, NULL, NULL);
+							new.kw = inu2s;
 							printf("inu2s ");
+							ungetc(letter, stdin);
+							return new;
 						} else if (!strcmp(lexem, "strcmp")) {
-							LInsertLast(L, inscmp, NULL, NULL, NULL);
+							//LInsertLast(L, inscmp, NULL, NULL, NULL);
+							new.kw = inscmp;
 							printf("inscmp ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					case 'n':
 						//null
 						if (!strcmp(lexem, "null")) {
-							LInsertLast(L, _null, NULL, NULL, NULL);
+							//LInsertLast(L, _null, NULL, NULL, NULL);
+							new.kw = _null;
 							printf("_null ");
+							ungetc(letter, stdin);
+							return new;
 						} else {
 							//id
-							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+							/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 								free(lexem);
 								return INTERNAL_COMPILER_ERROR;
-							}
-							strcpy(p, lexem);
-							LInsertLast(L, id, NULL, NULL, p);
-							printf("id_%s ", p);
+							}*/
+							new.kw = id;
+							strcpy(new.s, lexem);
+							//LInsertLast(L, id, NULL, NULL, p);
+							printf("id_%s ", LGetStrAct(&new));
+							ungetc(letter, stdin);
+							return new;
 						}
 						break;
 					default:
 						//id
-						if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+						/*if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
 							free(lexem);
 							return INTERNAL_COMPILER_ERROR;
-						}
-						strcpy(p, lexem);
-						LInsertLast(L, id, NULL, NULL, p);
-						printf("id_%s ", p);
-						break;
+						}*/
+						new.kw = id;
+						strcpy(new.s, lexem);
+						//LInsertLast(L, id, NULL, NULL, p);
+						printf("id_%s ", LGetStrAct(&new));
+						ungetc(letter, stdin);
+						return new;
 				}
-				lexem[0] = '\0';
+				//lexem[0] = '\0';
 				break;
 			default:
 				//chyba lexemu
-				free(lexem); //printf("%d", letter);
-				return LEXEM_ERROR;
+				//free(lexem); //printf("%d", letter);
+				new.kw = LEXEM;
+				new.i = LEXEM_ERROR;
+				return new;
 		}
 	}
 	//*p, *n, *d neuvolňuji, přešli do tokenu
-	LInsertLast(L, end, NULL, NULL, NULL);
-	free(lexem);
-	return 0;
+	//LInsertLast(L, end, NULL, NULL, NULL);
+	//free(lexem);
+	new.kw = end;
+	return new;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+#include <stdio.h>
+#include <string.h>
+
+typedef struct SToken{
+	//KeyWord kw;
+	int i;
+	double f;
+	char s[256];
+	//struct SToken *next;
+} Token;
+
+char *LGetStrAct(Token *T) {
+	return T->s;
+}
+
+int main(){
+    char a[256]="ggggggggggg";
+    Token new = {10, 33.3, ""};
+    strcpy(new.s, a);
+    
+    
+    printf("Hello World %s\n", LGetStrAct(&new));
+    char q= getchar();
+    ungetc(q, stdin);
+    printf("%c", getchar());
+
+    return 0;
+}*/

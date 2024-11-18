@@ -5,22 +5,22 @@
 #include "syntax_an.h"
 
 Token *token;
-List *tokenList;
-
+//List *tokenList;
+/*
 int get_token() {
 	token = LGetAct(tokenList);
 	LActNext(tokenList);
 	return 0;
-}
+}*/
 
-int syntax_analyzer(List *L) {
-	tokenList = L;
-	LActFirst(tokenList);
+int syntax_analyzer(/*List *L*/) {
+	//tokenList = L;
+	//LActFirst(tokenList);
 	int success;
 	success = seekHeaders();
 	if (success != 0)
 		return success;
-	LActFirst(tokenList);
+	//LActFirst(tokenList);
 	success = program();
 	if (success != 0)
 		return success;
