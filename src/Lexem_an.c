@@ -686,7 +686,12 @@ int Lexem_analyzer(List *L) {
 					case 'm':
 						//main
 						if (!strcmp(lexem, "main")) {
-							LInsertLast(L, _main, NULL, NULL, "main");
+							if (!(p = (char *)malloc(sizeof(char) * (1 + strlen(lexem))))) {
+								free(lexem);
+								return INTERNAL_COMPILER_ERROR;
+							}
+							strcpy(p, lexem);
+							LInsertLast(L, _main, NULL, NULL, p);
 							printf("_main ");
 						} else {
 							//id
