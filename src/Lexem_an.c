@@ -85,7 +85,7 @@ int Lexem_analyzer(List *L) {
 				break;
 			case '?':
 				LInsertLast(L, question_mark, NULL, NULL, NULL);
-				printf("choice ");
+				printf("optional ");
 				letter = getchar();
 				break;
 			case '|':
