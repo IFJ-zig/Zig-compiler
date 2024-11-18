@@ -24,13 +24,17 @@ typedef enum {
 // Data v tabulce:
 typedef struct symbol {
     htab_key_t    key;          // klíč
+    /*  No need to keep track of the values since the symtable is no longer avaliable after interpreting
     int intVal;
     float floatVal;
     char *charVal;
+    */
     int depth;
     varType type;
     varType returnType;
     bool isDefined;
+    bool isNullable;
+    bool isConst;
 } symbol_t;                  // typedef podle zadání
 
 // Tabulka:

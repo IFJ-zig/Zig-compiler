@@ -21,13 +21,15 @@ void exitScope(){
     htab_removeLast(list);
 }
 
-int defineSymbol(char *name, varType type){
+int defineSymbol(char *name, varType type, bool isConst, bool isNullable){
     symbol_t *symbol = htab_find(list->last, name);
     if(symbol != NULL)
         return REDEFINITION_ERROR;
     symbol = htab_define(list->last, name);
     symbol->type = type;
     symbol->isDefined = false;
+    symbol->isConst = isConst;
+    symbol->isNullable = isNullable;
     return 0;
 }
 
@@ -41,26 +43,27 @@ symbol_t *getSymbol(char *name){
     return symbol;
 }
 
-bool assignSymbol(char *name, char *value, KeyWord kw){
+bool assignSymbol(char *name, KeyWord kw){
     symbol_t *symbol = getSymbol(name);
     if(symbol == NULL)
         return false;   //Symbol does not exist
     symbol->isDefined = true;
+    if(symbol->isNullable == true){
+        if(kw == _null)
+            return true;
+    }
     if(symbol->type == INT){
         if(kw == dtint){
-            symbol->intVal = atoi(value);
             return true;
         }
     }
     else if(symbol->type == FLOAT){
         if(kw == dtflt || kw == dtint){
-            symbol->floatVal = atof(value);
             return true;
         }
     }
     else if(symbol->type == STRING)
         if(kw == dtstr){
-            symbol->charVal = value;
             return true;
         }
     return false;
@@ -79,7 +82,7 @@ int processParam(Token paramName, Token paramType){
         type = FLOAT;
     if(paramType.kw == dtstr)
         type = STRING;
-    defineSymbol(paramName.s, type);
+    defineSymbol(paramName.s, type, false, false); //Function can also return a nullable thing, figure this out later
     return 0;
 }
 
