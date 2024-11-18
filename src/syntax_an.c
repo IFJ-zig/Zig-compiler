@@ -49,7 +49,12 @@ int seekHeaders() {
 			fprintf(stderr, "Error: Expected function id in header\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		defineSymbol(token->s, FUNCTION, false, false);
+
+		//Save the name of functions into the symtable at depth 0
+		if(defineSymbol(token->s, FUNCTION, false, false) == REDEFINITION_ERROR){
+			fprintf(stderr, "Error: Function %s is already defined\n", token->s);
+			return REDEFINITION_ERROR;
+		}
 		symbol_t *fnSymbol = getSymbol(token->s);
 		if (token->kw == _main) {
 			fprintf(stderr, "ID: main\n");
@@ -62,7 +67,7 @@ int seekHeaders() {
 			fprintf(stderr, "Error: Expected '(' after function id in header\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		// TODO: PLACEHOLDER FOR PARAM LIST CHECK
+		// TODO: PLACEHOLDER FOR PARAM LIST CHECK - no need to do that here me thinks
 		while (token->kw != rbracket) {
 			get_token();
 		}
@@ -72,7 +77,7 @@ int seekHeaders() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		get_token();
-		fnSymbol->returnType = kwToVarType(token->kw);
+		fnSymbol->returnType = kwToVarType(token->kw);	//Save the return type of the function
 		get_token();
 
 		statusCode = skip_function_body();
@@ -80,7 +85,10 @@ int seekHeaders() {
 			return statusCode;
 		get_token();
 	}
-	// TODO: CHECK IF MAIN FUNCTION IS DEFINED
+	if(getSymbol("main") == NULL){
+		fprintf(stderr, "Error: Main function is not defined\n");
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;		//TODO: Is this the correct error code?
+	}
 	fprintf(stderr, "Headers OK\n");
 	return 0;
 };
