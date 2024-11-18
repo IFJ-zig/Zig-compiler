@@ -70,7 +70,7 @@ bool assignSymbol(char *name, KeyWord kw){
 }
 
 //Entering function, get 3 tokens from which extract paramName and paramType, this functions expects to already be shifted into the function scope
-int processParam(Token paramName, Token paramType){
+int processParam(Token paramName, Token paramType, bool isNullable){
 	if(!isValidParamType(paramType.kw)){
 		fprintf(stderr, "Error: %s is not a valid parameter type\n", paramType.s);
         return(PARAM_ERROR);
@@ -82,7 +82,7 @@ int processParam(Token paramName, Token paramType){
         type = FLOAT;
     if(paramType.kw == dtstr)
         type = STRING;
-    defineSymbol(paramName.s, type, false, false); //Function can also return a nullable thing, figure this out later
+    defineSymbol(paramName.s, type, false, isNullable); //Function can also return a nullable thing, figure this out later
     return 0;
 }
 
