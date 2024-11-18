@@ -343,12 +343,12 @@ int code(bool tokenWasGiven) {
 				return statusCode;
 			break;
 		case _while:
-			statusCode = while_syntax();
+			statusCode = while_syntax(); //semantic done
 			if (statusCode != 0)
 				return statusCode;
 			break;
 		case _return:
-			statusCode = return_syntax();
+			statusCode = return_syntax();	//No can do without precedent_an
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -552,17 +552,22 @@ int call_or_assignment() {
 };
 
 int while_syntax() {
+	enterScope();
 	int statusCode;
 	get_token();
 	if (token->kw != lbracket) {
 		fprintf(stderr, "Error: Expected '(' after while\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	skip_expression();
+	//Hack until precedent_an is working
+	varType optionalType = skip_expression_get_type();
 	get_token();
 	if (token->kw == vertical_bar) {
-		//TODO: SEMANTHIC CHECKS
 		get_token();
+		if(optionalType == VOID){
+			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
+		}
+		defineSymbol(token->s, optionalType, false, false);	//In this case hardcoded not nullable is ok, since the unwrapped value will never be an optional, however, if first value is const, this new one will be also const TODO: fix sometime
 		get_token();
 		if (token->kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
@@ -581,5 +586,6 @@ int while_syntax() {
 			return statusCode;
 		get_token();
 	}
+	exitScope();
 	return 0;
 }
