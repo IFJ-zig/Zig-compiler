@@ -18,7 +18,7 @@
 typedef const char * htab_key_t;        // typ klíče
 
 typedef enum {
-    INT, FLOAT, STRING, BOOL, FUNCTION
+    INT, FLOAT, STRING, BOOL, FUNCTION, VOID
 } varType;
 
 // Data v tabulce:

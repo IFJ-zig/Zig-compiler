@@ -91,3 +91,13 @@ bool isValidParamType(KeyWord kw){
         return true;
     return false;
 }
+
+varType kwToVarType(KeyWord kw){
+    if(kw == dtint)
+        return INT;
+    if(kw == dtflt)
+        return FLOAT;
+    if(kw == dtstr)
+        return STRING;
+    return VOID;
+}

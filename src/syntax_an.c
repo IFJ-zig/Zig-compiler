@@ -3,6 +3,7 @@
 * Tvůrci: Adam Vožda, xvozdaa00
 *********************************************/
 #include "syntax_an.h"
+#include "semantic_an.h"
 
 Token *token;
 List *tokenList;
@@ -48,7 +49,8 @@ int seekHeaders() {
 			fprintf(stderr, "Error: Expected function id in header\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		// TODO: SOME SEMANTHIC CHECKS
+		defineSymbol(token->s, FUNCTION, false, false);
+		symbol_t *fnSymbol = getSymbol(token->s);
 		if (token->kw == _main) {
 			fprintf(stderr, "ID: main\n");
 		} else {
@@ -69,12 +71,10 @@ int seekHeaders() {
 			fprintf(stderr, "Error: Expected ')' after param list in function header\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-
-		// TODO: PLACEHOLDER FOR RETURN TYPE
 		get_token();
+		fnSymbol->returnType = kwToVarType(token->kw);
 		get_token();
 
-		// TODO: AGAIN SOME SEMANTHIC CHECKS
 		statusCode = skip_function_body();
 		if (statusCode != 0)
 			return statusCode;
