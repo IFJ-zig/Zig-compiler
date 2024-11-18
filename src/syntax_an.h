@@ -32,5 +32,5 @@ int skip_expression();
 
 
 //Helper functions
-bool isValidParamType(KeyWord kw);
+bool isValidReturnType(KeyWord kw);
 #endif // SYNTAX_H

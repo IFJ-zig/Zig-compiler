@@ -12,6 +12,12 @@ void semanticInit(){
     enterScope(list);
 }
 
+void semanticDestroy(){
+    while(list->tablesCount > 0){
+        htab_removeLast(list);
+    }
+}
+
 void enterScope(){
     htab_t *t = htab_init(getCurrentDepth(list));
     htab_insertLast(list, t);

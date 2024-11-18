@@ -13,6 +13,7 @@
 #include "symtable.h"
 
 void semanticInit();
+void semanticDestroy();
 
 //Create a new symbol, returns 0 on success or REDEFINITION_ERROR is symbol of same name in scope already exists
 int defineSymbol(char *name, varType type, bool isConst, bool isNullable);
