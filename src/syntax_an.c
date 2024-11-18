@@ -437,7 +437,7 @@ int skip_expression() {
 }
 
 //This function is a hack just to get if_else working without a working precedent_an
-//Skips the expression and returns the type of the first ID it finds, VOID if no ID is found
+//Skips the expression and returns the type of the first ID it finds, VOID if no ID is found, or if the id does not exist in the symtable
 //I am not particularly proud of this function, but it works for now
 varType skip_expression_get_type(){
 	int statusCode;
@@ -453,9 +453,9 @@ varType skip_expression_get_type(){
 			symbol_t *symbol = getSymbol(token->s);
 			if(symbol == NULL){
 				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
-				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 			}
-			type = symbol->type;
+			else
+				type = symbol->type;
 		}
 	}
 	return type;
