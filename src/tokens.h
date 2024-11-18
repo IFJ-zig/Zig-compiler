@@ -89,47 +89,16 @@ typedef struct SToken{
 	int i;
 	double f;
 	char s[256];
-	//struct SToken *next;
 } Token;
-/*
-typedef struct SList{
-	Token *first;
-	Token *active;
-	Token *last;
-} List;
 
-void ListInit(List *L);*/
+KeyWord LGetKeyWAct(Token T);
 
-//Token LInsertLast(/*List *L, */KeyWord key, int a, double b, char *c);
-/*
-void LActFirst(List *L);
+int LGetNumAct(Token T);
 
-void LActNext(List *L);
+double LGetFloatAct(Token T);
 
-Token *LGetFirst(List *L);
+char *LGetStrAct(Token *T);
 
-Token *LGetAct(List *L);
-
-KeyWord LGetKeyWFirst(List *L);
-*/
-KeyWord LGetKeyWAct(/*List *L*/Token T);
-
-//int *LGetNumFirst(List *L);
-
-int LGetNumAct(/*List *L*/Token T);
-
-//double *LGetFloatFirst(List *L);
-
-double LGetFloatAct(/*List *L*/Token T);
-
-//char *LGetStrFirst(List *L);
-
-char *LGetStrAct(/*List *L*/Token *T);
-
-//void LDeleteFirst(List *L);
-
-//void LDestroy(List *L);
-
-Token get_token/*Lexem_analyzer*/(/*List *L*/);
+Token get_token();
 
 #endif // TOKENS_H
