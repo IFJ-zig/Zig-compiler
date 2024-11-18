@@ -16,22 +16,22 @@ int get_token() {
 int syntax_analyzer(List *L) {
 	tokenList = L;
 	LActFirst(tokenList);
-	int success;
-	success = seekHeaders();
-	if (success != 0)
-		return success;
+	int statusCode;
+	statusCode = seekHeaders();
+	if (statusCode != 0)
+		return statusCode;
 	LActFirst(tokenList);
-	success = program();
-	if (success != 0)
-		return success;
+	statusCode = program();
+	if (statusCode != 0)
+		return statusCode;
 	return 0;
 };
 
 
 int seekHeaders() {
-	int success = checkImport();
-	if (success != 0)
-		return success;
+	int statusCode = checkImport();
+	if (statusCode != 0)
+		return statusCode;
 	get_token();
 	while (token->kw != end) {
 		if (token->kw != _pub) {
@@ -75,9 +75,9 @@ int seekHeaders() {
 		get_token();
 
 		// TODO: AGAIN SOME SEMANTHIC CHECKS
-		success = skip_function_body();
-		if (success != 0)
-			return success;
+		statusCode = skip_function_body();
+		if (statusCode != 0)
+			return statusCode;
 		get_token();
 	}
 	// TODO: CHECK IF MAIN FUNCTION IS DEFINED
@@ -86,18 +86,18 @@ int seekHeaders() {
 };
 
 int program() {
-	int success;
-	success = checkImport();
-	if (success != 0)
-		return success;
+	int statusCode;
+	statusCode = checkImport();
+	if (statusCode != 0)
+		return statusCode;
 
 	// TODO: SOME CODE GENERATION STUFF
 	while (1) {
 		get_token();
 		if (token->kw == _pub) {
-			success = function_analysis();
-			if (success != 0)
-				return success;
+			statusCode = function_analysis();
+			if (statusCode != 0)
+				return statusCode;
 		} else if (token->kw == end) {
 			fprintf(stderr, "\nCompilation successfully finished \n");
 			return 0;
@@ -185,7 +185,7 @@ int checkImport() {
 }
 
 int function_analysis() {
-	int success = 0;
+	int statusCode = 0;
 
 	get_token();
 	if (token->kw != _fn) {
@@ -200,13 +200,13 @@ int function_analysis() {
 	// TODO: SOME SEMANTHIC ANALYSIS STUFF HERE
 	fprintf(stderr, "Analysis ID: %s\n", token->s);
 
-	success = param_list();
-	if (success != 0)
-		return success;
+	statusCode = param_list();
+	if (statusCode != 0)
+		return statusCode;
 
-	success = return_type();
-	if (success != 0)
-		return success;
+	statusCode = return_type();
+	if (statusCode != 0)
+		return statusCode;
 
 	get_token();
 	if (token->kw != lblock) {
@@ -215,9 +215,9 @@ int function_analysis() {
 	}
 	get_token();
 	while (token->kw != rblock) {
-		success = code(true);
-		if (success != 0) {
-			return success;
+		statusCode = code(true);
+		if (statusCode != 0) {
+			return statusCode;
 		}
 		get_token();
 	}
@@ -229,7 +229,7 @@ int function_analysis() {
 }
 
 int param_list() {
-	int success;
+	int statusCode;
 	get_token();
 	if (token->kw != lbracket) {
 		fprintf(stderr, "Error: Expected parameter list after function id\n");
@@ -252,9 +252,9 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		success = data_type();
-		if (success != 0)
-			return success;
+		statusCode = data_type();
+		if (statusCode != 0)
+			return statusCode;
 		get_token();
 		if (token->kw != comma && token->kw != rbracket) {
 			fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
@@ -291,38 +291,38 @@ int code(bool tokenWasGiven) {
 		get_token();
 	}
 
-	int success;
+	int statusCode;
 	switch (token->kw) {
 		case constant:
 		case variable:
-			success = variable_definition();
-			if (success != 0)
-				return success;
+			statusCode = variable_definition();
+			if (statusCode != 0)
+				return statusCode;
 			break;
 		case id:
-			success = call_or_assignment();
-			if (success != 0)
-				return success;
+			statusCode = call_or_assignment();
+			if (statusCode != 0)
+				return statusCode;
 			break;
 		case _if:
-			success = if_else();
-			if (success != 0)
-				return success;
+			statusCode = if_else();
+			if (statusCode != 0)
+				return statusCode;
 			break;
 		case _while:
-			success = while_syntax();
-			if (success != 0)
-				return success;
+			statusCode = while_syntax();
+			if (statusCode != 0)
+				return statusCode;
 			break;
 		case _return:
-			success = return_syntax();
-			if (success != 0)
-				return success;
+			statusCode = return_syntax();
+			if (statusCode != 0)
+				return statusCode;
 			break;
 		case inbuild:
-			success = inbuild_function();
-			if (success != 0)
-				return success;
+			statusCode = inbuild_function();
+			if (statusCode != 0)
+				return statusCode;
 			break;
 		default:
 			fprintf(stderr, "Error: Expected command but found: %d\n", token->kw);
@@ -333,7 +333,7 @@ int code(bool tokenWasGiven) {
 }
 
 int if_else() {
-	int success;
+	int statusCode;
 	get_token();
 	if (token->kw != lbracket) {
 		fprintf(stderr, "Error: Expected '(' after if\n");
@@ -359,9 +359,9 @@ int if_else() {
 	}
 	get_token();
 	while (token->kw != rblock) {
-		success = code(true);
-		if (success != 0)
-			return success;
+		statusCode = code(true);
+		if (statusCode != 0)
+			return statusCode;
 		get_token();
 	}
 
@@ -374,9 +374,9 @@ int if_else() {
 		}
 		get_token();
 		while (token->kw != rblock) {
-			success = code(true);
-			if (success != 0)
-				return success;
+			statusCode = code(true);
+			if (statusCode != 0)
+				return statusCode;
 			get_token();
 		}
 	}
@@ -385,13 +385,13 @@ int if_else() {
 }
 
 int skip_expression() {
-	int success;
+	int statusCode;
 	while (token->kw != rbracket) {
 		get_token();
 		if (token->kw == lbracket) {
-			success = skip_expression();
-			if (success != 0)
-				return success;
+			statusCode = skip_expression();
+			if (statusCode != 0)
+				return statusCode;
 		}
 	}
 	return 0;
@@ -408,7 +408,7 @@ int return_syntax() {
 }
 
 int inbuild_function() {
-	int success;
+	int statusCode;
 	get_token();
 	if (token->kw != dot) {
 		fprintf(stderr, "Error: Unexpected library usage\n");
@@ -430,9 +430,9 @@ int inbuild_function() {
 		case inwrt:
 		case ini2f:
 		case inf2i:
-			success = skip_expression();
-			if (success != 0)
-				return success;
+			statusCode = skip_expression();
+			if (statusCode != 0)
+				return statusCode;
 			break;
 		default:
 			fprintf(stderr, "Error: Undefined library call\n");
@@ -447,7 +447,7 @@ int inbuild_function() {
 }
 
 int variable_definition() {
-	int success;
+	int statusCode;
 	get_token();
 	if (token->kw != id) {
 		fprintf(stderr, "Error: Expected variable id\n");
@@ -455,9 +455,9 @@ int variable_definition() {
 	}
 	get_token();
 	if (token->kw == colon) {
-		success = data_type();
-		if (success != 0)
-			return success;
+		statusCode = data_type();
+		if (statusCode != 0)
+			return statusCode;
 		get_token();
 	}
 
@@ -482,7 +482,7 @@ int call_or_assignment() {
 };
 
 int while_syntax() {
-	int success;
+	int statusCode;
 	get_token();
 	if (token->kw != lbracket) {
 		fprintf(stderr, "Error: Expected '(' after while\n");
@@ -506,9 +506,9 @@ int while_syntax() {
 	}
 	get_token();
 	while (token->kw != rblock) {
-		success = code(true);
-		if (success != 0)
-			return success;
+		statusCode = code(true);
+		if (statusCode != 0)
+			return statusCode;
 		get_token();
 	}
 	return 0;
