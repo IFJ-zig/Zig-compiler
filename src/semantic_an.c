@@ -42,24 +42,27 @@ symbol_t *getSymbol(char *name){
 }
 
 bool assignSymbol(char *name, char *value, KeyWord kw){
-    value = value;  //just so compiler shuts up
-                    //i dont think we need to track the actual value of symbols since we're not building the AST
-                    //keeping track now might make codegen easier but who gaf?
     symbol_t *symbol = getSymbol(name);
     if(symbol == NULL)
         return false;   //Symbol does not exist
     symbol->isDefined = true;
     if(symbol->type == INT){
-        if(kw == dtint)
+        if(kw == dtint){
+            symbol->intVal = atoi(value);
             return true;
+        }
     }
     else if(symbol->type == FLOAT){
-        if(kw == dtflt || kw == dtint)
+        if(kw == dtflt || kw == dtint){
+            symbol->floatVal = atof(value);
             return true;
+        }
     }
     else if(symbol->type == STRING)
-        if(kw == dtstr)
+        if(kw == dtstr){
+            symbol->charVal = value;
             return true;
+        }
     return false;
 }
 
@@ -67,7 +70,7 @@ bool assignSymbol(char *name, char *value, KeyWord kw){
 void processParam(Token paramName, Token paramType){
 	if(!isValidParamType(paramType.kw)){
 		fprintf(stderr, "Error: %s is not a valid parameter type\n", paramType.s);
-        exit(PARAM_ERROR);
+        return(PARAM_ERROR);
     }
     varType type;
     if(paramType.kw == dtint)
