@@ -29,4 +29,8 @@ int return_syntax();
 int call_or_assignment();
 int variable_definition();
 int skip_expression();
+
+
+//Helper functions
+bool isValidParamType(KeyWord kw);
 #endif // SYNTAX_H

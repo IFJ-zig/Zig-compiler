@@ -77,7 +77,13 @@ int seekHeaders() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		get_token();
-		fnSymbol->returnType = kwToVarType(token->kw);	//Save the return type of the function
+		if(isValidParamType(token->kw)){
+			fnSymbol->returnType = kwToVarType(token->kw);	//Save the return type of the function
+		}
+		else{
+			fprintf(stderr, "Error: Invalid return type of function %s\n", fnSymbol->key);
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
 		get_token();
 
 		statusCode = skip_function_body();
@@ -193,6 +199,7 @@ int checkImport() {
 }
 
 int function_analysis() {
+	enterScope();
 	int statusCode = 0;
 
 	get_token();
@@ -205,8 +212,15 @@ int function_analysis() {
 		fprintf(stderr, "Error: Expected function id\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	// TODO: SOME SEMANTHIC ANALYSIS STUFF HERE
 	fprintf(stderr, "Analysis ID: %s\n", token->s);
+	//The function name should already be in the symtable at depth 0 since it was done in seekHeaders, lets just check if it's still there
+	if(getSymbol(token->s) == NULL){
+		fprintf(stderr, "Error: Function %s is not defined, this function should've been defined in seekHeaders!\n", token->s);
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+	}
+	else{
+		fprintf(stderr, "Function %s successfully found in symtable, depth=%d (should be 0), return type=%s\n", token->s, getSymbol(token->s)->depth, getSymbol(token->s)->returnType == INT ? "INT" : getSymbol(token->s)->returnType == FLOAT ? "FLOAT" : getSymbol(token->s)->returnType == STRING ? "STRING" : "VOID");
+	}
 
 	statusCode = param_list();
 	if (statusCode != 0)
@@ -231,12 +245,13 @@ int function_analysis() {
 	}
 
 
-	// TOD: SEMANTHIC CHECKS FOR RETURN STATEMENT
-
+	// TODO: SEMANTHIC CHECKS FOR RETURN STATEMENT
+	exitScope();
 	return 0;
 }
 
 int param_list() {
+	//Expect to already be in the function scope
 	int statusCode;
 	get_token();
 	if (token->kw != lbracket) {
@@ -254,6 +269,7 @@ int param_list() {
 			fprintf(stderr, "Error: Expected parameter id %d\n", token->kw);
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
+		Token paramID = *token;
 		get_token();
 		if (token->kw != colon) {
 			fprintf(stderr, "Error: Expected ':' after parameter id\n");
@@ -263,6 +279,8 @@ int param_list() {
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
+		processParam(paramID, *token, false);	//TODO: isNullable is hardcoded to false for now
+		fprintf(stderr, "Param %s of type %s loaded into symtable at depth\n", paramID.s, token->kw == dtint ? "INT" : token->kw == dtflt ? "FLOAT" : "STRING", getSymbol(paramID.s)->depth);
 		get_token();
 		if (token->kw != comma && token->kw != rbracket) {
 			fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
@@ -285,9 +303,15 @@ int data_type() {
 	return 0;
 }
 
+bool isValidParamType(KeyWord kw) {
+	if (kw != dtint && kw != dtstr && kw != dtflt && kw != dtvoid)
+		return false;
+	return true;
+}
+
 int return_type() {
 	get_token();
-	if (token->kw != dtint && token->kw != dtstr && token->kw != dtflt && token->kw != dtvoid) {
+	if (!isValidParamType(token->kw)) {
 		fprintf(stderr, "Error: Expected return type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
