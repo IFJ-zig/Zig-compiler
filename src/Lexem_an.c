@@ -686,7 +686,7 @@ int Lexem_analyzer(List *L) {
 					case 'm':
 						//main
 						if (!strcmp(lexem, "main")) {
-							LInsertLast(L, _main, NULL, NULL, NULL);
+							LInsertLast(L, _main, NULL, NULL, "main");
 							printf("_main ");
 						} else {
 							//id
