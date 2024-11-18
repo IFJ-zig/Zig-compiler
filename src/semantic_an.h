@@ -15,13 +15,13 @@
 void semanticInit();
 
 //Create a new symbol, returns 0 on success or REDEFINITION_ERROR is symbol of same name in scope already exists
-int defineSymbol(char *name, char *value, varType type);
+int defineSymbol(char *name, varType type);
 
-bool assignSymbol(char *name, char *value);
+bool assignSymbol(char *name, char *value, KeyWord kw);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
 
-void processParam(Token paramName, Token paramType);
+int processParam(Token paramName, Token paramType);
 
 void enterScope(); //A function for going into bigger depth so syntax analyzer doesn't need to keep track of depth itself
 void exitScope();

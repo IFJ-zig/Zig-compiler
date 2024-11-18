@@ -21,14 +21,13 @@ void exitScope(){
     htab_removeLast(list);
 }
 
-int defineSymbol(char *name, char *value, varType type){
+int defineSymbol(char *name, varType type){
     symbol_t *symbol = htab_find(list->last, name);
     if(symbol != NULL)
         return REDEFINITION_ERROR;
     symbol = htab_define(list->last, name);
     symbol->type = type;
-    //symbol->value = value;
-    value = value; //just so compiler doesnt freak out, don't worry ill delete this
+    symbol->isDefined = false;
     return 0;
 }
 
@@ -42,11 +41,36 @@ symbol_t *getSymbol(char *name){
     return symbol;
 }
 
+bool assignSymbol(char *name, char *value, KeyWord kw){
+    symbol_t *symbol = getSymbol(name);
+    if(symbol == NULL)
+        return false;   //Symbol does not exist
+    symbol->isDefined = true;
+    if(symbol->type == INT){
+        if(kw == dtint){
+            symbol->intVal = atoi(value);
+            return true;
+        }
+    }
+    else if(symbol->type == FLOAT){
+        if(kw == dtflt || kw == dtint){
+            symbol->floatVal = atof(value);
+            return true;
+        }
+    }
+    else if(symbol->type == STRING)
+        if(kw == dtstr){
+            symbol->charVal = value;
+            return true;
+        }
+    return false;
+}
+
 //Entering function, get 3 tokens from which extract paramName and paramType, this functions expects to already be shifted into the function scope
-void processParam(Token paramName, Token paramType){
+int processParam(Token paramName, Token paramType){
 	if(!isValidParamType(paramType.kw)){
 		fprintf(stderr, "Error: %s is not a valid parameter type\n", paramType.s);
-        exit(PARAM_ERROR);
+        return(PARAM_ERROR);
     }
     varType type;
     if(paramType.kw == dtint)
@@ -55,12 +79,12 @@ void processParam(Token paramName, Token paramType){
         type = FLOAT;
     if(paramType.kw == dtstr)
         type = STRING;
-    defineSymbol(paramName.s, NULL, type);
+    defineSymbol(paramName.s, type);
+    return 0;
 }
 
 bool isValidParamType(KeyWord kw){
     if(kw == dtint || kw == dtstr || kw == dtflt)
         return true;
     return false;
-
 }
