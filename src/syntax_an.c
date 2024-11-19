@@ -518,6 +518,7 @@ int inbuild_function() {
 }
 
 int variable_definition(bool isConst) {
+	bool isNullable = false;	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 	int statusCode;
 	get_token();
 	if (token->kw != id) {
@@ -526,11 +527,11 @@ int variable_definition(bool isConst) {
 	}
 	Token varID = *token;
 	get_token();
-	if (token->kw == colon) {
+	if (token->kw == colon) {	//Nice definition with variable type
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
-		defineSymbol(varID.s, kwToVarType(token->kw), isConst, false); //TODO: again isNullable is hardcoded to false
+		defineSymbol(varID.s, kwToVarType(token->kw), isConst, isNullable);
 		get_token();
 	}
 
@@ -538,10 +539,18 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Expected '=' after variable type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	if(token->kw == equal){
+	if(token->kw == equal){	//Not nice definition without variable type
 		get_token();
 		if(token->kw == inbuild)
-			defineSymbol(varID.s, FUNCTION, isConst, false);
+			defineSymbol(varID.s, FUNCTION, isConst, isNullable);
+		if(token->kw == id){
+			symbol_t *symbol = getSymbol(token->s);
+			if(symbol == NULL){
+				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
+				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+			}
+			defineSymbol(varID.s, symbol->type, isConst, isNullable);
+		}
 	}
 	symbol_t *symbol = getSymbol(varID.s);
 	if(symbol == NULL){
