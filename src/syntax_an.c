@@ -330,8 +330,12 @@ int code(bool tokenWasGiven) {
 	int statusCode;
 	switch (token->kw) {
 		case constant:
+			statusCode = variable_definition(true);		//semantic done
+			if (statusCode != 0)
+				return statusCode;
+			break;
 		case variable:
-			statusCode = variable_definition();	//semantic done
+			statusCode = variable_definition(false);	//semantic done
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -513,7 +517,7 @@ int inbuild_function() {
 	return 0;
 }
 
-int variable_definition() {
+int variable_definition(bool isConst) {
 	int statusCode;
 	get_token();
 	if (token->kw != id) {
@@ -526,7 +530,7 @@ int variable_definition() {
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
-		defineSymbol(varID.s, kwToVarType(token->kw), false, false); //TODO: again isNullable is hardcoded to false, same goes for isConst
+		defineSymbol(varID.s, kwToVarType(token->kw), isConst, false); //TODO: again isNullable is hardcoded to false
 		get_token();
 	}
 
@@ -537,7 +541,7 @@ int variable_definition() {
 	if(token->kw == equal){
 		get_token();
 		if(token->kw == inbuild)
-			defineSymbol(varID.s, FUNCTION, false, false);
+			defineSymbol(varID.s, FUNCTION, isConst, false);
 	}
 	symbol_t *symbol = getSymbol(varID.s);
 	if(symbol == NULL){
