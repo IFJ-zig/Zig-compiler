@@ -9,11 +9,21 @@ static htabs_l *list;
 
 void semanticInit(){
     list = symtable_init();
-    enterScope(list);
+    htab_t *t = htab_init(getCurrentDepth(list));
+    t->previous = NULL;
+    t->depth = 0;
+    htab_insertLast(list, t);
+}
+
+void semanticDestroy(){
+    while(list->tablesCount > 0){
+        htab_removeLast(list);
+    }
 }
 
 void enterScope(){
     htab_t *t = htab_init(getCurrentDepth(list));
+    t->depth = getCurrentDepth(list)+1;
     htab_insertLast(list, t);
 }
 
@@ -30,6 +40,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable){
     symbol->isDefined = false;
     symbol->isConst = isConst;
     symbol->isNullable = isNullable;
+    symbol->depth = getCurrentDepth(list);
     return 0;
 }
 
@@ -90,4 +101,14 @@ bool isValidParamType(KeyWord kw){
     if(kw == dtint || kw == dtstr || kw == dtflt)
         return true;
     return false;
+}
+
+varType kwToVarType(KeyWord kw){
+    if(kw == dtint)
+        return INT;
+    if(kw == dtflt)
+        return FLOAT;
+    if(kw == dtstr)
+        return STRING;
+    return VOID;
 }

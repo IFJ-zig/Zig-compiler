@@ -18,17 +18,12 @@
 typedef const char * htab_key_t;        // typ klíče
 
 typedef enum {
-    INT, FLOAT, STRING, BOOL, FUNCTION
+    INT, FLOAT, STRING, BOOL, FUNCTION, VOID
 } varType;
 
 // Data v tabulce:
 typedef struct symbol {
     htab_key_t    key;          // klíč
-    /*  No need to keep track of the values since the symtable is no longer avaliable after interpreting
-    int intVal;
-    float floatVal;
-    char *charVal;
-    */
     int depth;
     varType type;
     varType returnType;
@@ -36,6 +31,12 @@ typedef struct symbol {
     bool isNullable;
     bool isConst;
 } symbol_t;                  // typedef podle zadání
+
+// Prvek tabulky:
+typedef struct htab_itm {
+    symbol_t symbol;
+    struct htab_itm *next;
+} htab_itm_t;
 
 // Tabulka:
 typedef struct htab {
@@ -46,11 +47,6 @@ typedef struct htab {
     size_t arr_size;
     struct htab_itm **arr_ptr;
 } htab_t;
-
-typedef struct htab_itm {
-    symbol_t symbol;
-    struct htab_itm *next;
-} htab_itm_t;
 
 // DLL list s hash tabulkama podle hloubky
 typedef struct htabs {

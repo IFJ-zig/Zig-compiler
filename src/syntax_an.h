@@ -10,6 +10,7 @@
 
 #include "errors_enum.h"
 #include "tokens.h"
+#include "symtable.h" //For varType
 
 int syntax_analyzer(List *L);
 int code(bool tokenWasGiven);
@@ -29,4 +30,9 @@ int return_syntax();
 int call_or_assignment();
 int variable_definition();
 int skip_expression();
+
+
+//Helper functions
+bool isValidReturnType(KeyWord kw);
+varType skip_expression_get_type();
 #endif // SYNTAX_H
