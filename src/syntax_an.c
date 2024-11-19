@@ -549,7 +549,10 @@ int variable_definition(bool isConst) {
 				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 			}
-			defineSymbol(varID.s, symbol->type, isConst, isNullable);
+			if(symbol->type == FUNCTION)
+				defineSymbol(varID.s, symbol->returnType, isConst, isNullable);
+			else
+				defineSymbol(varID.s, symbol->type, isConst, isNullable);
 		}
 	}
 	symbol_t *symbol = getSymbol(varID.s);
