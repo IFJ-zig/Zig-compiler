@@ -382,14 +382,14 @@ int if_else() {
 	}
 	// TODO: PLACEHOLDER FOR BOTTOM UP SYNTAX ANALYSIS
 	//skip_expression();
-	varType optionalType = skip_expression_get_type();
+	symbol_t *mainSymbol = skip_expression_get_symbol();
 	get_token();
 	if (token->kw == vertical_bar) {
 		get_token();
-		if(optionalType == VOID){
+		if(mainSymbol->type == VOID){
 			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
 		}
-		defineSymbol(token->s, optionalType, false, false);	//In this case hardcoded not nullable is ok, since the unwrapped value will never be an optional, however, if first value is const, this new one will be also const TODO: fix sometime
+		defineSymbol(token->s, mainSymbol->type, mainSymbol->isConst, false);
 		get_token();
 		if (token->kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
@@ -446,9 +446,9 @@ int skip_expression() {
 //This function is a hack just to get if_else working without a working precedent_an
 //Skips the expression and returns the type of the first ID it finds, VOID if no ID is found, or if the id does not exist in the symtable
 //I am not particularly proud of this function, but it works for now
-varType skip_expression_get_type(){
+symbol_t* skip_expression_get_symbol(){
 	int statusCode;
-	varType type = VOID;
+	symbol_t *foundSymbol = NULL;
 	while (token->kw != rbracket) {
 		get_token();
 		if (token->kw == lbracket) {
@@ -462,10 +462,10 @@ varType skip_expression_get_type(){
 				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 			}
 			else
-				type = symbol->type;
+				foundSymbol = symbol;
 		}
 	}
-	return type;
+	return foundSymbol;
 }
 
 int return_syntax() {
@@ -573,14 +573,14 @@ int while_syntax() {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	//Hack until precedent_an is working
-	varType optionalType = skip_expression_get_type();
+	symbol_t *mainSymbol = skip_expression_get_symbol();
 	get_token();
 	if (token->kw == vertical_bar) {
 		get_token();
-		if(optionalType == VOID){
+		if(mainSymbol->type == VOID){
 			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
 		}
-		defineSymbol(token->s, optionalType, false, false);	//In this case hardcoded not nullable is ok, since the unwrapped value will never be an optional, however, if first value is const, this new one will be also const TODO: fix sometime
+		defineSymbol(token->s, mainSymbol->type, mainSymbol->isConst, false);
 		get_token();
 		if (token->kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");

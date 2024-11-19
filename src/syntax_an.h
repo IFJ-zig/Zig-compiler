@@ -34,5 +34,5 @@ int skip_expression();
 
 //Helper functions
 bool isValidReturnType(KeyWord kw);
-varType skip_expression_get_type();
+symbol_t* skip_expression_get_symbol();
 #endif // SYNTAX_H
