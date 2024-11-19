@@ -11,7 +11,7 @@ typedef enum
 } var_type_t;
 
 
-static char GV_precedentTable[TABLE_SIZE * TABLE_SIZE + 1] = {
+static char precedentTable[TABLE_SIZE * TABLE_SIZE + 1] = {
 		//  +     -     *     /     (     )     i     <     >     ==    <=    >=    !=    ;/, num
 		/* + */ '>', '>', '<', '<', '<', '>', '<', '>', '>', '>', '>', '>', '>', '>', '<',
 		/* - */ '<', '>', '<', '<', '<', '>', '<', '>', '>', '>', '>', '>', '>', '>', '<',
@@ -291,7 +291,7 @@ int getValuePrecedentTable(int tokenStack, int tokenInput) // Translates your to
 	if (j == -1) {
 		return -1;
 	}
-	return (int)GV_precedentTable[(TABLE_SIZE * i) + j];
+	return (int)precedentTable[(TABLE_SIZE * i) + j];
 }
 
 //_________________________________________________________________________
