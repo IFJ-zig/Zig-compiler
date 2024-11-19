@@ -70,7 +70,7 @@ int topTerminal(t_Stack *s) // Returns type of first terminal in stack. If there
 	}
 }
 
-void freeItAll(t_StackItem *stack) // Free attributes from stack element. Important for no memory leaks
+void freeStackItem(t_StackItem *stack) // Free attributes from stack element. Important for no memory leaks
 {
 	if (stack->attributes != NULL) {
 		if (stack->attributes->s != NULL) {
@@ -81,29 +81,29 @@ void freeItAll(t_StackItem *stack) // Free attributes from stack element. Import
 		stack->attributes = NULL;
 	}
 }
-t_StackItem popStack(t_Stack *s) // Pops element from stack. WARNING - call freeItAll on popped item for no memleaks
+t_StackItem popStack(t_Stack *s) // Pops element from stack. WARNING - call freeStackItem on popped item for no memleaks
 {
 	if (s->first == NULL) {
 		t_StackItem empty;
 		empty.data = error_token;
 		empty.attributes = NULL;
-		empty.dataType = illegal_token;
+		empty.dataType = void_token;
 		empty.next = NULL;
 		return empty;
 	}
 	t_StackItem *helper;
-	t_StackItem returnor;
+	t_StackItem returnItem;
 	helper = s->first;
 	s->first = s->first->next;
-	returnor.dataType = helper->dataType;
-	returnor.data = helper->data;
-	returnor.attributes = helper->attributes;
-	returnor.next = NULL;
-	returnor.ranking = helper->ranking;
-	returnor.stillCons = helper->stillCons;
+	returnItem.dataType = helper->dataType;
+	returnItem.data = helper->data;
+	returnItem.attributes = helper->attributes;
+	returnItem.next = NULL;
+	returnItem.ranking = helper->ranking;
+	returnItem.stillCons = helper->stillCons;
 	free(helper);
 	helper = NULL;
-	return returnor;
+	return returnItem;
 }
 
 Token *createAttributes(Token *attributes) // Creates stack element attributes. Dont call function if attributes is NULL
@@ -148,7 +148,7 @@ int pushStack(t_Stack *s, int data, int dataType, Token *attributes, bool isCons
 		newItem->attributes = NULL;
 		return 0;
 	}
-	newItem->attributes = createAttributes(attributes); // Create attributes for stack element - IMPORTANT - call freeItAll after pop, or memory leaks occur
+	newItem->attributes = createAttributes(attributes); // Create attributes for stack element - IMPORTANT - call freeStackItem after pop, or memory leaks occur
 	if (newItem->attributes == NULL) {
 		fprintf(stderr, "Error: malloc\n");
 		return -1;
@@ -165,7 +165,7 @@ int pushAfterTopTerminal(t_Stack *s) // Pushes < after first terminal in stack
 	}
 	t_StackItem *helper = s->first;
 	if (helper->data != nonterminal_token && helper->data != precedent_less_token) {
-		return pushStack(s, precedent_less_token, illegal_token, NULL, true, 0);
+		return pushStack(s, precedent_less_token, void_token, NULL, true, 0);
 	}
 
 	while (helper->next != NULL && (helper->next->data == nonterminal_token || helper->next->data == precedent_less_token)) {
@@ -180,7 +180,7 @@ int pushAfterTopTerminal(t_Stack *s) // Pushes < after first terminal in stack
 		}
 		newItem->next = helper->next;
 		newItem->data = precedent_less_token;
-		newItem->dataType = illegal_token;
+		newItem->dataType = void_token;
 		newItem->attributes = NULL;
 		helper->next = newItem;
 		return 0;
@@ -202,11 +202,11 @@ bool isInStack(t_Stack *s, int data) // Finds wheter type of element is in stack
 	return helper != NULL;
 }
 
-void deleteStack(t_Stack *s) // Deletes stack - only option where you dont need to call freeItAll separatedly. Still, dont forget call freeItAll on your popStacked elements.
+void deleteStack(t_Stack *s) // Deletes stack - only option where you dont need to call freeStackItem separatedly. Still, dont forget call freeStackItem on your popStacked elements.
 {
 	t_StackItem helper;
 	while ((helper = popStack(s)).data != error_token) {
-		freeItAll(&helper);
+		freeStackItem(&helper);
 	}
 	s->first = NULL;
 }
@@ -343,13 +343,13 @@ t_StackItem emptyItem() {
 	t_StackItem empty;
 	empty.attributes = NULL;
 	empty.data = 1000;
-	empty.dataType = illegal_token;
+	empty.dataType = void_token;
 	empty.next = NULL;
 	return empty;
 }
 
 
-int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, List *_tokenList_prec) {
+int precedentAnalysis(varType expected, varType *returned, Token *_token, List *_tokenList_prec) {
 	token_prec = _token;
 	tokenList_prec = _tokenList_prec;
 	int comp = 0;
@@ -362,18 +362,18 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 	t_StackItem helper = emptyItem();
 	t_StackItem deletor = emptyItem();
 
-	pushStack(&s, next, illegal_token, NULL, true, 0);
+	pushStack(&s, next, void_token, NULL, true, 0);
 
 	do {
 		printStack(&s);
-		freeItAll(&top);
-		freeItAll(&topFromStack);
+		freeStackItem(&top);
+		freeStackItem(&topFromStack);
 
 		top.data = topTerminal(&s);
 		int tableValue = getValuePrecedentTable(top.data, token_prec->kw);
 		switch (tableValue) {
 			case '=':
-				if (pushStack(&s, token_prec->kw, illegal_token, token_prec, true, 0) == -1) // Push token to
+				if (pushStack(&s, token_prec->kw, void_token, token_prec, true, 0) == -1) // Push token to
 				{
 					printf("Error: Memory allocation failed\n");
 					return INTERNAL_COMPILER_ERROR;
@@ -381,9 +381,9 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 
 				get_token_prec();
 				if (token_prec->kw == error_token) {
-					freeItAll(&top);
-					freeItAll(&topFromStack);
-					freeItAll(&helper);
+					freeStackItem(&top);
+					freeStackItem(&topFromStack);
+					freeStackItem(&helper);
 					return 1;
 				}
 				break;
@@ -392,15 +392,15 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 				{
 					return INTERNAL_COMPILER_ERROR;
 				}
-				if (pushStack(&s, token_prec->kw, illegal_token, token_prec, true, 0) == -1) {
+				if (pushStack(&s, token_prec->kw, void_token, token_prec, true, 0) == -1) {
 					return INTERNAL_COMPILER_ERROR;
 				}
 
 				get_token_prec();
 				if (token_prec->kw == error_token) {
-					freeItAll(&top);
-					freeItAll(&topFromStack);
-					freeItAll(&helper);
+					freeStackItem(&top);
+					freeStackItem(&topFromStack);
+					freeStackItem(&helper);
 					return 1;
 				}
 				break;
@@ -410,7 +410,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 					success = false;
 					break;
 				}
-				freeItAll(&top);
+				freeStackItem(&top);
 				top = popStack(&s);
 				switch (top.data) {
 					case num: // Top terminal is number and has higher priority than next token, apply E->int
@@ -424,36 +424,36 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 							if (returned != NULL) {
 								*returned = INT;
 							}
-							if (expected != ILLEGAL && expected != INT && expected != BOOL) {
-								freeItAll(&deletor); // Cleaning
-								freeItAll(&top);
-								freeItAll(&topFromStack);
+							if (expected != VOID && expected != INT && expected != BOOL) {
+								freeStackItem(&deletor); // Cleaning
+								freeStackItem(&top);
+								freeStackItem(&topFromStack);
 								return 5;
 							}
 						} else {
 							success = false;
 						}
-						freeItAll(&deletor);
+						freeStackItem(&deletor);
 						break;
 					case decim: // Top terminal is float and has higher priority than next token, apply E->float
 						if ((deletor = popStack(&s)).data == precedent_less_token) {
-							int alert = pushStack(&s, nonterminal_token, FLOAT64, top.attributes, true, 0);
+							int alert = pushStack(&s, nonterminal_token, FLOAT, top.attributes, true, 0);
 							if (alert == -1) {
 								return INTERNAL_COMPILER_ERROR;
 							}
 							if (returned != NULL) {
-								*returned = FLOAT64; // configure return type
+								*returned = FLOAT; // configure return type
 							}
-							if (expected != ILLEGAL && expected != FLOAT64 && expected != BOOL) {
-								freeItAll(&deletor);
-								freeItAll(&top);
-								freeItAll(&topFromStack);
+							if (expected != VOID && expected != FLOAT && expected != BOOL) {
+								freeStackItem(&deletor);
+								freeStackItem(&top);
+								freeStackItem(&topFromStack);
 								return 5;
 							}
 						} else {
 							success = false;
 						}
-						freeItAll(&deletor);
+						freeStackItem(&deletor);
 						break;
 					case text: // Top terminal is string and... E->string
 						if ((deletor = popStack(&s)).data == precedent_less_token) {
@@ -464,25 +464,25 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 							if (returned != NULL) {
 								*returned = STRING; // configure return type
 							}
-							if (expected != ILLEGAL && expected != STRING && expected != BOOL) {
-								freeItAll(&deletor);
-								freeItAll(&top);
-								freeItAll(&topFromStack);
+							if (expected != VOID && expected != STRING && expected != BOOL) {
+								freeStackItem(&deletor);
+								freeStackItem(&top);
+								freeStackItem(&topFromStack);
 								return 5;
 							}
 							fprintf(stderr, "7 ");
 						} else {
 							success = false;
 						}
-						freeItAll(&deletor);
+						freeStackItem(&deletor);
 						break;
 					case id: // Apply E->id
 						if ((deletor = popStack(&s)).data == precedent_less_token) {
 							if (false) {
 								deleteStack(&s); // Some cleaning
-								freeItAll(&deletor);
-								freeItAll(&topFromStack);
-								freeItAll(&top);
+								freeStackItem(&deletor);
+								freeStackItem(&topFromStack);
+								freeStackItem(&top);
 								return 3;
 							} else {
 								int alert = pushStack(&s, nonterminal_token, INT, top.attributes, false, 0);
@@ -497,54 +497,54 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 							fprintf(stderr, "4 ");
 						} else {
 							deleteStack(&s); // Some cleaning
-							freeItAll(&deletor);
-							freeItAll(&helper);
-							freeItAll(&topFromStack);
-							freeItAll(&top);
+							freeStackItem(&deletor);
+							freeStackItem(&helper);
+							freeStackItem(&topFromStack);
+							freeStackItem(&top);
 							return 2;
 						}
-						freeItAll(&deletor);
+						freeStackItem(&deletor);
 						break;
 					case rbracket: // Apply E->(E)
-						freeItAll(&helper);
+						freeStackItem(&helper);
 						helper = popStack(&s);
 						if (helper.data == nonterminal_token) {
 							if ((deletor = popStack(&s)).data == lbracket) {
-								freeItAll(&deletor);
+								freeStackItem(&deletor);
 								if ((deletor = popStack(&s)).data == precedent_less_token) {
 
 									int alert = pushStack(&s, nonterminal_token, helper.dataType, helper.attributes, helper.stillCons, 0);
 									if (alert == -1) {
 										return INTERNAL_COMPILER_ERROR;
 									}
-									freeItAll(&helper);
+									freeStackItem(&helper);
 									fprintf(stderr, "3 ");
 								} else {
 									success = false;
 								}
-								freeItAll(&deletor);
+								freeStackItem(&deletor);
 							} else {
 								success = false;
 							}
-							freeItAll(&deletor);
+							freeStackItem(&deletor);
 
 						} else {
 							success = false;
 						}
-						freeItAll(&helper);
-						freeItAll(&top);
-						freeItAll(&topFromStack);
+						freeStackItem(&helper);
+						freeStackItem(&top);
+						freeStackItem(&topFromStack);
 						break;
 					case nonterminal_token: // Apply some E->E op E rule
-						freeItAll(&topFromStack);
+						freeStackItem(&topFromStack);
 						topFromStack = popStack(&s);
 						correctOperation = false;
 						int operation = topFromStack.data;
 						if (comp > 0) // If program have already done some comparing, return error
 						{
-							freeItAll(&deletor);
-							freeItAll(&topFromStack);
-							freeItAll(&top);
+							freeStackItem(&deletor);
+							freeStackItem(&topFromStack);
+							freeStackItem(&top);
 							deleteStack(&s);
 							return 5;
 						}
@@ -558,8 +558,8 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								fprintf(stderr, "8 ");
 								if (top.dataType == STRING) // String can use only + operation, nothing else (and of course they can be compared, you curious)
 								{
-									freeItAll(&top);
-									freeItAll(&topFromStack);
+									freeStackItem(&top);
+									freeStackItem(&topFromStack);
 									deleteStack(&s);
 									return 5;
 								}
@@ -568,8 +568,8 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 							case multiply:
 								fprintf(stderr, "2 ");
 								if (top.dataType == STRING) {
-									freeItAll(&top);
-									freeItAll(&topFromStack);
+									freeStackItem(&top);
+									freeStackItem(&topFromStack);
 									deleteStack(&s);
 									return 5;
 								}
@@ -577,16 +577,16 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								break;
 							case division:
 								fprintf(stderr, "9 ");
-								if (top.stillCons == true && top.attributes != NULL && ((top.dataType == INT && top.attributes->i == 0) || (top.dataType == FLOAT64 && top.attributes == 0))) //
-								{                                                                                                                                                             // Division by zero
-									freeItAll(&top);
-									freeItAll(&topFromStack);
+								if (top.stillCons == true && top.attributes != NULL && ((top.dataType == INT && top.attributes->i == 0) || (top.dataType == FLOAT && top.attributes == 0))) //
+								{                                                                                                                                                           // Division by zero
+									freeStackItem(&top);
+									freeStackItem(&topFromStack);
 									deleteStack(&s);
 									return 9;
 								}
 								if (top.dataType == STRING) {
-									freeItAll(&top);
-									freeItAll(&topFromStack);
+									freeStackItem(&top);
+									freeStackItem(&topFromStack);
 									deleteStack(&s);
 									return 5;
 								}
@@ -594,7 +594,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								break;
 							case more:
 								fprintf(stderr, "10 ");
-								if (expected != BOOL && expected != ILLEGAL) // You shouldn't compare anything, total bullshit
+								if (expected != BOOL && expected != VOID) // You shouldn't compare anything, total bullshit
 								{
 									comp--;
 
@@ -608,7 +608,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								break;
 							case less:
 								fprintf(stderr, "11 ");
-								if (expected != BOOL && expected != ILLEGAL) {
+								if (expected != BOOL && expected != VOID) {
 									comp--;
 
 								} else {
@@ -618,7 +618,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								break;
 							case nequal:
 								fprintf(stderr, "12 ");
-								if (expected != BOOL && expected != ILLEGAL) {
+								if (expected != BOOL && expected != VOID) {
 									comp--;
 
 								} else {
@@ -628,7 +628,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								break;
 							case mequal:
 								fprintf(stderr, "13 ");
-								if (expected != BOOL && expected != ILLEGAL) {
+								if (expected != BOOL && expected != VOID) {
 									comp--;
 
 								} else {
@@ -638,7 +638,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								break;
 							case lequal:
 								fprintf(stderr, "14 ");
-								if (expected != BOOL && expected != ILLEGAL) {
+								if (expected != BOOL && expected != VOID) {
 									comp--;
 
 								} else {
@@ -648,7 +648,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 								break;
 							case compare_equal:
 								fprintf(stderr, "15 ");
-								if (expected != BOOL && expected != ILLEGAL) {
+								if (expected != BOOL && expected != VOID) {
 									comp--;
 
 								} else {
@@ -663,27 +663,27 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 						}
 						if (correctOperation) {
 
-							freeItAll(&topFromStack);
+							freeStackItem(&topFromStack);
 							topFromStack = popStack(&s);
 							if (topFromStack.data == nonterminal_token) // Rules are E-> E op E, no E -> bullshit op E
 							{
 								if ((deletor = popStack(&s)).data == precedent_less_token) {
-									if (topFromStack.dataType == illegal_token || top.dataType == ILLEGAL) // Expressions like _ + _ are illegal, sorry
+									if (topFromStack.dataType == void_token || top.dataType == VOID) // Expressions like _ + _ are VOID, sorry
 									{
-										freeItAll(&deletor);
-										freeItAll(&topFromStack);
-										freeItAll(&top);
+										freeStackItem(&deletor);
+										freeStackItem(&topFromStack);
+										freeStackItem(&top);
 										return 7;
 									}
 									if (topFromStack.dataType == top.dataType) {
-										if (topFromStack.dataType == FLOAT64 && topFromStack.stillCons && top.stillCons) // Totally useless, because variables exist and will break all the stuff
+										if (topFromStack.dataType == FLOAT && topFromStack.stillCons && top.stillCons) // Totally useless, because variables exist and will break all the stuff
 										{
 											*topFromStack.attributes->f = decimalOperation(*(topFromStack.attributes->f), *(top.attributes->f), operation);
 										} else if (topFromStack.dataType == INT && topFromStack.stillCons && top.stillCons) {
 											*topFromStack.attributes->i = decimalOperation(*(topFromStack.attributes->i), *(top.attributes->i), operation);
 										}
 										switch (top.dataType) {
-											case FLOAT64:
+											case FLOAT:
 												break;
 											case INT:
 												break;
@@ -697,30 +697,30 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 											return INTERNAL_COMPILER_ERROR;
 										}
 										// Creates new nonterminal_token with some E -> E op E rule
-										freeItAll(&topFromStack);
-										freeItAll(&top);
+										freeStackItem(&topFromStack);
+										freeStackItem(&top);
 									} else {
-										freeItAll(&deletor);
-										freeItAll(&topFromStack);
-										freeItAll(&top);
+										freeStackItem(&deletor);
+										freeStackItem(&topFromStack);
+										freeStackItem(&top);
 										return 5;
 									}
 
 								} else {
 									success = false;
 								}
-								freeItAll(&deletor);
+								freeStackItem(&deletor);
 							} else {
 								success = false;
 							}
-							freeItAll(&topFromStack);
-							freeItAll(&top);
+							freeStackItem(&topFromStack);
+							freeStackItem(&top);
 						} else {
 							success = false;
 						}
-						freeItAll(&topFromStack);
-						freeItAll(&top);
-						freeItAll(&deletor);
+						freeStackItem(&topFromStack);
+						freeStackItem(&top);
+						freeStackItem(&deletor);
 						break;
 					default:
 						success = false;
@@ -728,9 +728,9 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 				}
 				break;
 			case 0:
-				freeItAll(&deletor);
-				freeItAll(&topFromStack);
-				freeItAll(&top);
+				freeStackItem(&deletor);
+				freeStackItem(&topFromStack);
+				freeStackItem(&top);
 				deleteStack(&s);
 				return 2;
 				break;
@@ -749,11 +749,14 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 
 
 	deleteStack(&s);
-	freeItAll(&topFromStack);
-	freeItAll(&top);
+	freeStackItem(&topFromStack);
+	freeStackItem(&top);
 
 	if ((expected == BOOL && comp != 1) || comp > 1) {
 		return 5;
+	}
+	if (!success) {
+		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
 	if (token_prec->kw == end) {
@@ -761,7 +764,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 		return -1;
 	}
 
-	if (comp < 0) // Comparing were illegal and that's the result
+	if (comp < 0) // Comparing were VOID and that's the result
 	{
 		return 7;
 	}
