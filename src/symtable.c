@@ -90,7 +90,7 @@ symbol_t *htab_find(const htab_t *t, htab_key_t key) {
 	int index = hash % t->arr_size;
 	htab_itm_t *itm = t->arr_ptr[index];
 	while (itm != NULL) {
-		if (!strcmp(key, itm->symbol.key))
+		if (strcmp(key, itm->symbol.key) == 0)
 			return &itm->symbol;
 		itm = itm->next;
 	}

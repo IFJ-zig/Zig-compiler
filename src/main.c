@@ -5,6 +5,7 @@
 #include "errors_enum.h"
 #include "syntax_an.h"
 #include "tokens.h"
+#include "semantic_an.h"
 
 int main() {
 	List *pL;
@@ -12,6 +13,7 @@ int main() {
 		return INTERNAL_COMPILER_ERROR;
 	}
 	ListInit(pL);
+	semanticInit();
 
 	//Lexikální analýza
 	int err = Lexem_analyzer(pL);
@@ -29,6 +31,7 @@ int main() {
 	if (err) {
 		return err;
 	}
+	semanticDestroy();
 
 	return 0;
 }
