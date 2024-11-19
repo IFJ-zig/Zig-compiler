@@ -11,48 +11,56 @@
 #ifndef HTAB_H__
 #define HTAB_H__
 
-#include <string.h>     // size_t
-#include <stdbool.h>    // bool
+#include <stdbool.h> // bool
+#include <string.h>  // size_t
 
 // Typy:
-typedef const char * htab_key_t;        // typ klíče
+typedef const char *htab_key_t; // typ klíče
 
-typedef enum {
-    INT, FLOAT, STRING, BOOL, FUNCTION
+typedef enum
+{
+	INT,
+	FLOAT,
+	STRING,
+	BOOL,
+	FUNCTION,
+	VOID
 } varType;
 
 // Data v tabulce:
-typedef struct symbol {
-    htab_key_t    key;          // klíč
-    int intVal;
-    float floatVal;
-    char *charVal;
-    int depth;
-    varType type;
-    varType returnType;
-    bool isDefined;
-} symbol_t;                  // typedef podle zadání
+typedef struct symbol
+{
+	htab_key_t key; // klíč
+	int depth;
+	varType type;
+	varType returnType;
+	bool isDefined;
+} symbol_t; // typedef podle zadání
 
-// Tabulka:
-typedef struct htab {
-    int depth;
-    struct htab *previous;
-    struct htab *next;
-    size_t size;
-    size_t arr_size;
-    struct htab_itm **arr_ptr;
-} htab_t;
-
-typedef struct htab_itm {
-    symbol_t symbol;
-    struct htab_itm *next;
+// Prvek tabulky:
+typedef struct htab_itm
+{
+	symbol_t symbol;
+	struct htab_itm *next;
 } htab_itm_t;
 
+// Tabulka:
+typedef struct htab
+{
+	int depth;
+	struct htab *previous;
+	struct htab *next;
+	size_t size;
+	size_t arr_size;
+	struct htab_itm **arr_ptr;
+} htab_t;
+
 // DLL list s hash tabulkama podle hloubky
-typedef struct htabs {
-    struct htab *first;
-    struct htab *last;
-    int tablesCount;
+typedef struct htabs
+{
+	struct htab *first;
+	struct htab *last;
+	int tablesCount;
 } htabs_l;
 
 
@@ -68,13 +76,13 @@ void htab_removeLast(htabs_l *list);
 void htab_insertLast(htabs_l *list, htab_t *t);
 
 // Funkce pro práci s tabulkou:
-htab_t *htab_init(int depth);              // konstruktor tabulky
+htab_t *htab_init(int depth); // konstruktor tabulky
 
-symbol_t * htab_find(const htab_t * t, htab_key_t key);  // hledání
-symbol_t * htab_define(htab_t * t, htab_key_t key);
+symbol_t *htab_find(const htab_t *t, htab_key_t key); // hledání
+symbol_t *htab_define(htab_t *t, htab_key_t key);
 
-void htab_clear(htab_t * t);    // ruší všechny záznamy
-void htab_free(htab_t * t);     // destruktor tabulky
+void htab_clear(htab_t *t); // ruší všechny záznamy
+void htab_free(htab_t *t);  // destruktor tabulky
 
 int getCurrentDepth(htabs_l *list);
 

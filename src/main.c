@@ -3,6 +3,7 @@
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
 #include "errors_enum.h"
+#include "semantic_an.h"
 #include "syntax_an.h"
 #include "tokens.h"
 
@@ -14,6 +15,7 @@ int main() {
 	if (err) {
 		return err;
 	}
+	semanticDestroy();
 
 	return 0;
 }
