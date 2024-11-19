@@ -534,6 +534,11 @@ int variable_definition() {
 		fprintf(stderr, "Error: Expected '=' after variable type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
+	if(token->kw == equal){
+		get_token();
+		if(token->kw == inbuild)
+			defineSymbol(varID.s, FUNCTION, false, false);
+	}
 	symbol_t *symbol = getSymbol(varID.s);
 	if(symbol == NULL){
 		fprintf(stderr, "Error: Variable %s has not been defined\n", varID.s);
