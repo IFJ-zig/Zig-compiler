@@ -9,8 +9,8 @@
 #include <stdbool.h>
 
 #include "errors_enum.h"
-#include "tokens.h"
 #include "symtable.h"
+#include "tokens.h"
 
 void semanticInit();
 
@@ -25,7 +25,6 @@ int processParam(Token paramName, Token paramType, bool isNullable);
 
 void enterScope(); //A function for going into bigger depth so syntax analyzer doesn't need to keep track of depth itself
 void exitScope();
-
 
 
 #endif // SEMANTIC_H

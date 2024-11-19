@@ -29,12 +29,12 @@ static char precedentTable[TABLE_SIZE * TABLE_SIZE + 1] = {
 		/*;*/ '<', '<', '<', '<', '<', 0, '<', '<', '<', '<', '<', '<', '<', 0, '<',
 		/*num*/ '>', '>', '>', '>', 0, '>', 0, '>', '>', '>', '>', '>', '>', '>', 0};
 
-Token *token;
-List *tokenList;
+Token *token_prec;
+List *tokenList_prec;
 
 int get_token_prec() {
-	token = LGetAct(tokenList);
-	LActNext(tokenList);
+	token_prec = LGetAct(tokenList_prec);
+	LActNext(tokenList_prec);
 	return 0;
 }
 //_________________________________________________________________________
@@ -67,12 +67,12 @@ int topTerminal(t_Stack *s) // Returns type of first terminal in stack. If there
 	if (s->first == NULL) {
 		return -1;
 	}
-	t_StackItem *pom = s->first;
-	while (pom != NULL && (pom->data == nonterminal_token || pom->data == precedent_less_token)) {
-		pom = pom->next;
+	t_StackItem *helper = s->first;
+	while (helper != NULL && (helper->data == nonterminal_token || helper->data == precedent_less_token)) {
+		helper = helper->next;
 	}
-	if (pom != NULL) {
-		return pom->data;
+	if (helper != NULL) {
+		return helper->data;
 	} else {
 		return -1;
 	}
@@ -92,25 +92,25 @@ void freeItAll(t_StackItem *freeman) // Free attributes from stack element. Impo
 t_StackItem popStack(t_Stack *s) // Pops element from stack. WARNING - call freeItAll on popped item for no memleaks
 {
 	if (s->first == NULL) {
-		t_StackItem pom;
-		pom.data = error_token;
-		pom.attributes = NULL;
-		pom.dataType = illegal_token;
-		pom.next = NULL;
-		return pom;
+		t_StackItem helper;
+		helper.data = error_token;
+		helper.attributes = NULL;
+		helper.dataType = illegal_token;
+		helper.next = NULL;
+		return helper;
 	}
-	t_StackItem *pom;
+	t_StackItem *helper;
 	t_StackItem returnor;
-	pom = s->first;
+	helper = s->first;
 	s->first = s->first->next;
-	returnor.dataType = pom->dataType;
-	returnor.data = pom->data;
-	returnor.attributes = pom->attributes;
+	returnor.dataType = helper->dataType;
+	returnor.data = helper->data;
+	returnor.attributes = helper->attributes;
 	returnor.next = NULL;
-	returnor.ranking = pom->ranking;
-	returnor.stillCons = pom->stillCons;
-	free(pom);
-	pom = NULL;
+	returnor.ranking = helper->ranking;
+	returnor.stillCons = helper->stillCons;
+	free(helper);
+	helper = NULL;
 	return returnor;
 }
 
@@ -168,25 +168,25 @@ int pushAfterTopTerminal(t_Stack *s) // Pushes < after first terminal in stack
 	if (s->first == NULL) {
 		return -1;
 	}
-	t_StackItem *pom = s->first;
-	if (pom->data != nonterminal_token && pom->data != precedent_less_token) {
+	t_StackItem *helper = s->first;
+	if (helper->data != nonterminal_token && helper->data != precedent_less_token) {
 		return pushStack(s, precedent_less_token, illegal_token, NULL, true, 0);
 	}
 
-	while (pom->next != NULL && (pom->next->data == nonterminal_token || pom->next->data == precedent_less_token)) {
-		pom = pom->next;
+	while (helper->next != NULL && (helper->next->data == nonterminal_token || helper->next->data == precedent_less_token)) {
+		helper = helper->next;
 	}
-	if (pom->next != NULL) // Terminal found, allocate new element.
+	if (helper->next != NULL) // Terminal found, allocate new element.
 	{
 		t_StackItem *newItem = malloc(sizeof(struct StackItem));
 		if (newItem == NULL) {
 			return -1;
 		}
-		newItem->next = pom->next;
+		newItem->next = helper->next;
 		newItem->data = precedent_less_token;
 		newItem->dataType = illegal_token;
 		newItem->attributes = NULL;
-		pom->next = newItem;
+		helper->next = newItem;
 		return 0;
 	} else {
 		return -1;
@@ -198,18 +198,18 @@ bool isInStack(t_Stack *s, int data) // Finds wheter type of element is in stack
 	if (s->first == NULL) {
 		return false;
 	}
-	t_StackItem *pom = s->first;
-	while (pom != NULL && pom->data != data) {
-		pom = pom->next;
+	t_StackItem *helper = s->first;
+	while (helper != NULL && helper->data != data) {
+		helper = helper->next;
 	}
-	return pom != NULL;
+	return helper != NULL;
 }
 
 void deleteStack(t_Stack *s) // Deletes stack - only option where you dont need to call freeItAll separatedly. Still, dont forget call freeItAll on your popStacked elements.
 {
-	t_StackItem pom;
-	while ((pom = popStack(s)).data != error_token) {
-		freeItAll(&pom);
+	t_StackItem helper;
+	while ((helper = popStack(s)).data != error_token) {
+		freeItAll(&helper);
 	}
 	s->first = NULL;
 }
@@ -349,9 +349,9 @@ t_StackItem emptyItem() {
 }
 
 
-int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, List *_tokenList) {
-	token = _token;
-	tokenList = _tokenList;
+int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, List *_tokenList_prec) {
+	token_prec = _token;
+	tokenList_prec = _tokenList_prec;
 	int comp = 0;
 	t_Stack s;
 	bool success = true; // Input is gramatically correct
@@ -359,7 +359,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 	bool correctOperation;
 	stackInit(&s);
 	t_StackItem top = emptyItem();
-	t_StackItem pom = emptyItem();
+	t_StackItem helper = emptyItem();
 	t_StackItem deletor = emptyItem();
 
 	pushStack(&s, next, illegal_token, NULL, true, 0);
@@ -369,20 +369,20 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 		freeItAll(&topFromStack);
 
 		top.data = topTerminal(&s);
-		int tableValue = getValuePrecedentTable(top.data, token->kw);
+		int tableValue = getValuePrecedentTable(top.data, token_prec->kw);
 		switch (tableValue) {
 			case '=':
-				if (pushStack(&s, token->kw, illegal_token, token, true, 0) == -1) // Push token to
+				if (pushStack(&s, token_prec->kw, illegal_token, token_prec, true, 0) == -1) // Push token to
 				{
 					printf("Error: Memory allocation failed\n");
 					return INTERNAL_COMPILER_ERROR;
 				}
 
 				get_token_prec();
-				if (token->kw == error_token) {
+				if (token_prec->kw == error_token) {
 					freeItAll(&top);
 					freeItAll(&topFromStack);
-					freeItAll(&pom);
+					freeItAll(&helper);
 					return 1;
 				}
 				break;
@@ -391,15 +391,15 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 				{
 					return INTERNAL_COMPILER_ERROR;
 				}
-				if (pushStack(&s, token->kw, illegal_token, token, true, 0) == -1) {
+				if (pushStack(&s, token_prec->kw, illegal_token, token_prec, true, 0) == -1) {
 					return INTERNAL_COMPILER_ERROR;
 				}
 
 				get_token_prec();
-				if (token->kw == error_token) {
+				if (token_prec->kw == error_token) {
 					freeItAll(&top);
 					freeItAll(&topFromStack);
-					freeItAll(&pom);
+					freeItAll(&helper);
 					return 1;
 				}
 				break;
@@ -497,7 +497,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 						} else {
 							deleteStack(&s); // Some cleaning
 							freeItAll(&deletor);
-							freeItAll(&pom);
+							freeItAll(&helper);
 							freeItAll(&topFromStack);
 							freeItAll(&top);
 							return 2;
@@ -505,18 +505,18 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 						freeItAll(&deletor);
 						break;
 					case rbracket: // Apply E->(E)
-						freeItAll(&pom);
-						pom = popStack(&s);
-						if (pom.data == nonterminal_token) {
+						freeItAll(&helper);
+						helper = popStack(&s);
+						if (helper.data == nonterminal_token) {
 							if ((deletor = popStack(&s)).data == lbracket) {
 								freeItAll(&deletor);
 								if ((deletor = popStack(&s)).data == precedent_less_token) {
 
-									int alert = pushStack(&s, nonterminal_token, pom.dataType, pom.attributes, pom.stillCons, 0);
+									int alert = pushStack(&s, nonterminal_token, helper.dataType, helper.attributes, helper.stillCons, 0);
 									if (alert == -1) {
 										return INTERNAL_COMPILER_ERROR;
 									}
-									freeItAll(&pom);
+									freeItAll(&helper);
 									fprintf(stderr, "3 ");
 								} else {
 									success = false;
@@ -530,7 +530,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 						} else {
 							success = false;
 						}
-						freeItAll(&pom);
+						freeItAll(&helper);
 						freeItAll(&top);
 						freeItAll(&topFromStack);
 						break;
@@ -740,11 +740,11 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 		if (!success)
 			break;
 
-		if (token->kw == next)
+		if (token_prec->kw == next)
 			break;
 
 		top.data = topTerminal(&s);
-	} while ((!isEndingTerminal(top.data)) || (!isEndingTerminal(token->kw)));
+	} while ((!isEndingTerminal(top.data)) || (!isEndingTerminal(token_prec->kw)));
 
 	deleteStack(&s);
 	freeItAll(&topFromStack);
@@ -754,7 +754,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 		return 5;
 	}
 
-	if (token->kw == next) {
+	if (token_prec->kw == next) {
 		return -1;
 	}
 
