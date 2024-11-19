@@ -5,6 +5,9 @@
 #include "syntax_an.h"
 #include "semantic_an.h"
 
+//TODO: Semantic integration leaking like a sieve, a fix would be nice but probably not necessary for the project
+
+
 Token *token;
 List *tokenList;
 

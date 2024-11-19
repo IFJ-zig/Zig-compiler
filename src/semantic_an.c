@@ -11,6 +11,7 @@ void semanticInit(){
     list = symtable_init();
     htab_t *t = htab_init(getCurrentDepth(list));
     t->previous = NULL;
+    t->depth = 0;
     htab_insertLast(list, t);
 }
 
