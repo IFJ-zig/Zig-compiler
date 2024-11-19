@@ -1,15 +1,5 @@
 #include "precedent_an.h"
 
-typedef enum
-{
-	FLOAT64,
-	INT,
-	STRING,
-	FUNC,
-	ILLEGAL,
-	BOOL
-} var_type_t;
-
 
 static char precedentTable[TABLE_SIZE * TABLE_SIZE + 1] = {
 		//  +     -     *     /     (     )     i     <     >     ==    <=    >=    !=    ;/, num
@@ -65,6 +55,7 @@ t_StackItem *pointerToTop(t_Stack *s) {
 int topTerminal(t_Stack *s) // Returns type of first terminal in stack. If there isn't any, returns -1
 {
 	if (s->first == NULL) {
+		fprintf(stderr, "Error: Stack is empty\n");
 		return -1;
 	}
 	t_StackItem *helper = s->first;
@@ -74,30 +65,31 @@ int topTerminal(t_Stack *s) // Returns type of first terminal in stack. If there
 	if (helper != NULL) {
 		return helper->data;
 	} else {
+		fprintf(stderr, "Error: topterm\n");
 		return -1;
 	}
 }
 
-void freeItAll(t_StackItem *freeman) // Free attributes from stack element. Important for no memory leaks
+void freeItAll(t_StackItem *stack) // Free attributes from stack element. Important for no memory leaks
 {
-	if (freeman->attributes != NULL) {
-		if (freeman->attributes->s != NULL) {
-			free(freeman->attributes->s);
-			freeman->attributes->s = NULL;
+	if (stack->attributes != NULL) {
+		if (stack->attributes->s != NULL) {
+			free(stack->attributes->s);
+			stack->attributes->s = NULL;
 		}
-		free(freeman->attributes);
-		freeman->attributes = NULL;
+		free(stack->attributes);
+		stack->attributes = NULL;
 	}
 }
 t_StackItem popStack(t_Stack *s) // Pops element from stack. WARNING - call freeItAll on popped item for no memleaks
 {
 	if (s->first == NULL) {
-		t_StackItem helper;
-		helper.data = error_token;
-		helper.attributes = NULL;
-		helper.dataType = illegal_token;
-		helper.next = NULL;
-		return helper;
+		t_StackItem empty;
+		empty.data = error_token;
+		empty.attributes = NULL;
+		empty.dataType = illegal_token;
+		empty.next = NULL;
+		return empty;
 	}
 	t_StackItem *helper;
 	t_StackItem returnor;
@@ -143,6 +135,7 @@ int pushStack(t_Stack *s, int data, int dataType, Token *attributes, bool isCons
 {
 	t_StackItem *newItem = malloc(sizeof(t_StackItem));
 	if (newItem == NULL) {
+		fprintf(stderr, "Error: malloc\n");
 		return -1;
 	}
 	newItem->ranking = ranking;
@@ -157,6 +150,7 @@ int pushStack(t_Stack *s, int data, int dataType, Token *attributes, bool isCons
 	}
 	newItem->attributes = createAttributes(attributes); // Create attributes for stack element - IMPORTANT - call freeItAll after pop, or memory leaks occur
 	if (newItem->attributes == NULL) {
+		fprintf(stderr, "Error: malloc\n");
 		return -1;
 	}
 
@@ -166,6 +160,7 @@ int pushStack(t_Stack *s, int data, int dataType, Token *attributes, bool isCons
 int pushAfterTopTerminal(t_Stack *s) // Pushes < after first terminal in stack
 {
 	if (s->first == NULL) {
+		fprintf(stderr, "Error: Stack is empty\n");
 		return -1;
 	}
 	t_StackItem *helper = s->first;
@@ -180,6 +175,7 @@ int pushAfterTopTerminal(t_Stack *s) // Pushes < after first terminal in stack
 	{
 		t_StackItem *newItem = malloc(sizeof(struct StackItem));
 		if (newItem == NULL) {
+			fprintf(stderr, "Error: malloc\n");
 			return -1;
 		}
 		newItem->next = helper->next;
@@ -189,6 +185,7 @@ int pushAfterTopTerminal(t_Stack *s) // Pushes < after first terminal in stack
 		helper->next = newItem;
 		return 0;
 	} else {
+		fprintf(stderr, "Error: pushafter\n");
 		return -1;
 	}
 }
@@ -216,6 +213,7 @@ void deleteStack(t_Stack *s) // Deletes stack - only option where you dont need 
 
 void printStack(t_Stack *s) // Prints stack
 {
+	fprintf(stderr, "---- stack print ----\n");
 	t_StackItem *stackElement = s->first;
 	while (stackElement != NULL) {
 		fprintf(stderr, "%d\n", stackElement->data);
@@ -285,10 +283,12 @@ int getValuePrecedentTable(int tokenStack, int tokenInput) // Translates your to
 	int i = precedentTableTranslator(tokenStack);
 	if (i == -1) // Token is not in stack
 	{
+		fprintf(stderr, "Error: Invalid token value\n");
 		return -1;
 	}
 	int j = precedentTableTranslator(tokenInput);
 	if (j == -1) {
+		fprintf(stderr, "Error: Invalid token value\n");
 		return -1;
 	}
 	return (int)precedentTable[(TABLE_SIZE * i) + j];
@@ -365,6 +365,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 	pushStack(&s, next, illegal_token, NULL, true, 0);
 
 	do {
+		printStack(&s);
 		freeItAll(&top);
 		freeItAll(&topFromStack);
 
@@ -746,6 +747,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 		top.data = topTerminal(&s);
 	} while ((!isEndingTerminal(top.data)) || (!isEndingTerminal(token_prec->kw)));
 
+
 	deleteStack(&s);
 	freeItAll(&topFromStack);
 	freeItAll(&top);
@@ -754,7 +756,8 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 		return 5;
 	}
 
-	if (token_prec->kw == next) {
+	if (token_prec->kw == end) {
+		fprintf(stderr, "Error: Expected token, but found eof\n");
 		return -1;
 	}
 
@@ -762,6 +765,7 @@ int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, 
 	{
 		return 7;
 	}
+
 
 	return 0;
 }

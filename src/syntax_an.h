@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #include "errors_enum.h"
+#include "precedent_an.h"
 #include "tokens.h"
 
 int syntax_analyzer(List *L);

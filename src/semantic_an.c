@@ -9,7 +9,7 @@ static htabs_l *list;
 
 void semanticInit() {
 	list = symtable_init();
-	enterScope(list);
+	enterScope();
 }
 
 void enterScope() {

@@ -466,9 +466,17 @@ int variable_definition() {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	// PLACEHOLDER FOR BOTTOM UP EXPRESSION ANALYSIS
-	while (token->kw != next) {
+	/* while (token->kw != next) {
 		get_token();
+	} */
+	get_token();
+	var_type_t returned = ILLEGAL;
+	success = precedentAnalysis(INT, &returned, token, tokenList);
+	if (success != 0) {
+		fprintf(stderr, "Error: %d\n", success);
+		return success;
 	}
+
 
 	return 0;
 };

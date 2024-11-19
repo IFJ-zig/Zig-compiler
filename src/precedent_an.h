@@ -8,6 +8,16 @@
 #include "errors_enum.h"
 #include "tokens.h"
 
+typedef enum
+{
+	FLOAT64,
+	INT,
+	STRING,
+	FUNC,
+	ILLEGAL,
+	BOOL
+} var_type_t;
+
 typedef struct StackItem // Item of stack
 {
 	struct StackItem *next;
@@ -33,4 +43,5 @@ bool isInStack(t_Stack *s, int data);                                           
 void deleteStack(t_Stack *s);                                                                   // Deletes stack
 void printStack(t_Stack *s);                                                                    // Prints all data from stack
 
+int precedentAnalysis(var_type_t expected, var_type_t *returned, Token *_token, List *_tokenList_prec);
 #endif // PRECEDENT_TABLE_H
