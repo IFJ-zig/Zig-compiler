@@ -220,7 +220,7 @@ int function_analysis() {
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
 	else{
-		fprintf(stderr, "Function %s successfully found in symtable, return type=%s\n", token->s, getSymbol(token->s)->returnType == INT ? "INT" : getSymbol(token->s)->returnType == FLOAT ? "FLOAT" : getSymbol(token->s)->returnType == STRING ? "STRING" : "VOID");
+		fprintf(stderr, "Function %s successfully found in symtable, depth=%d, return type=%s\n", token->s, getSymbol(token->s)->depth,getSymbol(token->s)->returnType == INT ? "INT" : getSymbol(token->s)->returnType == FLOAT ? "FLOAT" : getSymbol(token->s)->returnType == STRING ? "STRING" : "VOID");
 	}
 
 	statusCode = param_list();	//done semantic

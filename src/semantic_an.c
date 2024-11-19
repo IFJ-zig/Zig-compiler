@@ -9,7 +9,9 @@ static htabs_l *list;
 
 void semanticInit(){
     list = symtable_init();
-    enterScope(list);
+    htab_t *t = htab_init(getCurrentDepth(list));
+    t->previous = NULL;
+    htab_insertLast(list, t);
 }
 
 void semanticDestroy(){
@@ -20,6 +22,7 @@ void semanticDestroy(){
 
 void enterScope(){
     htab_t *t = htab_init(getCurrentDepth(list));
+    t->depth = getCurrentDepth(list)+1;
     htab_insertLast(list, t);
 }
 
@@ -36,6 +39,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable){
     symbol->isDefined = false;
     symbol->isConst = isConst;
     symbol->isNullable = isNullable;
+    symbol->depth = getCurrentDepth(list);
     return 0;
 }
 
