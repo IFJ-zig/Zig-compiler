@@ -31,6 +31,7 @@ int main() {
 	if (err) {
 		return err;
 	}
+	semanticDestroy();
 
 	return 0;
 }
