@@ -19,7 +19,9 @@ void semanticDestroy(){
     while(list->tablesCount > 0){
         htab_removeLast(list);
     }
+    free(list);
 }
+
 
 void enterScope(){
     htab_t *t = htab_init(getCurrentDepth(list));

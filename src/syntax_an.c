@@ -117,7 +117,6 @@ int program() {
 				return statusCode;
 		} else if (token->kw == end) {
 			fprintf(stderr, "\nCompilation successfully finished \n");
-			semanticDestroy();
 			return 0;
 		} else {
 			fprintf(stderr, "Error: Expected function definition or end of program, but found %d\n", token->kw);
