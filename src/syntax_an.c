@@ -72,6 +72,7 @@ int seekHeaders() {
 		//Save the name of functions into the symtable at depth 0
 		if (defineSymbol(fnName, FUNCTION, false, false) == REDEFINITION_ERROR) {
 			fprintf(stderr, "Error: Function %s is already defined\n", token.s);
+			free(token.s);
 			return REDEFINITION_ERROR;
 		}
 		symbol_t *fnSymbol = getSymbol(fnName);
@@ -80,6 +81,7 @@ int seekHeaders() {
 		} else {
 			fprintf(stderr, "ID: %s\n", token.s);
 		}
+		free(token.s);
 
 		read_token();
 		if (token.kw != lbracket) {
@@ -202,8 +204,10 @@ int checkImport() {
 	read_token();
 	if (token.kw != text && strcmp(token.s, "ifj24.zig")) {
 		fprintf(stderr, "Error: Expected 'ifj24.zig' as name of the package\n");
+		free(token.s);
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
+	free(token.s);
 	read_token();
 	if (token.kw != rbracket) {
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -241,6 +245,7 @@ int function_analysis() {
 	//The function name should already be in the symtable at depth 0 since it was done in seekHeaders, lets just check if it's still there
 	if (getSymbol(fnName) == NULL) {
 		fprintf(stderr, "Error: Function %s is not defined, this function should've been defined in seekHeaders!\n", fnName);
+		free(token.s);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	} else {
 		fprintf(stderr, "Function %s successfully found in symtable, depth=%d, return type=%s\n", fnName, getSymbol(fnName)->depth, getSymbol(fnName)->returnType == INT ? "INT" : getSymbol(fnName)->returnType == FLOAT ? "FLOAT"
@@ -255,7 +260,8 @@ int function_analysis() {
 	statusCode = return_type(); //semantic done in seekHeaders
 	if (statusCode != 0)
 		return statusCode;
-
+	
+	free(token.s);
 	read_token();
 	if (token.kw != lblock) {
 		fprintf(stderr, "Error: Expected '{' after function definition\n");
@@ -410,6 +416,7 @@ int if_else() {
 			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
 		}
 		defineSymbol(token.s, optionalType, false, false); //In this case hardcoded not nullable is ok, since the unwrapped value will never be an optional, however, if first value is const, this new one will be also const TODO: fix sometime
+		free(token.s);
 		read_token();
 		if (token.kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
@@ -482,6 +489,7 @@ varType skip_expression_get_type() {
 				fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
 			} else
 				type = symbol->type;
+			free(token.s);
 		}
 	}
 	return type;
@@ -603,6 +611,7 @@ int while_syntax() {
 			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
 		}
 		defineSymbol(token.s, optionalType, false, false); //In this case hardcoded not nullable is ok, since the unwrapped value will never be an optional, however, if first value is const, this new one will be also const TODO: fix sometime
+		free(token.s);
 		read_token();
 		if (token.kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");

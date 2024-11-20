@@ -12,7 +12,7 @@
 
 
 typedef enum{
-	LEXEM,
+	LEXEM, INTERNAL,
 	//pro chybu v lexemu
 	num,
 	text,
@@ -88,7 +88,7 @@ typedef struct SToken{
 	KeyWord kw;
 	int i;
 	double f;
-	char s[256];
+	char *s;
 } Token;
 
 KeyWord LGetKeyWAct(Token T);

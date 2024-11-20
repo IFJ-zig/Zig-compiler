@@ -7,11 +7,19 @@
 
 Token get_token() {
 	//inicializace
-	char lexem[256];
 	int n;
+	size_t lex_size=8;
 	double d;
-	Token new = {next, 0, 0, ""};
+	Token new = {next, 0, 0, NULL};
 	char letter = getchar();
+
+	char *p;
+	char *lexem = malloc(sizeof(char) * lex_size);
+	if(lexem==NULL) {
+		new.kw = INTERNAL;
+		new.i = INTERNAL_COMPILER_ERROR;
+		return new;
+	}
 	lexem[0] = '\0';
 
 	//tělo programu
@@ -28,71 +36,85 @@ Token get_token() {
 			case ';':
 				//new = {next, 0, 0, ""};
 				printf("next\n");
+				free(lexem);
 				return new;
 				break;
 			case ':':
 				new.kw = colon;
 				printf("colon ");
+				free(lexem);
 				return new;
 				break;
 			case '(':
 				new.kw = lbracket;
 				printf("lbracket ");
+				free(lexem);
 				return new;
 				break;
 			case ')':
 				new.kw = rbracket;
 				printf("pbracket ");
+				free(lexem);
 				return new;
 				break;
 			case '{':
 				new.kw = lblock;
 				printf("lblock\n");
+				free(lexem);
 				return new;
 				break;
 			case '}':
 				new.kw = rblock;
 				printf("pblock\n");
+				free(lexem);
 				return new;
 				break;
 			case ',':
 				new.kw = comma;
 				printf("comma ");
+				free(lexem);
 				return new;
 				break;
 			case '.':
 				new.kw = dot;
 				printf("dot ");
+				free(lexem);
 				return new;
 				break;
 			case '+':
 				new.kw = plus;
 				printf("plus ");
+				free(lexem);
 				return new;
 				break;
 			case '-':
 				new.kw = minus;
 				printf("minus ");
+				free(lexem);
 				return new;
 				break;
 			case '*':
 				new.kw = multiply;
 				printf("krat ");
+				free(lexem);
 				return new;
 				break;
 			case '?':
 				new.kw = question_mark;
 				printf("choice ");
+				free(lexem);
 				return new;
 				break;
 			case '|':
 				new.kw = vertical_bar;
 				printf("popodm ");
+				free(lexem);
 				return new;
 				break;
 			case '@':
 				new.kw = at;
 				printf("zavin ");
+				free(lexem);
 				return new;
 				break;
 			case '[':
@@ -100,10 +122,12 @@ Token get_token() {
 				if (letter == ']') {
 					new.kw = square_brackets;
 					printf("square_brackets ");
+					free(lexem);
 					return new;
 				} else {
 					new.kw = LEXEM;
 					new.i = LEXEM_ERROR;
+					free(lexem);
 					return new;
 				}
 				break;
@@ -112,11 +136,13 @@ Token get_token() {
 				if (letter == '=') {
 					new.kw = lequal;
 					printf("lequal ");
+					free(lexem);
 					return new;
 				} else {
 					new.kw = less;
 					printf("less ");
 					ungetc(letter, stdin);
+					free(lexem);
 					return new;
 				}
 				break;
@@ -125,11 +151,13 @@ Token get_token() {
 				if (letter == '=') {
 					new.kw = mequal;
 					printf("mequal ");
+					free(lexem);
 					return new;
 				} else {
 					new.kw = more;
 					printf("more ");
 					ungetc(letter, stdin);
+					free(lexem);
 					return new;
 				}
 				break;
@@ -138,10 +166,12 @@ Token get_token() {
 				if (letter == '=') {
 					new.kw = nequal;
 					printf("nequal ");
+					free(lexem);
 					return new;
 				} else {
 					new.kw = LEXEM;
 					new.i = LEXEM_ERROR;
+					free(lexem);
 					return new;
 				}
 				break;
@@ -151,10 +181,12 @@ Token get_token() {
 					new.kw = equal;
 					printf("equal ");
 					ungetc(letter, stdin);
+					free(lexem);
 					return new;
 				} else {
 					new.kw = compare_equal;
 					printf("compare equal ");
+					free(lexem);
 					return new;
 				}
 				break;
@@ -170,6 +202,7 @@ Token get_token() {
 					new.kw = division;
 					printf("division ");
 					ungetc(letter, stdin);
+					free(lexem);
 					return new;
 				}
 				break;
@@ -180,11 +213,25 @@ Token get_token() {
 					if (letter != '\\') {
 						new.kw = LEXEM;
 						new.i = LEXEM_ERROR;
+						free(lexem);
 						return new;
 					}
 					letter = getchar();
-					//vezme všechny znaky
+					//takes all symbols
 					while (letter != EOF && letter != '\n') {
+						//check if size sufficient
+						if(strlen(lexem)>=(lex_size-1)) {
+							lex_size*=2;
+							p=realloc(lexem, sizeof(char) * lex_size);
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							} else {
+								lexem=p;
+							}
+						}
 						//komentař
 						if (letter == '/') {
 							if (letter == '/') {
@@ -242,12 +289,14 @@ Token get_token() {
 											//chyba lexemu
 											new.kw = LEXEM;
 											new.i = LEXEM_ERROR;
+											free(lexem);
 											return new;
 										}
 									} else {
 										//chyba lexemu
 										new.kw = LEXEM;
 										new.i = LEXEM_ERROR;
+										free(lexem);
 										return new;
 									}
 									break;
@@ -255,6 +304,7 @@ Token get_token() {
 									//chyba lexemu
 									new.kw = LEXEM;
 									new.i = LEXEM_ERROR;
+									free(lexem);
 									return new;
 							}
 						} else if (letter > 31) {
@@ -269,10 +319,18 @@ Token get_token() {
 						letter = getchar();
 					}
 				} while (letter == '\\');
+				p = malloc(sizeof(char) * (strlen(lexem)+1));
+				if(p==NULL) {
+					free(lexem);
+					new.kw = INTERNAL;
+					new.i = INTERNAL_COMPILER_ERROR;
+					return new;
+				}
 				new.kw = text;
-				strcpy(new.s, lexem);
+				strcpy(new.s, p);
 				printf("text_%s ", LGetStrAct(&new));
 				ungetc(letter, stdin);
+				free(lexem);
 				return new;
 				break;
 			case '"':
@@ -280,15 +338,35 @@ Token get_token() {
 				letter = getchar();
 				if (letter == '"') {
 					//druhý
-					letter = getchar();
 					//prázdný
+					p = malloc(sizeof(char) * (strlen(lexem)+1));
+					if(p==NULL) {
+						free(lexem);
+						new.kw = INTERNAL;
+						new.i = INTERNAL_COMPILER_ERROR;
+						return new;
+					}
 					new.kw = text;
+					strcpy(new.s, p);
 					printf("text_%s ", LGetStrAct(&new));
-					ungetc(letter, stdin);
+					free(lexem);
 					return new;
 				} else {
 					//jednoduchý
 					while (letter != '"' && letter != EOF && letter != '\n') {
+						//check if size sufficient
+						if(strlen(lexem)>=(lex_size-1)) {
+							lex_size*=2;
+							p=realloc(lexem, sizeof(char) * lex_size);
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							} else {
+								lexem=p;
+							}
+						}
 						//escape sekvence?
 						if (letter == '\\') {
 							int y;
@@ -336,12 +414,14 @@ Token get_token() {
 											//chyba lexemu
 											new.kw = LEXEM;
 											new.i = LEXEM_ERROR;
+											free(lexem);
 											return new;
 										}
 									} else {
 										//chyba lexemu
 										new.kw = LEXEM;
 										new.i = LEXEM_ERROR;
+										free(lexem);
 										return new;
 									}
 									break;
@@ -349,6 +429,7 @@ Token get_token() {
 									//chyba lexemu
 									new.kw = LEXEM;
 									new.i = LEXEM_ERROR;
+									free(lexem);
 									return new;
 							}
 						} else if (letter > 31) {
@@ -360,11 +441,20 @@ Token get_token() {
 						//chyba lexemu
 						new.kw = LEXEM;
 						new.i = LEXEM_ERROR;
+						free(lexem);
+						return new;
+					}
+					p = malloc(sizeof(char) * (strlen(lexem)+1));
+					if(p==NULL) {
+						free(lexem);
+						new.kw = INTERNAL;
+						new.i = INTERNAL_COMPILER_ERROR;
 						return new;
 					}
 					new.kw = text;
-					strcpy(new.s, lexem);
+					strcpy(new.s, p);
 					printf("text_%s ", LGetStrAct(&new));
+					free(lexem);
 					return new;
 				}
 				break;
@@ -374,6 +464,7 @@ Token get_token() {
 				if (letter >= '0' && letter <= '9') {
 					new.kw = LEXEM;
 					new.i = LEXEM_ERROR;
+					free(lexem);
 					return new;
 				}
 				strncat(lexem, "00", 1);
@@ -381,51 +472,147 @@ Token get_token() {
 			case '1' ... '9':
 				//čísla
 				while (letter >= '0' && letter <= '9') {
+					//check if size sufficient
+					if(strlen(lexem)>=(lex_size-1)) {
+						lex_size*=2;
+						p=realloc(lexem, sizeof(char) * lex_size);
+						if(p==NULL) {
+							free(lexem);
+							new.kw = INTERNAL;
+							new.i = INTERNAL_COMPILER_ERROR;
+							return new;
+						} else {
+							lexem=p;
+						}
+					}
 					strncat(lexem, &letter, 1);
 					letter = getchar();
 				}
 				//desetiná
+				//check if size sufficient
+				if(strlen(lexem)>=(lex_size-1)) {
+					lex_size*=2;
+					p=realloc(lexem, sizeof(char) * lex_size);
+					if(p==NULL) {
+						free(lexem);
+						new.kw = INTERNAL;
+						new.i = INTERNAL_COMPILER_ERROR;
+						return new;
+					} else {
+						lexem=p;
+					}
+				}
 				if (letter == '.') {
 					strncat(lexem, &letter, 1);
 					letter = getchar();
 					if (!(letter >= '0' && letter <= '9')) {
 						new.kw = LEXEM;
 						new.i = LEXEM_ERROR;
+						free(lexem);
 						return new;
 					}
 					while (letter >= '0' && letter <= '9') {
+						//check if size sufficient
+						if(strlen(lexem)>=(lex_size-1)) {
+							lex_size*=2;
+							p=realloc(lexem, sizeof(char) * lex_size);
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							} else {
+								lexem=p;
+							}
+						}
 						strncat(lexem, &letter, 1);
 						letter = getchar();
 					}
 					//exponent
+					//check if size sufficient
+					if(strlen(lexem)>=(lex_size-1)) {
+						lex_size*=2;
+						p=realloc(lexem, sizeof(char) * lex_size);
+						if(p==NULL) {
+							free(lexem);
+							new.kw = INTERNAL;
+							new.i = INTERNAL_COMPILER_ERROR;
+							return new;
+						} else {
+							lexem=p;
+						}
+					}
 					if (letter == 'e' || letter == 'E') {
 						strncat(lexem, &letter, 1);
 						letter = getchar();
 						if (letter == '+' || letter == '-') {
+							//check if size sufficient
+							if(strlen(lexem)>=(lex_size-1)) {
+								lex_size*=2;
+								p=realloc(lexem, sizeof(char) * lex_size);
+								if(p==NULL) {
+									free(lexem);
+									new.kw = INTERNAL;
+									new.i = INTERNAL_COMPILER_ERROR;
+									return new;
+								} else {
+									lexem=p;
+								}
+							}
 							strncat(lexem, &letter, 1);
 							letter = getchar();
 						}
 						if (!(letter >= '0' && letter <= '9')) {
 							new.kw = LEXEM;
 							new.i = LEXEM_ERROR;
+							free(lexem);
 							return new;
 						}
 						while (letter >= '0' && letter <= '9') {
+							//check if size sufficient
+							if(strlen(lexem)>=(lex_size-1)) {
+								lex_size*=2;
+								p=realloc(lexem, sizeof(char) * lex_size);
+								if(p==NULL) {
+									free(lexem);
+									new.kw = INTERNAL;
+									new.i = INTERNAL_COMPILER_ERROR;
+									return new;
+								} else {
+									lexem=p;
+								}
+							}
 							strncat(lexem, &letter, 1);
 							letter = getchar();
 						}
 						d = atof(lexem);
 						new.kw = decim;
 						new.f = d;
-						strcpy(new.s, lexem);
+						p = malloc(sizeof(char) * (strlen(lexem)+1));
+						if(p==NULL) {
+							free(lexem);
+							new.kw = INTERNAL;
+							new.i = INTERNAL_COMPILER_ERROR;
+							return new;
+						}
+						strcpy(new.s, p);
 						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+						free(lexem);
 						return new;
 					} else {
 						d = atof(lexem);
 						new.kw = decim;
 						new.f = d;
-						strcpy(new.s, lexem);
+						p = malloc(sizeof(char) * (strlen(lexem)+1));
+						if(p==NULL) {
+							free(lexem);
+							new.kw = INTERNAL;
+							new.i = INTERNAL_COMPILER_ERROR;
+							return new;
+						}
+						strcpy(new.s, p);
 						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+						free(lexem);
 						return new;
 					}
 				} else if (letter == 'e' || letter == 'E') {
@@ -433,32 +620,75 @@ Token get_token() {
 					strncat(lexem, &letter, 1);
 					letter = getchar();
 					if (letter == '+' || letter == '-') {
+						//check if size sufficient
+						if(strlen(lexem)>=(lex_size-1)) {
+							lex_size*=2;
+							p=realloc(lexem, sizeof(char) * lex_size);
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							} else {
+								lexem=p;
+							}
+						}
 						strncat(lexem, &letter, 1);
 						letter = getchar();
 					}
 					if (!(letter >= '0' && letter <= '9')) {
 						new.kw = LEXEM;
 						new.i = LEXEM_ERROR;
+						free(lexem);
 						return new;
 					}
 					while (letter >= '0' && letter <= '9') {
+						//check if size sufficient
+						if(strlen(lexem)>=(lex_size-1)) {
+							lex_size*=2;
+							p=realloc(lexem, sizeof(char) * lex_size);
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							} else {
+								lexem=p;
+							}
+						}
 						strncat(lexem, &letter, 1);
 						letter = getchar();
 					}
 					d = atof(lexem);
 					new.kw = decim;
 					new.f = d;
-					strcpy(new.s, lexem);
+					p = malloc(sizeof(char) * (strlen(lexem)+1));
+					if(p==NULL) {
+						free(lexem);
+						new.kw = INTERNAL;
+						new.i = INTERNAL_COMPILER_ERROR;
+						return new;
+					}
+					strcpy(new.s, p);
 					printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+					free(lexem);
 					return new;
 				} else {
 					//celá
 					n = atoi(lexem);
 					new.kw = num;
 					new.i = n;
-					strcpy(new.s, lexem);
+					p = malloc(sizeof(char) * (strlen(lexem)+1));
+					if(p==NULL) {
+						free(lexem);
+						new.kw = INTERNAL;
+						new.i = INTERNAL_COMPILER_ERROR;
+						return new;
+					}
+					strcpy(new.s, p);
 					printf("num_%s_%d ", LGetStrAct(&new), LGetNumAct(new));
 					ungetc(letter, stdin);
+					free(lexem);
 					return new;
 				}
 				break;
@@ -473,6 +703,7 @@ Token get_token() {
 						new.kw = underscore;
 						printf("underscore ");
 						ungetc(letter, stdin);
+						free(lexem);
 						return new;
 						break;
 					} else {
@@ -481,6 +712,19 @@ Token get_token() {
 				}
 				//identifikátory
 				while ((letter >= '0' && letter <= '9') || (letter >= 'a' && letter <= 'z') || (letter >= 'A' && letter <= 'Z') || letter == '_') {
+					//check if size sufficient
+					if(strlen(lexem)>=(lex_size-1)) {
+						lex_size*=2;
+						p=realloc(lexem, sizeof(char) * lex_size);
+						if(p==NULL) {
+							free(lexem);
+							new.kw = INTERNAL;
+							new.i = INTERNAL_COMPILER_ERROR;
+							return new;
+						} else {
+							lexem=p;
+						}
+					}
 					strncat(lexem, &letter, 1);
 					letter = getchar();
 				}
@@ -491,13 +735,22 @@ Token get_token() {
 							new.kw = inord;
 							printf("inord ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -507,23 +760,34 @@ Token get_token() {
 							new.kw = inchr;
 							printf("inchr ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "const")) {
 							new.kw = constant;
 							printf("konst ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "concat")) {
 							new.kw = inccat;
 							printf("inccat ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -533,18 +797,28 @@ Token get_token() {
 							new.kw = variable;
 							printf("variable ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "void")) {
 							new.kw = dtvoid;
 							printf("dtvoid ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -554,13 +828,22 @@ Token get_token() {
 							new.kw = inlen;
 							printf("inlen ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -572,13 +855,22 @@ Token get_token() {
 									new.kw = inres;
 									printf("inres ");
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								} else {
 									//id
 									new.kw = id;
-									strcpy(new.s, lexem);
+									p = malloc(sizeof(char) * (strlen(lexem)+1));
+									if(p==NULL) {
+										free(lexem);
+										new.kw = INTERNAL;
+										new.i = INTERNAL_COMPILER_ERROR;
+										return new;
+									}
+									strcpy(new.s, p);
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								}
 								break;
@@ -587,13 +879,22 @@ Token get_token() {
 									new.kw = inrei;
 									printf("inrei ");
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								} else {
 									//id
 									new.kw = id;
-									strcpy(new.s, lexem);
+									p = malloc(sizeof(char) * (strlen(lexem)+1));
+									if(p==NULL) {
+										free(lexem);
+										new.kw = INTERNAL;
+										new.i = INTERNAL_COMPILER_ERROR;
+										return new;
+									}
+									strcpy(new.s, p);
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								}
 								break;
@@ -602,13 +903,22 @@ Token get_token() {
 									new.kw = inref;
 									printf("inref ");
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								} else {
 									//id
 									new.kw = id;
-									strcpy(new.s, lexem);
+									p = malloc(sizeof(char) * (strlen(lexem)+1));
+									if(p==NULL) {
+										free(lexem);
+										new.kw = INTERNAL;
+										new.i = INTERNAL_COMPILER_ERROR;
+										return new;
+									}
+									strcpy(new.s, p);
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								}
 								break;
@@ -617,22 +927,39 @@ Token get_token() {
 									new.kw = _return;
 									printf("_return ");
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								} else {
 									//id
 									new.kw = id;
-									strcpy(new.s, lexem);
+									p = malloc(sizeof(char) * (strlen(lexem)+1));
+									if(p==NULL) {
+										free(lexem);
+										new.kw = INTERNAL;
+										new.i = INTERNAL_COMPILER_ERROR;
+										return new;
+									}
+									strcpy(new.s, p);
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
+									free(lexem);
 									return new;
 								}
 								break;
 							default:
 								//id
 								new.kw = id;
-								strcpy(new.s, lexem);
-								printf("id_%s ", LGetStrAct(&new));
-								ungetc(letter, stdin);
+									p = malloc(sizeof(char) * (strlen(lexem)+1));
+									if(p==NULL) {
+										free(lexem);
+										new.kw = INTERNAL;
+										new.i = INTERNAL_COMPILER_ERROR;
+										return new;
+									}
+									strcpy(new.s, p);
+									printf("id_%s ", LGetStrAct(&new));
+									ungetc(letter, stdin);
+									free(lexem);
 								return new;
 								break;
 						}
@@ -643,13 +970,22 @@ Token get_token() {
 							new.kw = _pub;
 							printf("_pub ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -659,14 +995,22 @@ Token get_token() {
 							new.kw = dtstr;
 							printf("dtstr ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
-							//LInsertLast(L, id, NULL, NULL, p);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -676,13 +1020,22 @@ Token get_token() {
 							new.kw = _main;
 							printf("_main ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -692,23 +1045,34 @@ Token get_token() {
 							new.kw = _fn;
 							printf("_fn ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "f64")) {
 							new.kw = dtflt;
 							printf("dtflt ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "f2i")) {
 							new.kw = inf2i;
 							printf("inf2i ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -718,18 +1082,28 @@ Token get_token() {
 							new.kw = inwrt;
 							printf("inwrt ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "while")) {
 							new.kw = _while;
 							printf("_while ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -739,13 +1113,22 @@ Token get_token() {
 							new.kw = _else;
 							printf("_else ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -755,33 +1138,46 @@ Token get_token() {
 							new.kw = _if;
 							printf("_if ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "i32")) {
 							new.kw = dtint;
 							printf("dtint ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "ifj")) {
 							new.kw = inbuild;
 							printf("inbuild ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "import")) {
 							new.kw = _import;
 							printf("_import ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "i2f")) {
 							new.kw = ini2f;
 							printf("ini2f ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -791,23 +1187,34 @@ Token get_token() {
 							new.kw = inssub;
 							printf("inssub ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "string")) {
 							new.kw = inu2s;
 							printf("inu2s ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "strcmp")) {
 							new.kw = inscmp;
 							printf("inscmp ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
@@ -817,22 +1224,39 @@ Token get_token() {
 							new.kw = _null;
 							printf("_null ");
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						} else {
 							//id
 							new.kw = id;
-							strcpy(new.s, lexem);
+							p = malloc(sizeof(char) * (strlen(lexem)+1));
+							if(p==NULL) {
+								free(lexem);
+								new.kw = INTERNAL;
+								new.i = INTERNAL_COMPILER_ERROR;
+								return new;
+							}
+							strcpy(new.s, p);
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
+							free(lexem);
 							return new;
 						}
 						break;
 					default:
 						//id
 						new.kw = id;
-						strcpy(new.s, lexem);
+						p = malloc(sizeof(char) * (strlen(lexem)+1));
+						if(p==NULL) {
+							free(lexem);
+							new.kw = INTERNAL;
+							new.i = INTERNAL_COMPILER_ERROR;
+							return new;
+						}
+						strcpy(new.s, p);
 						printf("id_%s ", LGetStrAct(&new));
 						ungetc(letter, stdin);
+						free(lexem);
 						return new;
 				}
 				break;
@@ -840,40 +1264,47 @@ Token get_token() {
 				//chyba lexemu
 				new.kw = LEXEM;
 				new.i = LEXEM_ERROR;
+				free(lexem);
 				return new;
 		}
 	}
 	new.kw = end;
+	free(lexem);
 	return new;
 }
 
-
 /*
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-typedef struct SToken{
-	//KeyWord kw;
-	int i;
-	double f;
-	char s[256];
-	//struct SToken *next;
-} Token;
+int main() {
+	char *p, l;
+	int lex_size= 2;
 
-char *LGetStrAct(Token *T) {
-	return T->s;
+	char *lexem = malloc(sizeof(char) * lex_size);
+	if(lexem==NULL) {
+		return 99;
+	}
+
+	l=getchar();
+	while(l!=EOF) {
+		if(strlen(lexem)>=(lex_size-1)) {
+			lex_size*=2;
+			p=realloc(lexem, sizeof(char) * lex_size);
+			if(p==NULL) {
+				free(lexem);
+				return 99;
+			} else {
+				lexem=p;
+				puts(lexem);
+			}
+		}
+		strncat(lexem, &l, 1);
+		l=getchar();
+	}
+	puts(lexem);
+	free(lexem);
+	return 0;
 }
-
-int main(){
-    char a[256]="ggggggggggg";
-    Token new = {10, 33.3, ""};
-    strcpy(new.s, a);
-    
-    
-    printf("Hello World %s\n", LGetStrAct(&new));
-    char q= getchar();
-    ungetc(q, stdin);
-    printf("%c", getchar());
-
-    return 0;
-}*/
+*/
