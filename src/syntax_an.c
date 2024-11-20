@@ -13,7 +13,7 @@ Token token;
 
 int read_token() {
 	token = get_token();
-	if (token.kw == LEXEM_ERROR) {
+	if (token.kw == LEXEM) {
 		fprintf(stderr, "Error: Lexical error\n");
 	}
 	return 0;
@@ -491,7 +491,7 @@ int return_syntax() {
 	// TODO: SEMANTHIC CHECKS, BOTTOM UP EXPRESSION ANALYSIS AND CODE GENERATION
 
 	//skip placeholder
-	while (token.kw != next && token.kw != end && token.kw != LEXEM_ERROR) {
+	while (token.kw != next && token.kw != end && token.kw != LEXEM) {
 		read_token();
 	}
 	return 0;
