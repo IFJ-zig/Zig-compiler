@@ -1,0 +1,97 @@
+.IFJcode24
+
+JUMP main
+
+LABEL readInt 
+    CREATEFRAME
+    PUSHFRAME
+    DEFVAR LF@retVal
+    DEFVAR LF@readValue
+    DEFVAR LF@readValueType
+    READ LF@readValue int
+    TYPE LF@readValueType LF@readValue
+    JUMPIFNEQ correct_input_int LF@readValueType nil@nil
+    MOVE LF@retVal nil@nil
+    POPFRAME
+    RETURN
+    LABEL correct_input_int
+    MOVE LF@retVal LF@readValue
+    POPFRAME
+RETURN
+
+LABEL readFloat
+    CREATEFRAME
+    PUSHFRAME
+    DEFVAR LF@retVal
+    DEFVAR LF@readValue
+    DEFVAR LF@readValueType
+    READ LF@readValue float
+    TYPE LF@readValueType LF@readValue
+    JUMPIFNEQ correct_input_float LF@readValueType nil@nil
+    MOVE LF@retVal nil@nil
+    POPFRAME
+    RETURN
+    LABEL correct_input_float
+    MOVE LF@retVal LF@readValue
+    POPFRAME
+RETURN
+
+LABEL readString
+    CREATEFRAME
+    PUSHFRAME
+    DEFVAR LF@retVal
+    DEFVAR LF@readValue
+    DEFVAR LF@readValueType
+    READ LF@readValue string
+    TYPE LF@readValueType LF@readValue
+    JUMPIFNEQ correct_input_string LF@readValueType nil@nil
+    MOVE LF@retVal nil@nil
+    POPFRAME
+    RETURN
+    LABEL correct_input_string
+    MOVE LF@retVal LF@readValue
+    POPFRAME
+RETURN
+
+LABEL int2float
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal
+    DEFVAR LF@param
+    POPS LF@param
+    INT2FLOAT LF@retVal LF@param
+    
+    POPFRAME
+RETURN
+    
+    
+LABEL float2int
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal
+    DEFVAR LF@param
+    POPS LF@param
+    FLOAT2INT LF@retVal LF@param
+    
+    POPFRAME
+RETURN
+
+
+LABEL main
+    CREATEFRAME
+    CALL readString
+    DEFVAR TF@toPrint
+    MOVE TF@toPrint TF@retVal
+    DEFVAR TF@string
+    MOVE TF@string string@ja\032kadim
+    DEFVAR TF@strLen
+    STRLEN TF@strLen TF@toPrint
+    BREAK
+    #PUSHS TF@toPrint
+    #CALL int2float
+    
+    #DEFVAR TF@toPrint
+    #MOVE TF@toPrint TF@retVal
+    WRITE TF@toPrint
