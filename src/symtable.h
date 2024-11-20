@@ -35,6 +35,8 @@ typedef struct symbol
 	varType type;
 	varType returnType;
 	bool isDefined;
+	bool isNullable;
+	bool isConst;
 } symbol_t; // typedef podle zadání
 
 // Prvek tabulky:

@@ -149,12 +149,12 @@ Token get_token() {
 				letter = getchar();
 				if (letter != '=') {
 					new.kw = equal;
-					printf("compare_equal ");
+					printf("equal ");
 					ungetc(letter, stdin);
 					return new;
 				} else {
 					new.kw = compare_equal;
-					printf("equal ");
+					printf("compare equal ");
 					return new;
 				}
 				break;
@@ -377,6 +377,7 @@ Token get_token() {
 					return new;
 				}
 				strncat(lexem, "00", 1);
+				break;
 			case '1' ... '9':
 				//čísla
 				while (letter >= '0' && letter <= '9') {
@@ -457,6 +458,7 @@ Token get_token() {
 					new.i = n;
 					strcpy(new.s, lexem);
 					printf("num_%s_%d ", LGetStrAct(&new), LGetNumAct(new));
+					ungetc(letter, stdin);
 					return new;
 				}
 				break;
