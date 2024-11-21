@@ -109,7 +109,7 @@ bool isValidParamType(KeyWord kw){
 }
 
 void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable){
-    fprintf(stderr, "Function %s has parameter %s of type %d isNullable=%s\n", function->key, paramName.s, paramType.kw, isNullable ? "true" : "false");
+    fprintf(stderr, "Function %s has a parameter %s of type %d isNullable=%s\n", function->key, paramName.s, paramType.kw, isNullable ? "true" : "false");
     function->paramCount++;
     function->params = realloc(function->params, function->paramCount * sizeof(symbol_t *));
     symbol_t *param = malloc(sizeof(symbol_t));

@@ -83,7 +83,6 @@ int seekHeaders() {
 				data_type();
 				
 				assignFunctionParameter(fnSymbol, paramID, *token, false);	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
-				//fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token->kw == dtint ? "INT" : token->kw == dtflt ? "FLOAT" : "STRING", getSymbol(paramID.s)->depth);
 				get_token();
 				if (token->kw != comma && token->kw != rbracket) {
 					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
@@ -93,8 +92,8 @@ int seekHeaders() {
 			else
 				get_token();
 		}
-		fprintf(stderr, "Param list OK\n");
 		fprintf(stderr, "Function %s has %d parameters\n", fnSymbol->key, fnSymbol->paramCount);
+		fprintf(stderr, "Param list OK\n\n");
 
 		if (token->kw != rbracket) {
 			fprintf(stderr, "Error: Expected ')' after param list in function header\n");
