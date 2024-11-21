@@ -70,10 +70,30 @@ int seekHeaders() {
 			fprintf(stderr, "Error: Expected '(' after function id in header\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		// TODO: PLACEHOLDER FOR PARAM LIST CHECK - no need to do that here me thinks
-		while (token->kw != rbracket) {
-			get_token();
+		get_token();
+		while (token->kw != rbracket) {	//Process the parameters
+			if (token->kw == id) {
+				fprintf(stderr, "Param ID: %s\n", token->s);
+				Token paramID = *token;
+				get_token();
+				if (token->kw != colon) {
+					fprintf(stderr, "Error: Expected ':' after parameter id\n");
+					return SYNTACTIC_ANALYSIS_ERROR;
+				}
+				data_type();
+				
+				assignFunctionParameter(fnSymbol, paramID, *token, false);	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+				get_token();
+				if (token->kw != comma && token->kw != rbracket) {
+					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
+					return SYNTACTIC_ANALYSIS_ERROR;
+				}
+			}
+			else
+				get_token();
 		}
+		fprintf(stderr, "Function %s has %d parameters\n", fnSymbol->key, fnSymbol->paramCount);
+		fprintf(stderr, "Param list OK\n\n");
 
 		if (token->kw != rbracket) {
 			fprintf(stderr, "Error: Expected ')' after param list in function header\n");
@@ -263,7 +283,7 @@ int param_list() {
 	}
 
 	while (token->kw != rbracket) {
-		printf("PARAM LIST\n");
+		fprintf(stderr, "PARAM LIST\n");
 		get_token();
 		if (token->kw == rbracket) {
 			break;

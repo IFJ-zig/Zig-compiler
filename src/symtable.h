@@ -27,6 +27,8 @@ typedef struct symbol {
     int depth;
     varType type;
     varType returnType;
+    int paramCount;
+    struct symbol **params;
     bool isDefined;
     bool isNullable;
     bool isConst;
