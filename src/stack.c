@@ -45,11 +45,6 @@ t_StackItem *stackTop(t_Stack *stack) {
 	return stack->top;
 }
 
-void stackDestroy(t_Stack *stack) {
-	stackClear(stack);
-	//free(stack);
-}
-
 void stackClear(t_Stack *stack) {
 	while (stack->top != NULL) {
 		stackPop(stack);

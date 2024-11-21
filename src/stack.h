@@ -50,8 +50,6 @@ void stackClear(t_Stack *stack);
 // Function to push a precedent less item onto the stack after closest terminal
 int stackPushPrecedentLess(t_Stack *stack);
 
-//destroy stack
-void stackDestroy(t_Stack *stack);
 
 //top terminal
 t_StackItem *topTerminal(t_Stack *stack);

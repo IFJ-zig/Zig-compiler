@@ -332,12 +332,12 @@ int code(bool tokenWasGiven) {
 	int statusCode;
 	switch (token->kw) {
 		case constant:
-			statusCode = variable_definition(true); //semantic done
+			statusCode = variable_definition(true); //semantic done, exp done
 			if (statusCode != 0)
 				return statusCode;
 			break;
 		case variable:
-			statusCode = variable_definition(false); //semantic done
+			statusCode = variable_definition(false); //semantic done, exp done
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -555,11 +555,37 @@ int variable_definition(bool isConst) {
 int call_or_assignment() {
 	// TODO: SEMANTHIC ANALYSIS
 	// I need semanthic analysis to define if id is a function or variable
+
+	symbol_t *sym = getSymbol(token->s);
+	if (sym == NULL) {
+		fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+	}
+	if (sym->type == FUNCTION) {
+		return function_call();
+	} else {
+		get_token();
+		if (token->kw != equal) {
+			fprintf(stderr, "Error: Expected '=' after variable id\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		int statusCode = expressionParser(tokenList);
+		if (statusCode != 0)
+			return statusCode;
+	}
+
+	return 0;
+};
+
+int function_call() {
 	while (token->kw != next) {
+		if (token->kw == end) {
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
 		get_token();
 	}
 	return 0;
-};
+}
 
 int while_syntax() {
 	enterScope();

@@ -115,12 +115,12 @@ int expressionParser(List *tokenList) {
 				statusCode = stackPushPrecedentLess(&stack);
 
 				if (statusCode != 0) {
-					stackDestroy(&stack);
+					stackClear(&stack);
 					return statusCode;
 				}
 				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
 				if (statusCode != 0) {
-					stackDestroy(&stack);
+					stackClear(&stack);
 					return statusCode;
 				}
 				getTokenPrec();
@@ -128,7 +128,7 @@ int expressionParser(List *tokenList) {
 			case '=':
 				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
 				if (statusCode != 0) {
-					stackDestroy(&stack);
+					stackClear(&stack);
 					return statusCode;
 				}
 				getTokenPrec();
@@ -138,20 +138,20 @@ int expressionParser(List *tokenList) {
 				/* code */
 				statusCode = tryToMatchRule(&stack);
 				if (statusCode != 0) {
-					stackDestroy(&stack);
+					stackClear(&stack);
 					return statusCode;
 				}
 				break;
 			case 1:
-				stackDestroy(&stack);
+				stackClear(&stack);
 				return 0;
 				break;
 			case 0:
-				stackDestroy(&stack);
+				stackClear(&stack);
 				return SYNTACTIC_ANALYSIS_ERROR;
 				break;
 			default:
-				stackDestroy(&stack);
+				stackClear(&stack);
 				return SYNTACTIC_ANALYSIS_ERROR;
 		}
 	}
@@ -185,8 +185,8 @@ int tryToMatchRule(t_Stack *stack) {
 	}
 	//Match rules 3-7
 	if (temp->type == TERMINAL) {
-		stackPop(stack);
 		if (temp->keyword == id || temp->keyword == num || temp->keyword == decim || temp->keyword == text) {
+			stackPop(stack);
 			temp = stackTop(stack);
 			if (temp == NULL) {
 				return SYNTACTIC_ANALYSIS_ERROR;
@@ -197,22 +197,29 @@ int tryToMatchRule(t_Stack *stack) {
 				stackPush(stack, NON_TERMINAL, EMPTY);
 				return 0;
 			}
-		}
-		if (temp->keyword == rbracket) {
+		} else if (temp->keyword == rbracket) {
+			stackPop(stack);
 			temp = stackTop(stack);
 			if (temp == NULL) {
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
-			stackPop(stack);
 			if (temp->type == NON_TERMINAL) {
+				stackPop(stack);
 				temp = stackTop(stack);
 				if (temp == NULL) {
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				stackPop(stack);
 				if (temp->keyword == lbracket) {
-					stackPush(stack, NON_TERMINAL, EMPTY);
-					return 0;
+					stackPop(stack);
+					temp = stackTop(stack);
+					if (temp == NULL) {
+						return SYNTACTIC_ANALYSIS_ERROR;
+					}
+					if (temp->type == PRECEDENT_LESS) {
+						stackPop(stack);
+						stackPush(stack, NON_TERMINAL, EMPTY);
+						return 0;
+					}
 				}
 			}
 		}

@@ -2,5 +2,6 @@
 const ifj = @import("ifj24.zig");
 // Hlavni funkce
 pub fn main() void {
-    const x = 2+2;
+    var x = (2+2)*2;
+    x = x / 8;
 }
