@@ -37,7 +37,7 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
 
 #Documentation
 zip:
-    zip -j xbohatd00 Makefile rozdeleni dokumentace.pdf src/*
+	zip -j xbohatd00 Makefile rozdeleni dokumentace.pdf src/*
 
 # Cleanup
 clean:
