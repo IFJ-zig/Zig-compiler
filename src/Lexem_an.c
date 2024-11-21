@@ -736,49 +736,11 @@ Token get_token() {
 					letter = getchar();
 				}
 				switch (lexem[0]) {
-					case 'o':
-						//ord
-						if (!strcmp(lexem, "ord")) {
-							new.kw = inord;
-							printf("inord ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else {
-							//id
-							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
-								free(lexem);
-								new.kw = INTERNAL;
-								new.i = INTERNAL_COMPILER_ERROR;
-								return new;
-							}
-							strcpy(p, lexem);
-							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						}
-						break;
 					case 'c':
 						//const concat chr
-						if (!strcmp(lexem, "chr")) {
-							new.kw = inchr;
-							printf("inchr ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else if (!strcmp(lexem, "const")) {
+						if (!strcmp(lexem, "const")) {
 							new.kw = constant;
 							printf("konst ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else if (!strcmp(lexem, "concat")) {
-							new.kw = inccat;
-							printf("inccat ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -832,11 +794,11 @@ Token get_token() {
 							return new;
 						}
 						break;
-					case 'l':
-						//length
-						if (!strcmp(lexem, "length")) {
-							new.kw = inlen;
-							printf("inlen ");
+					case 'r':
+						//return readstr readi32 readf64
+						if (!strcmp(lexem, "return")) {
+							new.kw = _return;
+							printf("_return ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -856,128 +818,6 @@ Token get_token() {
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
-						}
-						break;
-					case 'r':
-						//return readstr readi32 readf64
-						switch (lexem[4]) {
-							case 's':
-								if (!strcmp(lexem, "readstr")) {
-									new.kw = inres;
-									printf("inres ");
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								} else {
-									//id
-									new.kw = id;
-									p = malloc(sizeof(char) * (strlen(lexem)+1));
-									if(p==NULL) {
-										free(lexem);
-										new.kw = INTERNAL;
-										new.i = INTERNAL_COMPILER_ERROR;
-										return new;
-									}
-									strcpy(p, lexem);
-									new.s = p;
-									printf("id_%s ", LGetStrAct(&new));
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								}
-								break;
-							case 'i':
-								if (!strcmp(lexem, "readi32")) {
-									new.kw = inrei;
-									printf("inrei ");
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								} else {
-									//id
-									new.kw = id;
-									p = malloc(sizeof(char) * (strlen(lexem)+1));
-									if(p==NULL) {
-										free(lexem);
-										new.kw = INTERNAL;
-										new.i = INTERNAL_COMPILER_ERROR;
-										return new;
-									}
-									strcpy(p, lexem);
-									new.s = p;
-									printf("id_%s ", LGetStrAct(&new));
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								}
-								break;
-							case 'f':
-								if (!strcmp(lexem, "readf64")) {
-									new.kw = inref;
-									printf("inref ");
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								} else {
-									//id
-									new.kw = id;
-									p = malloc(sizeof(char) * (strlen(lexem)+1));
-									if(p==NULL) {
-										free(lexem);
-										new.kw = INTERNAL;
-										new.i = INTERNAL_COMPILER_ERROR;
-										return new;
-									}
-									strcpy(p, lexem);
-									new.s = p;
-									printf("id_%s ", LGetStrAct(&new));
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								}
-								break;
-							case 'r':
-								if (!strcmp(lexem, "return")) {
-									new.kw = _return;
-									printf("_return ");
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								} else {
-									//id
-									new.kw = id;
-									p = malloc(sizeof(char) * (strlen(lexem)+1));
-									if(p==NULL) {
-										free(lexem);
-										new.kw = INTERNAL;
-										new.i = INTERNAL_COMPILER_ERROR;
-										return new;
-									}
-									strcpy(p, lexem);
-									new.s = p;
-									printf("id_%s ", LGetStrAct(&new));
-									ungetc(letter, stdin);
-									free(lexem);
-									return new;
-								}
-								break;
-							default:
-								//id
-								new.kw = id;
-									p = malloc(sizeof(char) * (strlen(lexem)+1));
-									if(p==NULL) {
-										free(lexem);
-										new.kw = INTERNAL;
-										new.i = INTERNAL_COMPILER_ERROR;
-										return new;
-									}
-									strcpy(p, lexem);
-									new.s = p;
-									printf("id_%s ", LGetStrAct(&new));
-									ungetc(letter, stdin);
-									free(lexem);
-								return new;
-								break;
 						}
 						break;
 					case 'p':
@@ -1072,12 +912,6 @@ Token get_token() {
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
-						} else if (!strcmp(lexem, "f2i")) {
-							new.kw = inf2i;
-							printf("inf2i ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
 						} else {
 							//id
 							new.kw = id;
@@ -1098,13 +932,7 @@ Token get_token() {
 						break;
 					case 'w':
 						//while write
-						if (!strcmp(lexem, "write")) {
-							new.kw = inwrt;
-							printf("inwrt ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else if (!strcmp(lexem, "while")) {
+						if (!strcmp(lexem, "while")) {
 							new.kw = _while;
 							printf("_while ");
 							ungetc(letter, stdin);
@@ -1177,50 +1005,6 @@ Token get_token() {
 						} else if (!strcmp(lexem, "import")) {
 							new.kw = _import;
 							printf("_import ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else if (!strcmp(lexem, "i2f")) {
-							new.kw = ini2f;
-							printf("ini2f ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else {
-							//id
-							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
-								free(lexem);
-								new.kw = INTERNAL;
-								new.i = INTERNAL_COMPILER_ERROR;
-								return new;
-							}
-							strcpy(p, lexem);
-							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						}
-						break;
-					case 's':
-						//string substring strcmp
-						if (!strcmp(lexem, "substring")) {
-							new.kw = inssub;
-							printf("inssub ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else if (!strcmp(lexem, "string")) {
-							new.kw = inu2s;
-							printf("inu2s ");
-							ungetc(letter, stdin);
-							free(lexem);
-							return new;
-						} else if (!strcmp(lexem, "strcmp")) {
-							new.kw = inscmp;
-							printf("inscmp ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
