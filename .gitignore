@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c,windows,macos,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=c,windows,macos,visualstudiocode
 
+
+# Generated files
+xbohatd00.zip
+
 ### C ###
 # Prerequisites
 *.d
