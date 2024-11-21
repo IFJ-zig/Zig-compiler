@@ -35,6 +35,10 @@ prekladac: $(OBJECTS)
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
+#Documentation
+zip:
+    zip -j xbohatd00 Makefile rozdeleni dokumentace.pdf src/*
+
 # Cleanup
 clean:
 	rm -rf $(BUILD_DIR) ifj24.out
