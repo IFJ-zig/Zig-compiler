@@ -19,7 +19,9 @@ void semanticDestroy(){
     while(list->tablesCount > 0){
         htab_removeLast(list);
     }
+    free(list);
 }
+
 
 void enterScope(){
     htab_t *t = htab_init(getCurrentDepth(list));
@@ -41,6 +43,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable){
     symbol->isConst = isConst;
     symbol->isNullable = isNullable;
     symbol->depth = getCurrentDepth(list);
+    fprintf(stderr, "Symbol '%s' defined at depth %d, isConst=%s, isNullable=%s, type=%s\n", name, getCurrentDepth(list), isConst ? "true" : "false", isNullable ? "true" : "false", type == INT ? "INT" : type == FLOAT ? "FLOAT" : type == STRING ? "STRING" : type == FUNCTION ? "FUNCTION" : "VOID");
     return 0;
 }
 

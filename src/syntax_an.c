@@ -117,7 +117,6 @@ int program() {
 				return statusCode;
 		} else if (token->kw == end) {
 			fprintf(stderr, "\nCompilation successfully finished \n");
-			semanticDestroy();
 			return 0;
 		} else {
 			fprintf(stderr, "Error: Expected function definition or end of program, but found %d\n", token->kw);
@@ -330,8 +329,12 @@ int code(bool tokenWasGiven) {
 	int statusCode;
 	switch (token->kw) {
 		case constant:
+			statusCode = variable_definition(true);		//semantic done
+			if (statusCode != 0)
+				return statusCode;
+			break;
 		case variable:
-			statusCode = variable_definition();	//semantic done
+			statusCode = variable_definition(false);	//semantic done
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -378,14 +381,14 @@ int if_else() {
 	}
 	// TODO: PLACEHOLDER FOR BOTTOM UP SYNTAX ANALYSIS
 	//skip_expression();
-	varType optionalType = skip_expression_get_type();
+	symbol_t *mainSymbol = skip_expression_get_symbol();
 	get_token();
 	if (token->kw == vertical_bar) {
 		get_token();
-		if(optionalType == VOID){
+		if(mainSymbol->type == VOID){
 			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
 		}
-		defineSymbol(token->s, optionalType, false, false);	//In this case hardcoded not nullable is ok, since the unwrapped value will never be an optional, however, if first value is const, this new one will be also const TODO: fix sometime
+		defineSymbol(token->s, mainSymbol->type, mainSymbol->isConst, false);
 		get_token();
 		if (token->kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
@@ -442,9 +445,9 @@ int skip_expression() {
 //This function is a hack just to get if_else working without a working precedent_an
 //Skips the expression and returns the type of the first ID it finds, VOID if no ID is found, or if the id does not exist in the symtable
 //I am not particularly proud of this function, but it works for now
-varType skip_expression_get_type(){
+symbol_t* skip_expression_get_symbol(){
 	int statusCode;
-	varType type = VOID;
+	symbol_t *foundSymbol = NULL;
 	while (token->kw != rbracket) {
 		get_token();
 		if (token->kw == lbracket) {
@@ -458,10 +461,10 @@ varType skip_expression_get_type(){
 				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 			}
 			else
-				type = symbol->type;
+				foundSymbol = symbol;
 		}
 	}
-	return type;
+	return foundSymbol;
 }
 
 int return_syntax() {
@@ -513,7 +516,8 @@ int inbuild_function() {
 	return 0;
 }
 
-int variable_definition() {
+int variable_definition(bool isConst) {
+	bool isNullable = false;	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 	int statusCode;
 	get_token();
 	if (token->kw != id) {
@@ -522,11 +526,11 @@ int variable_definition() {
 	}
 	Token varID = *token;
 	get_token();
-	if (token->kw == colon) {
+	if (token->kw == colon) {	//Nice definition with variable type
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
-		defineSymbol(varID.s, kwToVarType(token->kw), false, false); //TODO: again isNullable is hardcoded to false, same goes for isConst
+		defineSymbol(varID.s, kwToVarType(token->kw), isConst, isNullable);
 		get_token();
 	}
 
@@ -534,10 +538,21 @@ int variable_definition() {
 		fprintf(stderr, "Error: Expected '=' after variable type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	if(token->kw == equal){
+	if(token->kw == equal){	//Not nice definition without variable type
 		get_token();
 		if(token->kw == inbuild)
-			defineSymbol(varID.s, FUNCTION, false, false);
+			defineSymbol(varID.s, FUNCTION, isConst, isNullable);
+		if(token->kw == id){
+			symbol_t *symbol = getSymbol(token->s);
+			if(symbol == NULL){
+				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
+				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+			}
+			if(symbol->type == FUNCTION)
+				defineSymbol(varID.s, symbol->returnType, isConst, isNullable);
+			else
+				defineSymbol(varID.s, symbol->type, isConst, isNullable);
+		}
 	}
 	symbol_t *symbol = getSymbol(varID.s);
 	if(symbol == NULL){
@@ -569,14 +584,14 @@ int while_syntax() {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	//Hack until precedent_an is working
-	varType optionalType = skip_expression_get_type();
+	symbol_t *mainSymbol = skip_expression_get_symbol();
 	get_token();
 	if (token->kw == vertical_bar) {
 		get_token();
-		if(optionalType == VOID){
+		if(mainSymbol->type == VOID){
 			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
 		}
-		defineSymbol(token->s, optionalType, false, false);	//In this case hardcoded not nullable is ok, since the unwrapped value will never be an optional, however, if first value is const, this new one will be also const TODO: fix sometime
+		defineSymbol(token->s, mainSymbol->type, mainSymbol->isConst, false);
 		get_token();
 		if (token->kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
