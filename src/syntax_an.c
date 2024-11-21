@@ -72,7 +72,7 @@ int seekHeaders() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		get_token();
-		while (token->kw != rbracket) {	//Process the parameters
+		while (token->kw != rbracket) { //Process the parameters
 			if (token->kw == id) {
 				fprintf(stderr, "Param ID: %s\n", token->s);
 				Token paramID = *token;
@@ -82,15 +82,14 @@ int seekHeaders() {
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
 				data_type();
-				
-				assignFunctionParameter(fnSymbol, paramID, *token, false);	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+
+				assignFunctionParameter(fnSymbol, paramID, *token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 				get_token();
 				if (token->kw != comma && token->kw != rbracket) {
 					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-			}
-			else
+			} else
 				get_token();
 		}
 		fprintf(stderr, "Function %s has %d parameters\n", fnSymbol->key, fnSymbol->paramCount);
