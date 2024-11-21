@@ -79,8 +79,9 @@ typedef enum
 	rbracket,
 	lblock,
 	rblock,
-	end
+	end,
 	//(,    ),      {,     },     konec
+	EMPTY = -1,
 } KeyWord;
 
 typedef struct SToken
