@@ -327,7 +327,8 @@ Token get_token() {
 					return new;
 				}
 				new.kw = text;
-				strcpy(new.s, p);
+				strcpy(p, lexem);
+				new.s = p;
 				printf("text_%s ", LGetStrAct(&new));
 				ungetc(letter, stdin);
 				free(lexem);
@@ -347,7 +348,8 @@ Token get_token() {
 						return new;
 					}
 					new.kw = text;
-					strcpy(new.s, p);
+					strcpy(p, lexem);
+					new.s = p;
 					printf("text_%s ", LGetStrAct(&new));
 					free(lexem);
 					return new;
@@ -452,7 +454,8 @@ Token get_token() {
 						return new;
 					}
 					new.kw = text;
-					strcpy(new.s, p);
+					strcpy(p, lexem);
+					new.s = p;
 					printf("text_%s ", LGetStrAct(&new));
 					free(lexem);
 					return new;
@@ -595,7 +598,8 @@ Token get_token() {
 							new.i = INTERNAL_COMPILER_ERROR;
 							return new;
 						}
-						strcpy(new.s, p);
+						strcpy(p, lexem);
+						new.s = p;
 						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
 						free(lexem);
 						return new;
@@ -610,7 +614,8 @@ Token get_token() {
 							new.i = INTERNAL_COMPILER_ERROR;
 							return new;
 						}
-						strcpy(new.s, p);
+						strcpy(p, lexem);
+						new.s = p;
 						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
 						free(lexem);
 						return new;
@@ -669,7 +674,8 @@ Token get_token() {
 						new.i = INTERNAL_COMPILER_ERROR;
 						return new;
 					}
-					strcpy(new.s, p);
+					strcpy(p, lexem);
+					new.s = p;
 					printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
 					free(lexem);
 					return new;
@@ -685,7 +691,8 @@ Token get_token() {
 						new.i = INTERNAL_COMPILER_ERROR;
 						return new;
 					}
-					strcpy(new.s, p);
+					strcpy(p, lexem);
+					new.s = p;
 					printf("num_%s_%d ", LGetStrAct(&new), LGetNumAct(new));
 					ungetc(letter, stdin);
 					free(lexem);
@@ -747,7 +754,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -784,7 +792,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -815,7 +824,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -840,7 +850,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -867,7 +878,8 @@ Token get_token() {
 										new.i = INTERNAL_COMPILER_ERROR;
 										return new;
 									}
-									strcpy(new.s, p);
+									strcpy(p, lexem);
+									new.s = p;
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
 									free(lexem);
@@ -891,7 +903,8 @@ Token get_token() {
 										new.i = INTERNAL_COMPILER_ERROR;
 										return new;
 									}
-									strcpy(new.s, p);
+									strcpy(p, lexem);
+									new.s = p;
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
 									free(lexem);
@@ -915,7 +928,8 @@ Token get_token() {
 										new.i = INTERNAL_COMPILER_ERROR;
 										return new;
 									}
-									strcpy(new.s, p);
+									strcpy(p, lexem);
+									new.s = p;
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
 									free(lexem);
@@ -939,7 +953,8 @@ Token get_token() {
 										new.i = INTERNAL_COMPILER_ERROR;
 										return new;
 									}
-									strcpy(new.s, p);
+									strcpy(p, lexem);
+									new.s = p;
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
 									free(lexem);
@@ -956,7 +971,8 @@ Token get_token() {
 										new.i = INTERNAL_COMPILER_ERROR;
 										return new;
 									}
-									strcpy(new.s, p);
+									strcpy(p, lexem);
+									new.s = p;
 									printf("id_%s ", LGetStrAct(&new));
 									ungetc(letter, stdin);
 									free(lexem);
@@ -982,7 +998,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1007,7 +1024,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1032,7 +1050,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1069,7 +1088,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1100,7 +1120,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1125,7 +1146,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1174,7 +1196,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1211,7 +1234,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1236,7 +1260,8 @@ Token get_token() {
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							}
-							strcpy(new.s, p);
+							strcpy(p, lexem);
+							new.s = p;
 							printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
@@ -1253,7 +1278,8 @@ Token get_token() {
 							new.i = INTERNAL_COMPILER_ERROR;
 							return new;
 						}
-						strcpy(new.s, p);
+						strcpy(p, lexem);
+						new.s = p;
 						printf("id_%s ", LGetStrAct(&new));
 						ungetc(letter, stdin);
 						free(lexem);
