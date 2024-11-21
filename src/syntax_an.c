@@ -72,7 +72,7 @@ int seekHeaders() {
 		}
 		get_token();
 		while (token->kw != rbracket) {	//Process the parameters
-			if (token->kw == id) {	//Found parameter id
+			if (token->kw == id) {
 				fprintf(stderr, "Param ID: %s\n", token->s);
 				Token paramID = *token;
 				get_token();
@@ -283,7 +283,7 @@ int param_list() {
 	}
 
 	while (token->kw != rbracket) {
-		printf("PARAM LIST\n");
+		fprintf(stderr, "PARAM LIST\n");
 		get_token();
 		if (token->kw == rbracket) {
 			break;
