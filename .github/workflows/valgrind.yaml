@@ -22,4 +22,4 @@ jobs:
       - name: List
         run: ls && cd build && ls
       - name: Run valgrind to check for memory leaks
-        run: valgrind --leak-check=full ./ifj24.out < ./tests/IFJ24_examples/example1.zig
+        run: valgrind --leak-check=full ./ifj24.out < ./tests/IFJ24_examples/myexample.zig

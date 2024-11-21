@@ -15,8 +15,7 @@ typedef enum
 {
 	TERMINAL,
 	NON_TERMINAL,
-	PRECENDENT_LESS,
-	VALUE
+	PRECEDENT_LESS
 } stackElementType;
 
 typedef struct Stack
@@ -57,4 +56,7 @@ void stackDestroy(t_Stack *stack);
 //top terminal
 t_StackItem *topTerminal(t_Stack *stack);
 
+//print stack
+void printStack(t_Stack *stack);
+char mapTokenToChar(KeyWord kw);
 #endif // HSTACK_H__

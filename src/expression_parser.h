@@ -14,5 +14,10 @@
 #include "stack.h"
 #include "tokens.h"
 
+int precedentTableTranslator(int token);
+int getOperation(int tokenStack, int tokenInput);
+int expressionParser(List *tokenList);
+int getTokenPrec();
+int tryToMatchRule(t_Stack *stack);
 
 #endif // HEXP_H__

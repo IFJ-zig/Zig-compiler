@@ -24,7 +24,7 @@ char precedentTable[TABLE_SIZE * TABLE_SIZE + 1] = {
 		/*;*/ '<', '<', '<', '<', '<', 0, '<', '<', '<', '<', '<', '<', '<', 1, '<',
 		/*x*/ '>', '>', '>', '>', 0, '>', 0, '>', '>', '>', '>', '>', '>', '>', 0};
 
-int precedent_table_translator(int token) // Returns position of element in precedent table
+int precedentTableTranslator(int token) // Returns position of element in precedent table
 {
 	switch (token) //  +     -     *     /     (     )     i     <     >     ==    <=    >=    !=    ;/,
 	{
@@ -72,13 +72,13 @@ int precedent_table_translator(int token) // Returns position of element in prec
 	}
 }
 
-int get_value_precedent_table(int tokenStack, int tokenInput) {
-	int i = precedent_table_translator(tokenStack);
+int getOperation(int tokenStack, int tokenInput) {
+	int i = precedentTableTranslator(tokenStack);
 	if (i == -1) {
 		fprintf(stderr, "Error: Invalid token value\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	int j = precedent_table_translator(tokenInput);
+	int j = precedentTableTranslator(tokenInput);
 	if (j == -1) {
 		fprintf(stderr, "Error: Invalid token value\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -86,19 +86,87 @@ int get_value_precedent_table(int tokenStack, int tokenInput) {
 	return (int)precedentTable[(TABLE_SIZE * i) + j];
 }
 
-//_________________________________________________________________________
-//________________________Grammar definition_______________________________
-//_________________________________________________________________________
+Token *tokenPrec;
+List *tokenListPrec;
 
-//Our grammar
+int getTokenPrec() {
+	tokenPrec = LGetAct(tokenListPrec);
+	LActNext(tokenListPrec);
+	return 0;
+}
+
+
+int expressionParser(List *tokenList) {
+	int statusCode;
+	tokenListPrec = tokenList;
+
+	t_Stack stack;
+	stackInit(&stack);
+	statusCode = stackPush(&stack, TERMINAL, next);
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	getTokenPrec();
+	while (1) {
+		printStack(&stack);
+		int operation = getOperation(topTerminal(&stack)->keyword, tokenPrec->kw);
+		switch (operation) {
+			case '<':
+				statusCode = stackPushPrecedentLess(&stack);
+
+				if (statusCode != 0) {
+					stackDestroy(&stack);
+					return statusCode;
+				}
+				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
+				if (statusCode != 0) {
+					stackDestroy(&stack);
+					return statusCode;
+				}
+				getTokenPrec();
+				break;
+			case '=':
+				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
+				if (statusCode != 0) {
+					stackDestroy(&stack);
+					return statusCode;
+				}
+				getTokenPrec();
+				/* code */
+				break;
+			case '>':
+				/* code */
+				statusCode = tryToMatchRule(&stack);
+				if (statusCode != 0) {
+					stackDestroy(&stack);
+					return statusCode;
+				}
+				break;
+			case 1:
+				stackDestroy(&stack);
+				return 0;
+				break;
+			case 0:
+				stackDestroy(&stack);
+				return SYNTACTIC_ANALYSIS_ERROR;
+				break;
+			default:
+				stackDestroy(&stack);
+				return SYNTACTIC_ANALYSIS_ERROR;
+		}
+	}
+}
+
+
+//Rules
 /*
 * 1: E->E+E
 * 2: E->E*E
-* 3: E->(E) yes
-* 4: E->id yes
-* 5: E->int yes
-* 6: E->float yes
-* 7: E->string yes
+* 3: E->(E)
+* 4: E->id
+* 5: E->num
+* 6: E->float
+* 7: E->string
 * 8: E->E-E
 * 9: E->E/E
 * 10: E->E>E
@@ -109,62 +177,103 @@ int get_value_precedent_table(int tokenStack, int tokenInput) {
 * 15: E->E==E
 * 15: E->-E
 */
+int tryToMatchRule(t_Stack *stack) {
+	t_StackItem *temp = stackTop(stack);
 
-
-Token *tokenPrec;
-List *tokenListPrec;
-
-int get_token_prec() {
-	tokenPrec = LGetAct(tokenListPrec);
-	LActNext(tokenListPrec);
-	return 0;
-}
-
-
-int expression_parser(List *tokenList) {
-	int statusCode;
-	tokenListPrec = tokenList;
-
-	t_Stack stack;
-	stackInit(&stack);
-	statusCode = statstackPush(&stack, TERMINAL, next);
-	if (statusCode != 0) {
-		return statusCode;
+	if (temp == NULL) {
+		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	while (1) {
-		get_token_prec();
-		int operation = get_value_precedent_table(topTerminal(&stack)->keyword, tokenPrec->kw);
-
-		switch (operation) {
-			case '<':
-				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
-				if (statusCode != 0) {
-					return statusCode;
-				}
-				statusCode = stakcPushPrecedentLess(&stack);
-				if (statusCode != 0) {
-					return statusCode;
-				}
-				break;
-			case '=':
-				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
-				if (statusCode != 0) {
-					return statusCode;
-				}
-				/* code */
-				break;
-			case '>':
-				/* code */
-
-				break;
-			case 1:
-				return 0;
-				break;
-			case 0:
+	//Match rules 3-7
+	if (temp->type == TERMINAL) {
+		stackPop(stack);
+		if (temp->keyword == id || temp->keyword == num || temp->keyword == decim || temp->keyword == text) {
+			temp = stackTop(stack);
+			if (temp == NULL) {
 				return SYNTACTIC_ANALYSIS_ERROR;
+			}
+
+			if (temp->type == PRECEDENT_LESS) {
+				stackPop(stack);
+				stackPush(stack, NON_TERMINAL, EMPTY);
+				return 0;
+			}
+		}
+		if (temp->keyword == rbracket) {
+			temp = stackTop(stack);
+			if (temp == NULL) {
+				return SYNTACTIC_ANALYSIS_ERROR;
+			}
+			stackPop(stack);
+			if (temp->type == NON_TERMINAL) {
+				temp = stackTop(stack);
+				if (temp == NULL) {
+					return SYNTACTIC_ANALYSIS_ERROR;
+				}
+				stackPop(stack);
+				if (temp->keyword == lbracket) {
+					stackPush(stack, NON_TERMINAL, EMPTY);
+					return 0;
+				}
+			}
+		}
+	} // Math rest of rules
+	else if (temp->type == NON_TERMINAL) {
+		stackPop(stack);
+		temp = stackTop(stack);
+
+		switch (temp->keyword) {
+			case plus:
+			case multiply:
+			case division:
+			case less:
+			case more:
+			case compare_equal:
+			case nequal:
+			case lequal:
+			case mequal:
+				stackPop(stack);
+				temp = stackTop(stack);
+				if (temp == NULL) {
+					return SYNTACTIC_ANALYSIS_ERROR;
+				}
+				if (temp->type == NON_TERMINAL) {
+					stackPop(stack);
+					temp = stackTop(stack);
+					if (temp == NULL) {
+						return SYNTACTIC_ANALYSIS_ERROR;
+					}
+					if (temp->type == PRECEDENT_LESS) {
+						stackPop(stack);
+						stackPush(stack, NON_TERMINAL, EMPTY);
+						return 0;
+					}
+				}
+				break;
+			case minus:
+				temp = stackTop(stack);
+				if (temp == NULL) {
+					return SYNTACTIC_ANALYSIS_ERROR;
+				}
+				if (temp->type == PRECEDENT_LESS) {
+					stackPop(stack);
+					stackPush(stack, NON_TERMINAL, EMPTY);
+					return 0;
+				} else if (temp->type == NON_TERMINAL) {
+					temp = stackTop(stack);
+					if (temp == NULL) {
+						return SYNTACTIC_ANALYSIS_ERROR;
+					}
+					if (temp->type == PRECEDENT_LESS) {
+						stackPop(stack);
+						stackPush(stack, NON_TERMINAL, EMPTY);
+						return 0;
+					}
+				}
 				break;
 			default:
 				return SYNTACTIC_ANALYSIS_ERROR;
+				break;
 		}
 	}
+	return SYNTACTIC_ANALYSIS_ERROR;
 }
