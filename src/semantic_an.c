@@ -42,6 +42,8 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable){
     symbol->isDefined = false;
     symbol->isConst = isConst;
     symbol->isNullable = isNullable;
+    symbol->paramCount = 0;
+    symbol->params = NULL;
     symbol->depth = getCurrentDepth(list);
     fprintf(stderr, "Symbol '%s' defined at depth %d, isConst=%s, isNullable=%s, type=%s\n", name, getCurrentDepth(list), isConst ? "true" : "false", isNullable ? "true" : "false", type == INT ? "INT" : type == FLOAT ? "FLOAT" : type == STRING ? "STRING" : type == FUNCTION ? "FUNCTION" : "VOID");
     return 0;
