@@ -75,6 +75,12 @@ void htab_clear(htab_t * t){
     for(size_t i=0; i<t->arr_size; i++){
         htab_itm_t *itm = t->arr_ptr[i];
         while(itm!=NULL){
+            if(itm->symbol.type == FUNCTION){
+                for(int j=0; j<itm->symbol.paramCount; j++){
+                    free(itm->symbol.params[j]);
+                }
+                free(itm->symbol.params);
+            }
             previtm=itm;
             itm=itm->next;
             free((char *)previtm->symbol.key);    //is set to const char*, need to cast away constness
