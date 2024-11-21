@@ -35,85 +35,85 @@ Token get_token() {
 			//jednoznačné tokeny
 			case ';':
 				//new = {next, 0, 0, ""};
-				printf("next\n");
+				//printf("next\n");
 				free(lexem);
 				return new;
 				break;
 			case ':':
 				new.kw = colon;
-				printf("colon ");
+				//printf("colon ");
 				free(lexem);
 				return new;
 				break;
 			case '(':
 				new.kw = lbracket;
-				printf("lbracket ");
+				//printf("lbracket ");
 				free(lexem);
 				return new;
 				break;
 			case ')':
 				new.kw = rbracket;
-				printf("pbracket ");
+				//printf("pbracket ");
 				free(lexem);
 				return new;
 				break;
 			case '{':
 				new.kw = lblock;
-				printf("lblock\n");
+				//printf("lblock\n");
 				free(lexem);
 				return new;
 				break;
 			case '}':
 				new.kw = rblock;
-				printf("pblock\n");
+				//printf("pblock\n");
 				free(lexem);
 				return new;
 				break;
 			case ',':
 				new.kw = comma;
-				printf("comma ");
+				//printf("comma ");
 				free(lexem);
 				return new;
 				break;
 			case '.':
 				new.kw = dot;
-				printf("dot ");
+				//printf("dot ");
 				free(lexem);
 				return new;
 				break;
 			case '+':
 				new.kw = plus;
-				printf("plus ");
+				//printf("plus ");
 				free(lexem);
 				return new;
 				break;
 			case '-':
 				new.kw = minus;
-				printf("minus ");
+				//printf("minus ");
 				free(lexem);
 				return new;
 				break;
 			case '*':
 				new.kw = multiply;
-				printf("krat ");
+				//printf("krat ");
 				free(lexem);
 				return new;
 				break;
 			case '?':
 				new.kw = question_mark;
-				printf("choice ");
+				//printf("choice ");
 				free(lexem);
 				return new;
 				break;
 			case '|':
 				new.kw = vertical_bar;
-				printf("popodm ");
+				//printf("popodm ");
 				free(lexem);
 				return new;
 				break;
 			case '@':
 				new.kw = at;
-				printf("zavin ");
+				//printf("zavin ");
 				free(lexem);
 				return new;
 				break;
@@ -121,7 +121,7 @@ Token get_token() {
 				letter = getchar();
 				if (letter == ']') {
 					new.kw = square_brackets;
-					printf("square_brackets ");
+					//printf("square_brackets ");
 					free(lexem);
 					return new;
 				} else {
@@ -135,12 +135,12 @@ Token get_token() {
 				letter = getchar();
 				if (letter == '=') {
 					new.kw = lequal;
-					printf("lequal ");
+					//printf("lequal ");
 					free(lexem);
 					return new;
 				} else {
 					new.kw = less;
-					printf("less ");
+					//printf("less ");
 					ungetc(letter, stdin);
 					free(lexem);
 					return new;
@@ -150,12 +150,12 @@ Token get_token() {
 				letter = getchar();
 				if (letter == '=') {
 					new.kw = mequal;
-					printf("mequal ");
+					//printf("mequal ");
 					free(lexem);
 					return new;
 				} else {
 					new.kw = more;
-					printf("more ");
+					//printf("more ");
 					ungetc(letter, stdin);
 					free(lexem);
 					return new;
@@ -165,7 +165,7 @@ Token get_token() {
 				letter = getchar();
 				if (letter == '=') {
 					new.kw = nequal;
-					printf("nequal ");
+					//printf("nequal ");
 					free(lexem);
 					return new;
 				} else {
@@ -179,13 +179,13 @@ Token get_token() {
 				letter = getchar();
 				if (letter != '=') {
 					new.kw = equal;
-					printf("equal ");
+					//printf("equal ");
 					ungetc(letter, stdin);
 					free(lexem);
 					return new;
 				} else {
 					new.kw = compare_equal;
-					printf("compare equal ");
+					//printf("compare equal ");
 					free(lexem);
 					return new;
 				}
@@ -200,7 +200,7 @@ Token get_token() {
 					}
 				} else {
 					new.kw = division;
-					printf("division ");
+					//printf("division ");
 					ungetc(letter, stdin);
 					free(lexem);
 					return new;
@@ -329,7 +329,7 @@ Token get_token() {
 				new.kw = text;
 				strcpy(p, lexem);
 				new.s = p;
-				printf("text_%s ", LGetStrAct(&new));
+				//printf("text_%s ", LGetStrAct(&new));
 				ungetc(letter, stdin);
 				free(lexem);
 				return new;
@@ -350,7 +350,7 @@ Token get_token() {
 					new.kw = text;
 					strcpy(p, lexem);
 					new.s = p;
-					printf("text_%s ", LGetStrAct(&new));
+					//printf("text_%s ", LGetStrAct(&new));
 					free(lexem);
 					return new;
 				} else {
@@ -456,7 +456,7 @@ Token get_token() {
 					new.kw = text;
 					strcpy(p, lexem);
 					new.s = p;
-					printf("text_%s ", LGetStrAct(&new));
+					//printf("text_%s ", LGetStrAct(&new));
 					free(lexem);
 					return new;
 				}
@@ -600,7 +600,7 @@ Token get_token() {
 						}
 						strcpy(p, lexem);
 						new.s = p;
-						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+						//printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
 						free(lexem);
 						return new;
 					} else {
@@ -616,7 +616,7 @@ Token get_token() {
 						}
 						strcpy(p, lexem);
 						new.s = p;
-						printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+						//printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
 						free(lexem);
 						return new;
 					}
@@ -676,7 +676,7 @@ Token get_token() {
 					}
 					strcpy(p, lexem);
 					new.s = p;
-					printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
+					//printf("decim_%s_%f ", LGetStrAct(&new), LGetFloatAct(new));
 					free(lexem);
 					return new;
 				} else {
@@ -693,7 +693,7 @@ Token get_token() {
 					}
 					strcpy(p, lexem);
 					new.s = p;
-					printf("num_%s_%d ", LGetStrAct(&new), LGetNumAct(new));
+					//printf("num_%s_%d ", LGetStrAct(&new), LGetNumAct(new));
 					ungetc(letter, stdin);
 					free(lexem);
 					return new;
@@ -708,7 +708,7 @@ Token get_token() {
 					letter = getchar();
 					if (!(letter >= 'a' && letter <= 'z') && !(letter >= 'A' && letter <= 'Z') && !(letter >= '0' && letter <= '9') && letter != '_') {
 						new.kw = underscore;
-						printf("underscore ");
+						//printf("underscore ");
 						ungetc(letter, stdin);
 						free(lexem);
 						return new;
@@ -740,7 +740,7 @@ Token get_token() {
 						//const concat chr
 						if (!strcmp(lexem, "const")) {
 							new.kw = constant;
-							printf("konst ");
+							//printf("konst ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -756,7 +756,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -766,13 +766,13 @@ Token get_token() {
 						//var void
 						if (!strcmp(lexem, "var")) {
 							new.kw = variable;
-							printf("variable ");
+							//printf("variable ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "void")) {
 							new.kw = dtvoid;
-							printf("dtvoid ");
+							//printf("dtvoid ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -788,7 +788,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -798,7 +798,7 @@ Token get_token() {
 						//return readstr readi32 readf64
 						if (!strcmp(lexem, "return")) {
 							new.kw = _return;
-							printf("_return ");
+							//printf("_return ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -814,7 +814,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -824,7 +824,7 @@ Token get_token() {
 						//pub
 						if (!strcmp(lexem, "pub")) {
 							new.kw = _pub;
-							printf("_pub ");
+							//printf("_pub ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -840,7 +840,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -850,7 +850,7 @@ Token get_token() {
 						//u8
 						if (!strcmp(lexem, "u8")) {
 							new.kw = dtstr;
-							printf("dtstr ");
+							//printf("dtstr ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -866,7 +866,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -876,7 +876,7 @@ Token get_token() {
 						//main
 						if (!strcmp(lexem, "main")) {
 							new.kw = _main;
-							printf("_main ");
+							//printf("_main ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -892,7 +892,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -902,13 +902,13 @@ Token get_token() {
 						//fn f64 f2i
 						if (!strcmp(lexem, "fn")) {
 							new.kw = _fn;
-							printf("_fn ");
+							//printf("_fn ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "f64")) {
 							new.kw = dtflt;
-							printf("dtflt ");
+							//printf("dtflt ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -924,7 +924,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -934,7 +934,7 @@ Token get_token() {
 						//while write
 						if (!strcmp(lexem, "while")) {
 							new.kw = _while;
-							printf("_while ");
+							//printf("_while ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -950,7 +950,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -960,7 +960,7 @@ Token get_token() {
 						//else
 						if (!strcmp(lexem, "else")) {
 							new.kw = _else;
-							printf("_else ");
+							//printf("_else ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -976,7 +976,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -986,25 +986,25 @@ Token get_token() {
 						//if i32 ifj import i2f
 						if (!strcmp(lexem, "if")) {
 							new.kw = _if;
-							printf("_if ");
+							//printf("_if ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "i32")) {
 							new.kw = dtint;
-							printf("dtint ");
+							//printf("dtint ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "ifj")) {
 							new.kw = inbuild;
-							printf("inbuild ");
+							//printf("inbuild ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
 						} else if (!strcmp(lexem, "import")) {
 							new.kw = _import;
-							printf("_import ");
+							//printf("_import ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -1020,7 +1020,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -1030,7 +1030,7 @@ Token get_token() {
 						//null
 						if (!strcmp(lexem, "null")) {
 							new.kw = _null;
-							printf("_null ");
+							//printf("_null ");
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -1046,7 +1046,7 @@ Token get_token() {
 							}
 							strcpy(p, lexem);
 							new.s = p;
-							printf("id_%s ", LGetStrAct(&new));
+							//printf("id_%s ", LGetStrAct(&new));
 							ungetc(letter, stdin);
 							free(lexem);
 							return new;
@@ -1064,7 +1064,7 @@ Token get_token() {
 						}
 						strcpy(p, lexem);
 						new.s = p;
-						printf("id_%s ", LGetStrAct(&new));
+						//printf("id_%s ", LGetStrAct(&new));
 						ungetc(letter, stdin);
 						free(lexem);
 						return new;
@@ -1082,39 +1082,3 @@ Token get_token() {
 	free(lexem);
 	return new;
 }
-
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-int main() {
-	char *p, l;
-	int lex_size= 2;
-
-	char *lexem = malloc(sizeof(char) * lex_size);
-	if(lexem==NULL) {
-		return 99;
-	}
-
-	l=getchar();
-	while(l!=EOF) {
-		if(strlen(lexem)>=(lex_size-1)) {
-			lex_size*=2;
-			p=realloc(lexem, sizeof(char) * lex_size);
-			if(p==NULL) {
-				free(lexem);
-				return 99;
-			} else {
-				lexem=p;
-				puts(lexem);
-			}
-		}
-		strncat(lexem, &l, 1);
-		l=getchar();
-	}
-	puts(lexem);
-	free(lexem);
-	return 0;
-}
-*/
