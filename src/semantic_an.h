@@ -21,6 +21,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable);
 bool assignSymbol(char *name, KeyWord kw);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
+void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);
 
 int processParam(Token paramName, Token paramType, bool isNullable);
 varType kwToVarType(KeyWord kw);
