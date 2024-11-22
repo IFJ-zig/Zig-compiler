@@ -21,7 +21,7 @@ int seekHeaders();
 int skip_function_body();
 int checkImport();
 int function_analysis();
-int function_call();
+int function_call(bool expectReturn);
 int return_type();
 int data_type();
 int param_list();

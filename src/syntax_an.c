@@ -545,34 +545,15 @@ int inbuild_function() {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	read_token();
-
-	switch (token.kw) {
-		case inord:
-		case inchr:
-		case inlen:
-		case inssub:
-		case inccat:
-		case inu2s:
-		case inscmp:
-		case inres:
-		case inrei:
-		case inref:
-		case inwrt:
-		case ini2f:
-		case inf2i:
-			statusCode = skip_expression();
-			if (statusCode != 0)
-				return statusCode;
-			break;
-		default:
-			fprintf(stderr, "Error: Undefined library call\n");
-			break;
-	}
-	read_token();
-	if (token.kw != next) {
-		fprintf(stderr, "Error: Expected ';'\n");
+	if (token.kw != id) {
+		fprintf(stderr, "Error: Expected library call\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
+
+	statusCode = function_call(true);
+	if (statusCode != 0)
+		return statusCode;
+
 	return 0;
 }
 
@@ -620,7 +601,7 @@ int call_or_assignment() {
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
 	if (sym->type == FUNCTION) {
-		return function_call();
+		return function_call(true);
 	} else {
 		read_token();
 		if (token.kw != equal) {
@@ -635,14 +616,27 @@ int call_or_assignment() {
 	return 0;
 };
 
-int function_call() {
-	while (token.kw != next) {
-		if (token.kw == end) {
-			return SYNTACTIC_ANALYSIS_ERROR;
+int function_call(bool expectNext) {
+	int unclosedBrackets = 0;
+	while (token.kw != end) {
+		if (token.kw == lbracket) {
+			unclosedBrackets++;
+		} else if (token.kw == rbracket) {
+			unclosedBrackets--;
+			if (unclosedBrackets == 0) {
+				if (expectNext) {
+					read_token();
+					if (token.kw != next) {
+						fprintf(stderr, "Error: Expected ';' after function call\n");
+						return SYNTACTIC_ANALYSIS_ERROR;
+					}
+				}
+				return 0;
+			}
 		}
 		read_token();
 	}
-	return 0;
+	return SYNTACTIC_ANALYSIS_ERROR;
 }
 
 int while_syntax() {
