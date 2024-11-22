@@ -3,9 +3,9 @@
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
 #include "errors_enum.h"
+#include "semantic_an.h"
 #include "syntax_an.h"
 #include "tokens.h"
-#include "semantic_an.h"
 
 int main() {
 	List *pL;
@@ -28,10 +28,10 @@ int main() {
 
 	LDestroy(pL);
 	free(pL);
+	semanticDestroy();
 	if (err) {
 		return err;
 	}
-	semanticDestroy();
 
 	return 0;
 }

@@ -3,6 +3,7 @@
 * Tvůrci: Adam Vožda, xvozdaa00
 *********************************************/
 #include "syntax_an.h"
+
 #include "semantic_an.h"
 
 //TODO: Semantic integration leaking like a sieve, a fix would be nice but probably not necessary for the project
@@ -54,7 +55,7 @@ int seekHeaders() {
 		}
 
 		//Save the name of functions into the symtable at depth 0
-		if(defineSymbol(token->s, FUNCTION, false, false) == REDEFINITION_ERROR){
+		if (defineSymbol(token->s, FUNCTION, false, false) == REDEFINITION_ERROR) {
 			fprintf(stderr, "Error: Function %s is already defined\n", token->s);
 			return REDEFINITION_ERROR;
 		}
@@ -71,7 +72,7 @@ int seekHeaders() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		get_token();
-		while (token->kw != rbracket) {	//Process the parameters
+		while (token->kw != rbracket) { //Process the parameters
 			if (token->kw == id) {
 				fprintf(stderr, "Param ID: %s\n", token->s);
 				Token paramID = *token;
@@ -81,15 +82,14 @@ int seekHeaders() {
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
 				data_type();
-				
-				assignFunctionParameter(fnSymbol, paramID, *token, false);	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+
+				assignFunctionParameter(fnSymbol, paramID, *token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 				get_token();
 				if (token->kw != comma && token->kw != rbracket) {
 					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-			}
-			else
+			} else
 				get_token();
 		}
 		fprintf(stderr, "Function %s has %d parameters\n", fnSymbol->key, fnSymbol->paramCount);
@@ -100,10 +100,9 @@ int seekHeaders() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		get_token();
-		if(isValidReturnType(token->kw)){
-			fnSymbol->returnType = kwToVarType(token->kw);	//Save the return type of the function
-		}
-		else{
+		if (isValidReturnType(token->kw)) {
+			fnSymbol->returnType = kwToVarType(token->kw); //Save the return type of the function
+		} else {
 			fprintf(stderr, "Error: Invalid return type of function %s\n", fnSymbol->key);
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
@@ -114,9 +113,9 @@ int seekHeaders() {
 			return statusCode;
 		get_token();
 	}
-	if(getSymbol("main") == NULL){
+	if (getSymbol("main") == NULL) {
 		fprintf(stderr, "Error: Main function is not defined\n");
-		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;		//TODO: Is this the correct error code?
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR; //TODO: Is this the correct error code?
 	}
 	fprintf(stderr, "Headers OK\n");
 	return 0;
@@ -237,19 +236,20 @@ int function_analysis() {
 	}
 	fprintf(stderr, "Analysis ID: %s\n", token->s);
 	//The function name should already be in the symtable at depth 0 since it was done in seekHeaders, lets just check if it's still there
-	if(getSymbol(token->s) == NULL){
+	if (getSymbol(token->s) == NULL) {
 		fprintf(stderr, "Error: Function %s is not defined, this function should've been defined in seekHeaders!\n", token->s);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
-	}
-	else{
-		fprintf(stderr, "Function %s successfully found in symtable, depth=%d, return type=%s\n", token->s, getSymbol(token->s)->depth,getSymbol(token->s)->returnType == INT ? "INT" : getSymbol(token->s)->returnType == FLOAT ? "FLOAT" : getSymbol(token->s)->returnType == STRING ? "STRING" : "VOID");
+	} else {
+		fprintf(stderr, "Function %s successfully found in symtable, depth=%d, return type=%s\n", token->s, getSymbol(token->s)->depth, getSymbol(token->s)->returnType == INT ? "INT" : getSymbol(token->s)->returnType == FLOAT ? "FLOAT"
+																																												 : getSymbol(token->s)->returnType == STRING      ? "STRING"
+																																																								  : "VOID");
 	}
 
-	statusCode = param_list();	//done semantic
+	statusCode = param_list(); //done semantic
 	if (statusCode != 0)
 		return statusCode;
 
-	statusCode = return_type();	//semantic done in seekHeaders
+	statusCode = return_type(); //semantic done in seekHeaders
 	if (statusCode != 0)
 		return statusCode;
 
@@ -302,8 +302,10 @@ int param_list() {
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
-		processParam(paramID, *token, false);	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
-		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token->kw == dtint ? "INT" : token->kw == dtflt ? "FLOAT" : "STRING", getSymbol(paramID.s)->depth);
+		processParam(paramID, *token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token->kw == dtint ? "INT" : token->kw == dtflt ? "FLOAT"
+																																			 : "STRING",
+				getSymbol(paramID.s)->depth);
 		get_token();
 		if (token->kw != comma && token->kw != rbracket) {
 			fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
@@ -349,22 +351,22 @@ int code(bool tokenWasGiven) {
 	int statusCode;
 	switch (token->kw) {
 		case constant:
-			statusCode = variable_definition(true);		//semantic done
+			statusCode = variable_definition(true); //semantic done, exp done
 			if (statusCode != 0)
 				return statusCode;
 			break;
 		case variable:
-			statusCode = variable_definition(false);	//semantic done
+			statusCode = variable_definition(false); //semantic done, exp done
 			if (statusCode != 0)
 				return statusCode;
 			break;
 		case id:
-			statusCode = call_or_assignment();	//TODO: this
+			statusCode = call_or_assignment(); //TODO: assignment done, call is missing
 			if (statusCode != 0)
 				return statusCode;
 			break;
 		case _if:
-			statusCode = if_else();	//semantic done
+			statusCode = if_else(); //semantic done,
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -374,7 +376,7 @@ int code(bool tokenWasGiven) {
 				return statusCode;
 			break;
 		case _return:
-			statusCode = return_syntax();	//No can do without precedent_an
+			statusCode = return_syntax(); //No can do without precedent_an
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -394,21 +396,17 @@ int code(bool tokenWasGiven) {
 int if_else() {
 	int statusCode;
 	enterScope();
-	get_token();
-	if (token->kw != lbracket) {
-		fprintf(stderr, "Error: Expected '(' after if\n");
-		return SYNTACTIC_ANALYSIS_ERROR;
-	}
-	// TODO: PLACEHOLDER FOR BOTTOM UP SYNTAX ANALYSIS
-	//skip_expression();
-	symbol_t *mainSymbol = skip_expression_get_symbol();
-	get_token();
+
+	statusCode = expressionParser(tokenList);
+	token = LGetAct(tokenList);
 	if (token->kw == vertical_bar) {
 		get_token();
-		if(mainSymbol->type == VOID){
-			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
+		if (token->kw != id) {
+			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		defineSymbol(token->s, mainSymbol->type, mainSymbol->isConst, false);
+
+		defineSymbol(token->s, INT, false, false);
 		get_token();
 		if (token->kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
@@ -416,7 +414,7 @@ int if_else() {
 		}
 		get_token();
 	}
-
+	printf("here %d\n", token->kw);
 	if (token->kw != lblock) {
 		fprintf(stderr, "Error: Expected '{' after if condition\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -428,7 +426,7 @@ int if_else() {
 			return statusCode;
 		get_token();
 	}
-	exitScope();	//Exit the scope of the if statement has to be here since we can't have the unwrapped value reach the else block
+	exitScope(); //Exit the scope of the if statement has to be here since we can't have the unwrapped value reach the else block
 	get_token();
 	if (token->kw == _else) {
 		enterScope();
@@ -465,7 +463,7 @@ int skip_expression() {
 //This function is a hack just to get if_else working without a working precedent_an
 //Skips the expression and returns the type of the first ID it finds, VOID if no ID is found, or if the id does not exist in the symtable
 //I am not particularly proud of this function, but it works for now
-symbol_t* skip_expression_get_symbol(){
+symbol_t *skip_expression_get_symbol() {
 	int statusCode;
 	symbol_t *foundSymbol = NULL;
 	while (token->kw != rbracket) {
@@ -475,12 +473,11 @@ symbol_t* skip_expression_get_symbol(){
 			if (statusCode != 0)
 				return 0;
 		}
-		if (token->kw == id){
+		if (token->kw == id) {
 			symbol_t *symbol = getSymbol(token->s);
-			if(symbol == NULL){
+			if (symbol == NULL) {
 				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
-			}
-			else
+			} else
 				foundSymbol = symbol;
 		}
 	}
@@ -537,7 +534,7 @@ int inbuild_function() {
 }
 
 int variable_definition(bool isConst) {
-	bool isNullable = false;	//TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+	bool isNullable = false; //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 	int statusCode;
 	get_token();
 	if (token->kw != id) {
@@ -546,7 +543,7 @@ int variable_definition(bool isConst) {
 	}
 	Token varID = *token;
 	get_token();
-	if (token->kw == colon) {	//Nice definition with variable type
+	if (token->kw == colon) { //Nice definition with variable type
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
@@ -558,42 +555,52 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Expected '=' after variable type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	if(token->kw == equal){	//Not nice definition without variable type
-		get_token();
-		if(token->kw == inbuild)
-			defineSymbol(varID.s, FUNCTION, isConst, isNullable);
-		if(token->kw == id){
-			symbol_t *symbol = getSymbol(token->s);
-			if(symbol == NULL){
-				fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
-				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
-			}
-			if(symbol->type == FUNCTION)
-				defineSymbol(varID.s, symbol->returnType, isConst, isNullable);
-			else
-				defineSymbol(varID.s, symbol->type, isConst, isNullable);
-		}
-	}
-	symbol_t *symbol = getSymbol(varID.s);
-	if(symbol == NULL){
-		fprintf(stderr, "Error: Variable %s has not been defined\n", varID.s);
-		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
-	}
-	// PLACEHOLDER FOR BOTTOM UP EXPRESSION ANALYSIS
-	while (token->kw != next) {
-		get_token();
-	}
+
+	statusCode = defineSymbol(varID.s, INT, isConst, isNullable);
+	if (statusCode != 0)
+		return statusCode;
+
+	statusCode = expressionParser(tokenList);
+
+	if (statusCode != 0)
+		return statusCode;
 
 	return 0;
 };
 int call_or_assignment() {
 	// TODO: SEMANTHIC ANALYSIS
 	// I need semanthic analysis to define if id is a function or variable
+
+	symbol_t *sym = getSymbol(token->s);
+	if (sym == NULL) {
+		fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+	}
+	if (sym->type == FUNCTION) {
+		return function_call();
+	} else {
+		get_token();
+		if (token->kw != equal) {
+			fprintf(stderr, "Error: Expected '=' after variable id\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		int statusCode = expressionParser(tokenList);
+		if (statusCode != 0)
+			return statusCode;
+	}
+
+	return 0;
+};
+
+int function_call() {
 	while (token->kw != next) {
+		if (token->kw == end) {
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
 		get_token();
 	}
 	return 0;
-};
+}
 
 int while_syntax() {
 	enterScope();
@@ -608,7 +615,7 @@ int while_syntax() {
 	get_token();
 	if (token->kw == vertical_bar) {
 		get_token();
-		if(mainSymbol->type == VOID){
+		if (mainSymbol->type == VOID) {
 			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
 		}
 		defineSymbol(token->s, mainSymbol->type, mainSymbol->isConst, false);
