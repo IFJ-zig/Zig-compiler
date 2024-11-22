@@ -12,11 +12,12 @@
 
 #include "errors_enum.h"
 #include "stack.h"
+#include "syntax_an.h"
 #include "tokens.h"
 
 int precedentTableTranslator(int token);
 int getOperation(int tokenStack, int tokenInput);
-int expressionParser(List *tokenList);
+int expressionParser();
 int getTokenPrec();
 int tryToMatchRule(t_Stack *stack);
 
