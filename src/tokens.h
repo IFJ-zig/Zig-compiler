@@ -11,8 +11,9 @@
 #include <string.h> //strcat,cmp,cpy,len
 
 
-typedef enum
-{
+typedef enum{
+	LEXEM, INTERNAL,
+	//pro chybu v lexemu
 	num,
 	text,
 	decim,
@@ -79,58 +80,26 @@ typedef enum
 	rbracket,
 	lblock,
 	rblock,
-	end
+	end,
 	//(,    ),      {,     },     konec
+	EMPTY = -1,
 } KeyWord;
 
-typedef struct SToken
-{
+typedef struct SToken{
 	KeyWord kw;
-	int *i;
-	double *f;
+	int i;
+	double f;
 	char *s;
-	struct SToken *next;
 } Token;
 
-typedef struct SList
-{
-	Token *first;
-	Token *active;
-	Token *last;
-} List;
+KeyWord LGetKeyWAct(Token T);
 
-void ListInit(List *L);
+int LGetNumAct(Token T);
 
-int LInsertLast(List *L, KeyWord key, int *a, double *b, char *c);
+double LGetFloatAct(Token T);
 
-void LActFirst(List *L);
+char *LGetStrAct(Token *T);
 
-void LActNext(List *L);
-
-Token *LGetFirst(List *L);
-
-Token *LGetAct(List *L);
-
-KeyWord LGetKeyWFirst(List *L);
-
-KeyWord LGetKeyWAct(List *L);
-
-int *LGetNumFirst(List *L);
-
-int *LGetNumAct(List *L);
-
-double *LGetFloatFirst(List *L);
-
-double *LGetFloatAct(List *L);
-
-char *LGetStrFirst(List *L);
-
-char *LGetStrAct(List *L);
-
-void LDeleteFirst(List *L);
-
-void LDestroy(List *L);
-
-int Lexem_analyzer(List *L);
+Token get_token();
 
 #endif // TOKENS_H

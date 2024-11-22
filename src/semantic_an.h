@@ -9,8 +9,8 @@
 #include <stdbool.h>
 
 #include "errors_enum.h"
-#include "tokens.h"
 #include "symtable.h"
+#include "tokens.h"
 
 void semanticInit();
 void semanticDestroy();
@@ -21,13 +21,13 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable);
 bool assignSymbol(char *name, KeyWord kw);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
+void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);
 
 int processParam(Token paramName, Token paramType, bool isNullable);
 varType kwToVarType(KeyWord kw);
 
 void enterScope(); //A function for going into bigger depth so syntax analyzer doesn't need to keep track of depth itself
 void exitScope();
-
 
 
 #endif // SEMANTIC_H
