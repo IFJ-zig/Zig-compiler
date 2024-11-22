@@ -19,7 +19,9 @@ void semanticDestroy() {
 	while (list->tablesCount > 0) {
 		htab_removeLast(list);
 	}
+	free(list);
 }
+
 
 void enterScope() {
 	htab_t *t = htab_init(getCurrentDepth(list));
@@ -40,7 +42,13 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 	symbol->isDefined = false;
 	symbol->isConst = isConst;
 	symbol->isNullable = isNullable;
+	symbol->paramCount = 0;
+	symbol->params = NULL;
 	symbol->depth = getCurrentDepth(list);
+	fprintf(stderr, "Symbol '%s' defined at depth %d, isConst=%s, isNullable=%s, type=%s\n", name, getCurrentDepth(list), isConst ? "true" : "false", isNullable ? "true" : "false", type == INT ? "INT" : type == FLOAT ? "FLOAT"
+																																																   : type == STRING      ? "STRING"
+																																																   : type == FUNCTION    ? "FUNCTION"
+																																																						 : "VOID");
 	return 0;
 }
 
@@ -99,6 +107,22 @@ bool isValidParamType(KeyWord kw) {
 	if (kw == dtint || kw == dtstr || kw == dtflt)
 		return true;
 	return false;
+}
+
+
+//This function creates a memore leak, because the symbols created for params are never freed, fix before final version TODO
+void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable) {
+	fprintf(stderr, "Function %s has a parameter %s of type %d isNullable=%s\n", function->key, paramName.s, paramType.kw, isNullable ? "true" : "false");
+	function->paramCount++;
+	function->params = realloc(function->params, function->paramCount * sizeof(symbol_t *));
+	symbol_t *param = malloc(sizeof(symbol_t));
+	param->key = paramName.s;
+	param->type = kwToVarType(paramType.kw);
+	param->isNullable = isNullable;
+	param->isConst = false;
+	param->isDefined = false;
+	param->depth = -1;
+	function->params[function->paramCount - 1] = param;
 }
 
 varType kwToVarType(KeyWord kw) {

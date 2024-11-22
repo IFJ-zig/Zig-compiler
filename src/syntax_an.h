@@ -9,8 +9,9 @@
 #include <stdbool.h>
 
 #include "errors_enum.h"
-#include "tokens.h"
+#include "expression_parser.h"
 #include "symtable.h" //For varType
+#include "tokens.h"
 
 int syntax_analyzer(/*List *L*/);
 int code(bool tokenWasGiven);
@@ -28,11 +29,11 @@ int if_else();
 int inbuild_function();
 int return_syntax();
 int call_or_assignment();
-int variable_definition();
+int variable_definition(bool isConst);
 int skip_expression();
 
 
 //Helper functions
 bool isValidReturnType(KeyWord kw);
-varType skip_expression_get_type();
+symbol_t *skip_expression_get_symbol();
 #endif // SYNTAX_H
