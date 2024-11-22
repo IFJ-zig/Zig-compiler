@@ -100,7 +100,7 @@ int expressionParser() {
 		return statusCode;
 	}
 	while (1) {
-		printStack(&stack);
+		//printStack(&stack);
 		//temporarily handle inbuild functions
 		if (token.kw == inbuild) {
 			read_token();
