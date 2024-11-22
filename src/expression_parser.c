@@ -101,9 +101,9 @@ int expressionParser() {
 	}
 	while (1) {
 		printStack(&stack);
+		//temporarily handle inbuild functions
 		if (token.kw == inbuild) {
 			read_token();
-
 			if (token.kw != dot) {
 				fprintf(stderr, "Error: Unexpected library usage %d\n", token.kw);
 				stackClear(&stack);
@@ -122,10 +122,12 @@ int expressionParser() {
 			}
 			token.kw = id;
 		}
+
 		int operation = getOperation(topTerminal(&stack)->keyword, token.kw);
 		switch (operation) {
 			case '<':
-				statusCode = stackPushPrecedentLess(&stack);
+				statusCode
+						= stackPushPrecedentLess(&stack);
 
 				if (statusCode != 0) {
 					stackClear(&stack);

@@ -29,21 +29,6 @@ typedef enum
 	variable,
 	_null,
 	//i32, u8,    f64,   void,   const, var,  null
-	inord,
-	inchr,
-	inlen,
-	inssub,
-	inccat,
-	inu2s,
-	inscmp,
-	//ord, chr, length, substring, concat, string, strcmp
-	inres,
-	inrei,
-	inref,
-	inwrt,
-	ini2f,
-	inf2i,
-	//readstr, readi32, readf64, write, i2f,   f2i
 	_if,
 	_else,
 	_while,
