@@ -361,12 +361,12 @@ int code(bool tokenWasGiven) {
 				return statusCode;
 			break;
 		case id:
-			statusCode = call_or_assignment(); //TODO: this
+			statusCode = call_or_assignment(); //TODO: assignment done, call is missing
 			if (statusCode != 0)
 				return statusCode;
 			break;
 		case _if:
-			statusCode = if_else(); //semantic done
+			statusCode = if_else(); //semantic done,
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -396,21 +396,17 @@ int code(bool tokenWasGiven) {
 int if_else() {
 	int statusCode;
 	enterScope();
-	get_token();
-	if (token->kw != lbracket) {
-		fprintf(stderr, "Error: Expected '(' after if\n");
-		return SYNTACTIC_ANALYSIS_ERROR;
-	}
-	// TODO: PLACEHOLDER FOR BOTTOM UP SYNTAX ANALYSIS
-	//skip_expression();
-	symbol_t *mainSymbol = skip_expression_get_symbol();
-	get_token();
+
+	statusCode = expressionParser(tokenList);
+	token = LGetAct(tokenList);
 	if (token->kw == vertical_bar) {
 		get_token();
-		if (mainSymbol->type == VOID) {
-			fprintf(stderr, "skip_expression_get_type() has not found any IDs in the expression, however, unwrapped value was still created, this should've resulted in a compile error\n ");
+		if (token->kw != id) {
+			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		defineSymbol(token->s, mainSymbol->type, mainSymbol->isConst, false);
+
+		defineSymbol(token->s, INT, false, false);
 		get_token();
 		if (token->kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
@@ -418,7 +414,7 @@ int if_else() {
 		}
 		get_token();
 	}
-
+	printf("here %d\n", token->kw);
 	if (token->kw != lblock) {
 		fprintf(stderr, "Error: Expected '{' after if condition\n");
 		return SYNTACTIC_ANALYSIS_ERROR;

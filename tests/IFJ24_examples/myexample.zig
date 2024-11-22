@@ -4,4 +4,8 @@ const ifj = @import("ifj24.zig");
 pub fn main() void {
     var x = (2+2)*2;
     x = x / 8;
+
+    if(x){
+        
+    }
 }

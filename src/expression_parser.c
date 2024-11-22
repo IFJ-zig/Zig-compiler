@@ -55,15 +55,12 @@ int precedentTableTranslator(int token) // Returns position of element in preced
 		case nequal:
 			return 12;
 		case next:
-			return 13;
 		case comma:
-			return 13;
 		case lblock:
+		case vertical_bar:
 			return 13;
 		case num:
-			return 14;
 		case decim:
-			return 14;
 		case text:
 			return 14;
 		default:
@@ -132,10 +129,8 @@ int expressionParser(List *tokenList) {
 					return statusCode;
 				}
 				getTokenPrec();
-				/* code */
 				break;
 			case '>':
-				/* code */
 				statusCode = tryToMatchRule(&stack);
 				if (statusCode != 0) {
 					stackClear(&stack);
