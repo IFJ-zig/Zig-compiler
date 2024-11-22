@@ -108,8 +108,11 @@ int seekHeaders() {
 					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-			} else {
-				fprintf(stderr, "Error: Expected parameter id\n");
+				if(token.kw == comma)
+					read_token();
+			}
+			else{
+				fprintf(stderr, "Error: Expected parameter id, got %d\n", comma);
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
 		}

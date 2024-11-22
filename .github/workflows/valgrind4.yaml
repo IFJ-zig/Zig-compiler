@@ -1,0 +1,25 @@
+name: Memory Leak Check on myexample.zig
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  memory-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install valgrind
+        run: sudo apt-get install valgrind
+
+      - name: Build project
+        run: make
+      - name: List
+        run: ls && cd build && ls
+      - name: Run valgrind on myexample.zig
+        run: valgrind --leak-check=full ./ifj24.out < ./tests/IFJ24_examples/myexample.zig
