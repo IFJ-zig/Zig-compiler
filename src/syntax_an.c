@@ -561,18 +561,22 @@ int inbuild_function() {
 
 int variable_definition(bool isConst) {
 	bool isNullable = false; //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
-	int statusCode;
+	int statusCode = 0;
 	read_token();
 	if (token.kw != id) {
 		fprintf(stderr, "Error: Expected variable id\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	Token varID = token;
+	fprintf(stderr, "Variable ID: %s\n", varID.s);
 	read_token();
+	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
+		isDefined = true;
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
+		fprintf(stderr, "trying to define symbol %s\n", varID.s);
 		defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
 		read_token();
 	}
@@ -581,8 +585,8 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Expected '=' after variable type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-
-	statusCode = defineSymbol(varID.s, INT, isConst, isNullable);
+	if(!isDefined)
+		statusCode = defineSymbol(varID.s, INT, isConst, isNullable);
 	if (statusCode != 0)
 		return statusCode;
 
