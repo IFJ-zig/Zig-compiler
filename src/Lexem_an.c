@@ -8,14 +8,14 @@
 Token get_token() {
 	//inicializace
 	int n;
-	size_t lex_size=8;
+	size_t lex_size = 8;
 	double d;
 	Token new = {next, 0, 0, NULL};
 	char letter = getchar();
 
 	char *p;
 	char *lexem = malloc(sizeof(char) * lex_size);
-	if(lexem==NULL) {
+	if (lexem == NULL) {
 		new.kw = INTERNAL;
 		new.i = INTERNAL_COMPILER_ERROR;
 		return new;
@@ -220,16 +220,16 @@ Token get_token() {
 					//takes all symbols
 					while (letter != EOF && letter != '\n') {
 						//check if size sufficient
-						if(strlen(lexem)>=(lex_size-1)) {
-							lex_size*=2;
-							p=realloc(lexem, sizeof(char) * lex_size);
-							if(p==NULL) {
+						if (strlen(lexem) >= (lex_size - 1)) {
+							lex_size *= 2;
+							p = realloc(lexem, sizeof(char) * lex_size);
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							} else {
-								lexem=p;
+								lexem = p;
 							}
 						}
 						//komentař
@@ -319,8 +319,8 @@ Token get_token() {
 						letter = getchar();
 					}
 				} while (letter == '\\');
-				p = malloc(sizeof(char) * (strlen(lexem)+1));
-				if(p==NULL) {
+				p = malloc(sizeof(char) * (strlen(lexem) + 1));
+				if (p == NULL) {
 					free(lexem);
 					new.kw = INTERNAL;
 					new.i = INTERNAL_COMPILER_ERROR;
@@ -340,8 +340,8 @@ Token get_token() {
 				if (letter == '"') {
 					//druhý
 					//prázdný
-					p = malloc(sizeof(char) * (strlen(lexem)+1));
-					if(p==NULL) {
+					p = malloc(sizeof(char) * (strlen(lexem) + 1));
+					if (p == NULL) {
 						free(lexem);
 						new.kw = INTERNAL;
 						new.i = INTERNAL_COMPILER_ERROR;
@@ -357,16 +357,16 @@ Token get_token() {
 					//jednoduchý
 					while (letter != '"' && letter != EOF && letter != '\n') {
 						//check if size sufficient
-						if(strlen(lexem)>=(lex_size-1)) {
-							lex_size*=2;
-							p=realloc(lexem, sizeof(char) * lex_size);
-							if(p==NULL) {
+						if (strlen(lexem) >= (lex_size - 1)) {
+							lex_size *= 2;
+							p = realloc(lexem, sizeof(char) * lex_size);
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							} else {
-								lexem=p;
+								lexem = p;
 							}
 						}
 						//escape sekvence?
@@ -446,8 +446,8 @@ Token get_token() {
 						free(lexem);
 						return new;
 					}
-					p = malloc(sizeof(char) * (strlen(lexem)+1));
-					if(p==NULL) {
+					p = malloc(sizeof(char) * (strlen(lexem) + 1));
+					if (p == NULL) {
 						free(lexem);
 						new.kw = INTERNAL;
 						new.i = INTERNAL_COMPILER_ERROR;
@@ -476,16 +476,16 @@ Token get_token() {
 				//čísla
 				while (letter >= '0' && letter <= '9') {
 					//check if size sufficient
-					if(strlen(lexem)>=(lex_size-1)) {
-						lex_size*=2;
-						p=realloc(lexem, sizeof(char) * lex_size);
-						if(p==NULL) {
+					if (strlen(lexem) >= (lex_size - 1)) {
+						lex_size *= 2;
+						p = realloc(lexem, sizeof(char) * lex_size);
+						if (p == NULL) {
 							free(lexem);
 							new.kw = INTERNAL;
 							new.i = INTERNAL_COMPILER_ERROR;
 							return new;
 						} else {
-							lexem=p;
+							lexem = p;
 						}
 					}
 					strncat(lexem, &letter, 1);
@@ -493,16 +493,16 @@ Token get_token() {
 				}
 				//desetiná
 				//check if size sufficient
-				if(strlen(lexem)>=(lex_size-1)) {
-					lex_size*=2;
-					p=realloc(lexem, sizeof(char) * lex_size);
-					if(p==NULL) {
+				if (strlen(lexem) >= (lex_size - 1)) {
+					lex_size *= 2;
+					p = realloc(lexem, sizeof(char) * lex_size);
+					if (p == NULL) {
 						free(lexem);
 						new.kw = INTERNAL;
 						new.i = INTERNAL_COMPILER_ERROR;
 						return new;
 					} else {
-						lexem=p;
+						lexem = p;
 					}
 				}
 				if (letter == '.') {
@@ -516,16 +516,16 @@ Token get_token() {
 					}
 					while (letter >= '0' && letter <= '9') {
 						//check if size sufficient
-						if(strlen(lexem)>=(lex_size-1)) {
-							lex_size*=2;
-							p=realloc(lexem, sizeof(char) * lex_size);
-							if(p==NULL) {
+						if (strlen(lexem) >= (lex_size - 1)) {
+							lex_size *= 2;
+							p = realloc(lexem, sizeof(char) * lex_size);
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							} else {
-								lexem=p;
+								lexem = p;
 							}
 						}
 						strncat(lexem, &letter, 1);
@@ -533,16 +533,16 @@ Token get_token() {
 					}
 					//exponent
 					//check if size sufficient
-					if(strlen(lexem)>=(lex_size-1)) {
-						lex_size*=2;
-						p=realloc(lexem, sizeof(char) * lex_size);
-						if(p==NULL) {
+					if (strlen(lexem) >= (lex_size - 1)) {
+						lex_size *= 2;
+						p = realloc(lexem, sizeof(char) * lex_size);
+						if (p == NULL) {
 							free(lexem);
 							new.kw = INTERNAL;
 							new.i = INTERNAL_COMPILER_ERROR;
 							return new;
 						} else {
-							lexem=p;
+							lexem = p;
 						}
 					}
 					if (letter == 'e' || letter == 'E') {
@@ -550,16 +550,16 @@ Token get_token() {
 						letter = getchar();
 						if (letter == '+' || letter == '-') {
 							//check if size sufficient
-							if(strlen(lexem)>=(lex_size-1)) {
-								lex_size*=2;
-								p=realloc(lexem, sizeof(char) * lex_size);
-								if(p==NULL) {
+							if (strlen(lexem) >= (lex_size - 1)) {
+								lex_size *= 2;
+								p = realloc(lexem, sizeof(char) * lex_size);
+								if (p == NULL) {
 									free(lexem);
 									new.kw = INTERNAL;
 									new.i = INTERNAL_COMPILER_ERROR;
 									return new;
 								} else {
-									lexem=p;
+									lexem = p;
 								}
 							}
 							strncat(lexem, &letter, 1);
@@ -573,16 +573,16 @@ Token get_token() {
 						}
 						while (letter >= '0' && letter <= '9') {
 							//check if size sufficient
-							if(strlen(lexem)>=(lex_size-1)) {
-								lex_size*=2;
-								p=realloc(lexem, sizeof(char) * lex_size);
-								if(p==NULL) {
+							if (strlen(lexem) >= (lex_size - 1)) {
+								lex_size *= 2;
+								p = realloc(lexem, sizeof(char) * lex_size);
+								if (p == NULL) {
 									free(lexem);
 									new.kw = INTERNAL;
 									new.i = INTERNAL_COMPILER_ERROR;
 									return new;
 								} else {
-									lexem=p;
+									lexem = p;
 								}
 							}
 							strncat(lexem, &letter, 1);
@@ -591,8 +591,8 @@ Token get_token() {
 						d = atof(lexem);
 						new.kw = decim;
 						new.f = d;
-						p = malloc(sizeof(char) * (strlen(lexem)+1));
-						if(p==NULL) {
+						p = malloc(sizeof(char) * (strlen(lexem) + 1));
+						if (p == NULL) {
 							free(lexem);
 							new.kw = INTERNAL;
 							new.i = INTERNAL_COMPILER_ERROR;
@@ -607,8 +607,8 @@ Token get_token() {
 						d = atof(lexem);
 						new.kw = decim;
 						new.f = d;
-						p = malloc(sizeof(char) * (strlen(lexem)+1));
-						if(p==NULL) {
+						p = malloc(sizeof(char) * (strlen(lexem) + 1));
+						if (p == NULL) {
 							free(lexem);
 							new.kw = INTERNAL;
 							new.i = INTERNAL_COMPILER_ERROR;
@@ -626,16 +626,16 @@ Token get_token() {
 					letter = getchar();
 					if (letter == '+' || letter == '-') {
 						//check if size sufficient
-						if(strlen(lexem)>=(lex_size-1)) {
-							lex_size*=2;
-							p=realloc(lexem, sizeof(char) * lex_size);
-							if(p==NULL) {
+						if (strlen(lexem) >= (lex_size - 1)) {
+							lex_size *= 2;
+							p = realloc(lexem, sizeof(char) * lex_size);
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							} else {
-								lexem=p;
+								lexem = p;
 							}
 						}
 						strncat(lexem, &letter, 1);
@@ -649,16 +649,16 @@ Token get_token() {
 					}
 					while (letter >= '0' && letter <= '9') {
 						//check if size sufficient
-						if(strlen(lexem)>=(lex_size-1)) {
-							lex_size*=2;
-							p=realloc(lexem, sizeof(char) * lex_size);
-							if(p==NULL) {
+						if (strlen(lexem) >= (lex_size - 1)) {
+							lex_size *= 2;
+							p = realloc(lexem, sizeof(char) * lex_size);
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
 								return new;
 							} else {
-								lexem=p;
+								lexem = p;
 							}
 						}
 						strncat(lexem, &letter, 1);
@@ -667,8 +667,8 @@ Token get_token() {
 					d = atof(lexem);
 					new.kw = decim;
 					new.f = d;
-					p = malloc(sizeof(char) * (strlen(lexem)+1));
-					if(p==NULL) {
+					p = malloc(sizeof(char) * (strlen(lexem) + 1));
+					if (p == NULL) {
 						free(lexem);
 						new.kw = INTERNAL;
 						new.i = INTERNAL_COMPILER_ERROR;
@@ -684,8 +684,8 @@ Token get_token() {
 					n = atoi(lexem);
 					new.kw = num;
 					new.i = n;
-					p = malloc(sizeof(char) * (strlen(lexem)+1));
-					if(p==NULL) {
+					p = malloc(sizeof(char) * (strlen(lexem) + 1));
+					if (p == NULL) {
 						free(lexem);
 						new.kw = INTERNAL;
 						new.i = INTERNAL_COMPILER_ERROR;
@@ -720,16 +720,16 @@ Token get_token() {
 				//identifikátory
 				while ((letter >= '0' && letter <= '9') || (letter >= 'a' && letter <= 'z') || (letter >= 'A' && letter <= 'Z') || letter == '_') {
 					//check if size sufficient
-					if(strlen(lexem)>=(lex_size-1)) {
-						lex_size*=2;
-						p=realloc(lexem, sizeof(char) * lex_size);
-						if(p==NULL) {
+					if (strlen(lexem) >= (lex_size - 1)) {
+						lex_size *= 2;
+						p = realloc(lexem, sizeof(char) * lex_size);
+						if (p == NULL) {
 							free(lexem);
 							new.kw = INTERNAL;
 							new.i = INTERNAL_COMPILER_ERROR;
 							return new;
 						} else {
-							lexem=p;
+							lexem = p;
 						}
 					}
 					strncat(lexem, &letter, 1);
@@ -747,8 +747,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -779,8 +779,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -805,8 +805,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -831,8 +831,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -857,8 +857,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -883,8 +883,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -915,8 +915,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -941,8 +941,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -967,8 +967,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -1011,8 +1011,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -1037,8 +1037,8 @@ Token get_token() {
 						} else {
 							//id
 							new.kw = id;
-							p = malloc(sizeof(char) * (strlen(lexem)+1));
-							if(p==NULL) {
+							p = malloc(sizeof(char) * (strlen(lexem) + 1));
+							if (p == NULL) {
 								free(lexem);
 								new.kw = INTERNAL;
 								new.i = INTERNAL_COMPILER_ERROR;
@@ -1055,8 +1055,8 @@ Token get_token() {
 					default:
 						//id
 						new.kw = id;
-						p = malloc(sizeof(char) * (strlen(lexem)+1));
-						if(p==NULL) {
+						p = malloc(sizeof(char) * (strlen(lexem) + 1));
+						if (p == NULL) {
 							free(lexem);
 							new.kw = INTERNAL;
 							new.i = INTERNAL_COMPILER_ERROR;

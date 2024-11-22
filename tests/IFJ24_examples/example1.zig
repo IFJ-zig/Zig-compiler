@@ -5,7 +5,7 @@ pub fn main() void {
     ifj.write("Zadejte cislo pro vypocet faktorialu\n");
     const a = ifj.readi32();
     if (a) |val| {
-        if (val < 0) {
+        if (val < 1) {
             ifj.write("Faktorial ");
             ifj.write(val);
             ifj.write(" nelze spocitat\n");
