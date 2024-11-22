@@ -10,11 +10,12 @@
 
 #include "errors_enum.h"
 #include "expression_parser.h"
+#include "semantic_an.h"
 #include "symtable.h" //For varType
 #include "tokens.h"
 
 int syntax_analyzer(/*List *L*/);
-int code(bool tokenWasGiven);
+int code();
 int program();
 int seekHeaders();
 int skip_function_body();
@@ -31,6 +32,7 @@ int return_syntax();
 int call_or_assignment();
 int variable_definition(bool isConst);
 int skip_expression();
+int read_token();
 
 
 //Helper functions

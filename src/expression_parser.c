@@ -83,19 +83,10 @@ int getOperation(int tokenStack, int tokenInput) {
 	return (int)precedentTable[(TABLE_SIZE * i) + j];
 }
 
-Token *tokenPrec;
-List *tokenListPrec;
+extern Token token;
 
-int getTokenPrec() {
-	tokenPrec = LGetAct(tokenListPrec);
-	LActNext(tokenListPrec);
-	return 0;
-}
-
-
-int expressionParser(List *tokenList) {
+int expressionParser() {
 	int statusCode;
-	tokenListPrec = tokenList;
 
 	t_Stack stack;
 	stackInit(&stack);
@@ -103,10 +94,14 @@ int expressionParser(List *tokenList) {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	getTokenPrec();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		stackClear(&stack);
+		return statusCode;
+	}
 	while (1) {
 		printStack(&stack);
-		int operation = getOperation(topTerminal(&stack)->keyword, tokenPrec->kw);
+		int operation = getOperation(topTerminal(&stack)->keyword, token.kw);
 		switch (operation) {
 			case '<':
 				statusCode = stackPushPrecedentLess(&stack);
@@ -115,20 +110,28 @@ int expressionParser(List *tokenList) {
 					stackClear(&stack);
 					return statusCode;
 				}
-				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
+				statusCode = stackPush(&stack, TERMINAL, token.kw);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;
 				}
-				getTokenPrec();
+				statusCode = read_token();
+				if (statusCode != 0) {
+					stackClear(&stack);
+					return statusCode;
+				}
 				break;
 			case '=':
-				statusCode = stackPush(&stack, TERMINAL, tokenPrec->kw);
+				statusCode = stackPush(&stack, TERMINAL, token.kw);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;
 				}
-				getTokenPrec();
+				statusCode = read_token();
+				if (statusCode != 0) {
+					stackClear(&stack);
+					return statusCode;
+				}
 				break;
 			case '>':
 				statusCode = tryToMatchRule(&stack);
@@ -252,6 +255,7 @@ int tryToMatchRule(t_Stack *stack) {
 				}
 				break;
 			case minus:
+				stackPop(stack);
 				temp = stackTop(stack);
 				if (temp == NULL) {
 					return SYNTACTIC_ANALYSIS_ERROR;
@@ -261,6 +265,7 @@ int tryToMatchRule(t_Stack *stack) {
 					stackPush(stack, NON_TERMINAL, EMPTY);
 					return 0;
 				} else if (temp->type == NON_TERMINAL) {
+					stackPop(stack);
 					temp = stackTop(stack);
 					if (temp == NULL) {
 						return SYNTACTIC_ANALYSIS_ERROR;

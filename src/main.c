@@ -10,12 +10,13 @@
 int main() {
 	semanticInit();
 	//TODO další kontroly a generace kodu
+
 	int err = syntax_analyzer();
 
 	if (err) {
 		return err;
 	}
-	//semanticDestroy();
+	semanticDestroy();
 
 	return 0;
 }
