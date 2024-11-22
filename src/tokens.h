@@ -11,8 +11,10 @@
 #include <string.h> //strcat,cmp,cpy,len
 
 
-typedef enum{
-	LEXEM, INTERNAL,
+typedef enum
+{
+	LEXEM,
+	INTERNAL,
 	//pro chybu v lexemu
 	num,
 	text,
@@ -85,7 +87,8 @@ typedef enum{
 	EMPTY = -1,
 } KeyWord;
 
-typedef struct SToken{
+typedef struct SToken
+{
 	KeyWord kw;
 	int i;
 	double f;
