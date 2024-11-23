@@ -12,8 +12,8 @@
 typedef struct ast_node
 {
     Token *token;
-    struct SNode *left;
-    struct SNode *right;
+    struct ast_node *left;
+    struct ast_node *right;
 } ast_node_t;
 
 typedef struct ast {
