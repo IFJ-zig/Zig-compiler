@@ -5,14 +5,14 @@ pub fn main() void {
     ifj.write("Zadejte cislo pro vypocet faktorialu\n");
     const a = ifj.readi32();
     if (a) |val| {
-        if (val < 0) {
+        if (val < 1) {
             ifj.write("Faktorial ");
             ifj.write(val);
             ifj.write(" nelze spocitat\n");
         } else {
             var d: f64 = ifj.i2f(val);
             var vysl: f64 = 1.0;
-            while (d > 0) {
+            while (d > 1) {
                 vysl = vysl * d;
                 d = d - 1.0;
             }

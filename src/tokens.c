@@ -3,6 +3,7 @@
 * Tvůrci: Ivo Puchnar, xpuchn02
 *********************************************/
 #include "tokens.h"
+
 #include "errors_enum.h"
 
 

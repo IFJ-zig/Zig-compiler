@@ -100,11 +100,34 @@ int expressionParser() {
 		return statusCode;
 	}
 	while (1) {
-		printStack(&stack);
+		//printStack(&stack);
+		//temporarily handle inbuild functions
+		if (token.kw == inbuild) {
+			read_token();
+			if (token.kw != dot) {
+				fprintf(stderr, "Error: Unexpected library usage %d\n", token.kw);
+				stackClear(&stack);
+				return SYNTACTIC_ANALYSIS_ERROR;
+			}
+			read_token();
+			if (token.kw != id) {
+				fprintf(stderr, "Error: Expected library call\n");
+				stackClear(&stack);
+				return SYNTACTIC_ANALYSIS_ERROR;
+			}
+			statusCode = function_call(false);
+			if (statusCode != 0) {
+				stackClear(&stack);
+				return statusCode;
+			}
+			token.kw = id;
+		}
+
 		int operation = getOperation(topTerminal(&stack)->keyword, token.kw);
 		switch (operation) {
 			case '<':
-				statusCode = stackPushPrecedentLess(&stack);
+				statusCode
+						= stackPushPrecedentLess(&stack);
 
 				if (statusCode != 0) {
 					stackClear(&stack);
