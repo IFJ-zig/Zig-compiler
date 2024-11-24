@@ -4,8 +4,6 @@
 *********************************************/
 #include "syntax_an.h"
 
-//TODO: Semantic integration leaking like a sieve, a fix would be nice but probably not necessary for the project
-
 
 Token token;
 bool tokenWasGiven = 0;
@@ -87,7 +85,7 @@ int seekHeaders() {
 
 		read_token();
 		if (token.kw != lbracket) {
-			fprintf(stderr, "Error: Expected '(' after function id in header\n");
+			fprintf(stderr, "Error: Expected '(' after function id in header, got %s\n", getTokenName(token));
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		read_token();
@@ -97,7 +95,7 @@ int seekHeaders() {
 				Token paramID = token;
 				read_token();
 				if (token.kw != colon) {
-					fprintf(stderr, "Error: Expected ':' after parameter id\n");
+					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
 				data_type();
@@ -105,13 +103,13 @@ int seekHeaders() {
 				assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 				read_token();
 				if (token.kw != comma && token.kw != rbracket) {
-					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
+					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
 				if (token.kw == comma)
 					read_token();
 			} else {
-				fprintf(stderr, "Error: Expected parameter id, got %d\n", comma);
+				fprintf(stderr, "Error: Expected parameter id, got %s\n", getTokenName(token));
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
 		}
@@ -119,7 +117,7 @@ int seekHeaders() {
 		fprintf(stderr, "Param list OK\n\n");
 
 		if (token.kw != rbracket) {
-			fprintf(stderr, "Error: Expected ')' after param list in function header\n");
+			fprintf(stderr, "Error: Expected ')' after param list in function header, got %s\n", getTokenName(token));
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		read_token();
