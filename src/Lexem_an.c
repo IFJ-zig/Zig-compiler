@@ -471,7 +471,6 @@ Token get_token() {
 					return new;
 				}
 				strncat(lexem, "00", 1);
-				break;
 			case '1' ... '9':
 				//čísla
 				while (letter >= '0' && letter <= '9') {
