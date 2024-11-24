@@ -90,4 +90,6 @@ char *LGetStrAct(Token *T);
 
 Token get_token();
 
+char *getTokenName(Token T);
+
 #endif // TOKENS_H
