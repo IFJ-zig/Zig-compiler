@@ -530,6 +530,7 @@ Token get_token() {
 						strncat(lexem, &letter, 1);
 						letter = getchar();
 					}
+					ungetc(letter, stdin);
 					//exponent
 					//check if size sufficient
 					if (strlen(lexem) >= (lex_size - 1)) {

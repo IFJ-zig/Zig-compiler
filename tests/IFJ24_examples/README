@@ -1,2 +1,5 @@
 Tento adresář obsahuje několik příkladů programů napsaných v IFJ24 pro dokreslení zadání a upozornění na některé hůře pochopitelné aspekty IFJ24.
 Pro spuštění všech testů můžete využít dávku ./examples.sh (bash script) a případně si jej upravit/rozšířit pro své potřeby. Jednotlivé testy lze zkoušet dávkou ./run.sh.
+2024-10-10: Oprava chyby v testu example2.zig, kde bylo unární mínus (nahrazeno výrazem s binárním mínus).
+2024-11-19: Oprava ifj24.zig (write pro vypis i nullable promennych), oprava komentare v multiline.zig a doplneni demonstrace neinterpretace escake sekvenci.
+

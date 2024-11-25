@@ -12,6 +12,7 @@ int read_token() {
 	token = get_token();
 	if (token.kw == LEXEM) {
 		fprintf(stderr, "Error: Lexical error\n");
+		return LEXEM_ERROR;
 	}
 	return 0;
 }
@@ -583,7 +584,7 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Expected '=' after variable type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	if(!isDefined)
+	if (!isDefined)
 		statusCode = defineSymbol(varID.s, INT, isConst, isNullable);
 	if (statusCode != 0)
 		return statusCode;

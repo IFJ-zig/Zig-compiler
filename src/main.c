@@ -14,6 +14,7 @@ int main() {
 	int err = syntax_analyzer();
 
 	if (err) {
+		printf("Error code: %d\n", err);
 		return err;
 	}
 	semanticDestroy();

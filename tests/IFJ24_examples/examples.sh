@@ -2,7 +2,7 @@
 
 # IFJ24 - Priklady pro studenty pro dokresleni zadani (spusteni konfigurovano pro server Merlin)
 
-COMPILER="./ifj24.out"  # zde muze byt vas prekladac IFJ24 (napr. ./ifj24)
+COMPILER=""  # zde muze byt vas prekladac IFJ24 (napr. ./ifj24)
 HELPER="ifj24.zig"
 INTERPRETER="./run.sh"  # zde muze byt interpret IFJcode24 (./ic24int)
 
