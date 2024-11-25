@@ -25,7 +25,6 @@ typedef enum {
 
 typedef struct ast_node_fn_param{
     ast_node_type type;
-    char *name;         //Same as symbol->key
     symbol_t *symbol;
 } ast_node_fn_param_t;
 
@@ -33,9 +32,8 @@ typedef struct ast_node_fn_param{
 typedef struct ast_node_fn_def{
     Token *token;
     ast_node_type type;
-    struct ast_node_fn_param **params;
     struct ast_default_node **body;
-    unsigned int paramCount;
+    symbol_t *fnSymbol;
     varType returnType;
 
 } ast_node_fn_def_t;
