@@ -14,19 +14,13 @@ typedef enum {
     AST_NODE_FN_PARAM,
     AST_NODE_FN_DEF,
     AST_NODE_FN_RETURN,
+    AST_NODE_FN_CALL,   
+    AST_NODE_EXP,       
     AST_NODE_VAR_DEF,
     AST_NODE_VAR_ASSIGN,
-    AST_NODE_FN_CALL,
-    AST_NODE_RETURN,
-    AST_NODE_IF,
+    AST_NODE_IF_ELSE,
     AST_NODE_WHILE,
-    AST_NODE_EXPRESSION,
-    AST_NODE_BLOCK,
-    AST_NODE_PARAM_LIST,
-    AST_NODE_DATA_TYPE,
-    AST_NODE_LITERAL,
-    AST_NODE_IDENTIFIER,
-    AST_NODE_OPERATOR,
+    AST_NODE_DEFAULT,   //Default node for the AST
 } ast_node_type;
 
 typedef struct ast_node_fn_param{
@@ -45,6 +39,16 @@ typedef struct ast_node_fn_def{
 
 } ast_node_fn_def_t;
 
+
+typedef struct ast_node_fn_call{
+    ast_node_type type;
+    Token *token;
+    char *name;
+    ast_node_exp_t **args;
+    unsigned int argCount;
+} ast_node_fn_call_t;
+
+
 typedef struct ast_node_fn_return{
     ast_node_type type;
     Token *token;
@@ -53,20 +57,63 @@ typedef struct ast_node_fn_return{
     unsigned int returnCount;
 } ast_node_fn_return_t;
 
+
 typedef struct ast_node_exp{
     ast_node_type type;
     Token *token;
     varType dataType;
-    //todo finish this, imma go play civ
-
+    struct{
+        struct{
+            struct ast_node_exp *left;
+            struct ast_node_exp *right;
+        } binary_op;
+        ast_node_fn_call_t *fnCall;
+    } data_t
 } ast_node_exp_t;
+
+
+typedef struct ast_node_var_assign{
+    ast_node_type type;
+    Token *token;
+    char *name;
+    symbol_t *symbol;
+    ast_node_exp_t *expression;
+    unsigned int assignCount;
+} ast_node_var_assign_t;
+
+
+typedef struct ast_node_var_def{
+    ast_node_type type;
+    Token *token;
+    char *name;
+    symbol_t *symbol;
+    ast_node_var_assign_t *assignment;
+} ast_node_var_def_t;
+
+
+typedef struct ast_node_if_else{
+    ast_node_type type;
+    ast_node_exp_t *conditionExp;
+    ast_default_node_t **ifBlock;
+    ast_default_node_t **elseBlock;
+    unsigned int ifCount;
+    unsigned int elseCount;
+} ast_node_if_else_t;
+
+
+typedef struct ast_node_while{
+    ast_node_type type;
+    ast_node_exp_t *conditionExp;
+    ast_default_node_t **block;
+    unsigned int blockCount;
+} ast_node_while_t;
 
 
 typedef struct ast_default_node{
     ast_node_type type;
     union {
-        ast_node_fn_param_t *fn_param;
-        ast_node_fn_def_t *fn_def;
+        ast_node_fn_param_t *fnParam;
+        ast_node_fn_def_t *fnDef;
 
         struct body{
             ast_default_node_t **nodes;
