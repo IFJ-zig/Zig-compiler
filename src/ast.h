@@ -33,7 +33,7 @@ typedef struct ast_node_fn_param{
 typedef struct ast_node_fn_def{
     Token *token;
     ast_node_type type;
-    ast_node_fn_param_t **params;
+    struct ast_node_fn_param **params;
     unsigned int paramCount;
     varType returnType;
 
@@ -44,7 +44,7 @@ typedef struct ast_node_fn_call{
     ast_node_type type;
     Token *token;
     char *name;
-    ast_node_exp_t **args;
+    struct ast_node_exp **args;
     unsigned int argCount;
 } ast_node_fn_call_t;
 
@@ -53,7 +53,7 @@ typedef struct ast_node_fn_return{
     ast_node_type type;
     Token *token;
     varType returnType;
-    ast_node_exp_t *expression;
+    struct ast_node_exp *expression;
     unsigned int returnCount;
 } ast_node_fn_return_t;
 
@@ -70,8 +70,8 @@ typedef struct ast_node_exp{
             struct ast_node_exp *left;
             struct ast_node_exp *right;
         } binary_op;
-        ast_node_fn_call_t *fnCall;
-    } data_t
+        struct ast_node_fn_call *fnCall;
+    } data_t;
 } ast_node_exp_t;
 
 
@@ -80,7 +80,7 @@ typedef struct ast_node_var_assign{
     Token *token;
     char *name;
     symbol_t *symbol;
-    ast_node_exp_t *expression;
+    struct ast_node_exp *expression;
     unsigned int assignCount;
 } ast_node_var_assign_t;
 
@@ -90,15 +90,15 @@ typedef struct ast_node_var_def{
     Token *token;
     char *name;
     symbol_t *symbol;
-    ast_node_var_assign_t *assignment;
+    struct ast_node_var_assign *assignment;
 } ast_node_var_def_t;
 
 
 typedef struct ast_node_if_else{
     ast_node_type type;
-    ast_node_exp_t *conditionExp;
-    ast_default_node_t **ifBlock;
-    ast_default_node_t **elseBlock;
+    struct ast_node_exp *conditionExp;
+    struct ast_default_node **ifBlock;
+    struct ast_default_node **elseBlock;
     unsigned int ifCount;
     unsigned int elseCount;
 } ast_node_if_else_t;
@@ -106,8 +106,8 @@ typedef struct ast_node_if_else{
 
 typedef struct ast_node_while{
     ast_node_type type;
-    ast_node_exp_t *conditionExp;
-    ast_default_node_t **block;
+    struct ast_node_exp *conditionExp;
+    struct ast_default_node **block;
     unsigned int blockCount;
 } ast_node_while_t;
 
@@ -115,11 +115,11 @@ typedef struct ast_node_while{
 typedef struct ast_default_node{
     ast_node_type type;
     union {
-        ast_node_fn_param_t *fnParam;
-        ast_node_fn_def_t *fnDef;
+        struct ast_node_fn_param *fnParam;
+        struct ast_node_fn_def *fnDef;
 
         struct body{
-            ast_default_node_t **nodes;
+            struct ast_default_node **nodes;
             unsigned int nodeCount;
         } body_t;
     } data_t;
