@@ -34,6 +34,7 @@ typedef struct ast_node_fn_def{
     Token *token;
     ast_node_type type;
     struct ast_node_fn_param **params;
+    struct ast_default_node **body;
     unsigned int paramCount;
     varType returnType;
 
@@ -117,6 +118,13 @@ typedef struct ast_default_node{
     union {
         struct ast_node_fn_param *fnParam;
         struct ast_node_fn_def *fnDef;
+        struct ast_node_fn_call *fnCall;
+        struct ast_node_fn_return *fnReturn;
+        struct ast_node_fn_exp *exp;
+        struct ast_node_var_assign *varAssign;
+        struct ast_node_var_def *varDef;
+        struct ast_node_if_else *ifElse;
+        struct ast_node_while *While;
 
         struct body{
             struct ast_default_node **nodes;
