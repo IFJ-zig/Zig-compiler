@@ -64,6 +64,9 @@ typedef struct ast_node_exp{
     varType dataType;
     struct{
         struct{
+            struct ast_node_exp *exp;
+        } unary_op;
+        struct{
             struct ast_node_exp *left;
             struct ast_node_exp *right;
         } binary_op;
