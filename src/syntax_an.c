@@ -190,8 +190,9 @@ int program() {
 			statusCode = function_analysis();
 			if (statusCode != 0)
 				return statusCode;
+			fprintf(stderr, "\n");
 		} else if (token.kw == end) {
-			fprintf(stderr, "\nCompilation successfully finished \n");
+			fprintf(stderr, "Compilation successfully finished \n");
 			return 0;
 		} else {
 			fprintf(stderr, "Error: Expected function definition or end of program, but found %d\n", token.kw);
@@ -651,7 +652,10 @@ int if_else() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		defineSymbol(token.s, INT, false, false);
+		statusCode = defineSymbol(token.s, INT, false, false);
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		statusCode = read_token();
 		if (statusCode != 0) {
 			return statusCode;
@@ -771,7 +775,6 @@ int variable_definition(bool isConst) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	Token varID = token;
-	fprintf(stderr, "Variable ID: %s\n", varID.s);
 	statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -782,8 +785,10 @@ int variable_definition(bool isConst) {
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
-		fprintf(stderr, "trying to define symbol %s\n", varID.s);
-		defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
+		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		statusCode = read_token();
 		if (statusCode != 0) {
 			return statusCode;
@@ -914,7 +919,10 @@ int while_syntax() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		defineSymbol(token.s, INT, false, false);
+		statusCode = defineSymbol(token.s, INT, false, false);
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		statusCode = read_token();
 		if (statusCode != 0) {
 			return statusCode;
