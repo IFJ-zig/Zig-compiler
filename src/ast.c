@@ -9,14 +9,14 @@
 #include <stdlib.h>
 
 #include "errors_enum.h"
-/*
 
-void ast_init(ast_t *ast){
-    ast->root = NULL;
-    ast->activeNode = NULL;
-    ast->nodeCount = 0;
+
+void ast_init(ast_default_node_t *ast){
+    ast->type = AST_NODE_DEFAULT;
+    ast->data_t.body_t.nodes = NULL;
+    ast->data_t.body_t.nodeCount = 0;
 }
-
+/*
 void ast_insert(ast_t *ast, bool insertLeft, Token *token){
     ast_node_t *newNode = (ast_node_t *)malloc(sizeof(ast_node_t));
     if (newNode == NULL)
@@ -63,5 +63,4 @@ void ast_destroy_node(ast_node_t *node){
         ast_destroy_node(node->right);
     }
     free(node);
-}
-*/
+}*/
