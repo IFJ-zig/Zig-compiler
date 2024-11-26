@@ -1,0 +1,270 @@
+.IFJcode24
+
+JUMP main
+
+LABEL ifjreadi32
+    CREATEFRAME
+    PUSHFRAME
+    DEFVAR LF@retVal%%
+    DEFVAR LF@readValue%%
+    DEFVAR LF@readValueType%%
+    READ LF@readValue%% int
+    TYPE LF@readValueType%% LF@readValue%%
+    JUMPIFNEQ correct_input_int LF@readValueType%% nil@nil
+    MOVE LF@retVal%% nil@nil
+    POPFRAME
+    RETURN
+    LABEL correct_input_int
+    MOVE LF@retVal%% LF@readValue%%
+    POPFRAME
+RETURN
+
+LABEL ifjreadf64
+    CREATEFRAME
+    PUSHFRAME
+    DEFVAR LF@retVal%%
+    DEFVAR LF@readValue%%
+    DEFVAR LF@readValueType%%
+    READ LF@readValue%% float
+    TYPE LF@readValueType%% LF@readValue%%
+    JUMPIFNEQ correct_input_float LF@readValueType%% nil@nil
+    MOVE LF@retVal%% nil@nil
+    POPFRAME
+    RETURN
+    LABEL correct_input_float
+    MOVE LF@retVal%% LF@readValue%%
+    POPFRAME
+RETURN
+
+LABEL ifjreadstr
+    CREATEFRAME
+    PUSHFRAME
+    DEFVAR LF@retVal%%
+    DEFVAR LF@readValue%%
+    DEFVAR LF@readValueType%%
+    READ LF@readValue%% string
+    TYPE LF@readValueType%% LF@readValue%%
+    JUMPIFNEQ correct_input_string LF@readValueType%% nil@nil
+    MOVE LF@retVal%% nil@nil
+    POPFRAME
+    RETURN
+    LABEL correct_input_string
+    MOVE LF@retVal%% LF@readValue%%
+    POPFRAME
+RETURN
+
+LABEL ifji2f
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    DEFVAR LF@param%%
+    POPS LF@param%%
+    INT2FLOAT LF@retVal%% LF@param%%
+    
+    POPFRAME
+RETURN
+    
+    
+LABEL ifjf2i
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    DEFVAR LF@param%%
+    POPS LF@param%%
+    FLOAT2INT LF@retVal%% LF@param%%
+    
+    POPFRAME
+RETURN
+
+LABEL ifjlength
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    DEFVAR LF@param%%
+    POPS LF@param%%
+    STRLEN LF@retVal%% LF@param%%
+    
+    POPFRAME
+RETURN
+
+LABEL ifjconcat 
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    DEFVAR LF@param1%%
+    DEFVAR LF@param2%%
+    POPS LF@param2%%
+    POPS LF@param1%%
+    CONCAT LF@retVal%% LF@param1%% LF@param2%%
+    
+    POPFRAME
+RETURN
+
+LABEL ifjsubstring
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    MOVE LF@retVal%% string@
+    DEFVAR LF@string%%
+    DEFVAR LF@startIndex%%
+    DEFVAR LF@endIndex%%
+    DEFVAR LF@strLength%%
+    POPS LF@endIndex%%
+    POPS LF@startIndex%%
+    POPS LF@string%%
+    STRLEN LF@strLength%% LF@string%%
+    DEFVAR LF@indexCheck%%
+    LT LF@indexCheck%% LF@startIndex%% int@0
+    JUMPIFEQ substrCheckFailed LF@indexCheck%% bool@true
+    LT LF@indexCheck%% LF@endIndex%% int@0
+    JUMPIFEQ substrCheckFailed LF@indexCheck%% bool@true
+    GT LF@indexCheck%% LF@startIndex%% LF@endIndex%%
+    JUMPIFEQ substrCheckFailed LF@indexCheck%% bool@true
+    LT LF@indexCheck%% LF@startIndex%% LF@strLength%%
+    JUMPIFNEQ substrCheckFailed LF@indexCheck%% bool@true
+    GT LF@indexCheck%% LF@endIndex%% LF@strLength%%
+    JUMPIFEQ substrCheckFailed LF@indexCheck%% bool@true
+    DEFVAR LF@substrChar%%
+    DEFVAR LF@substrCounter%%
+    SUB LF@substrCounter%% LF@endIndex%% LF@startIndex%%
+    LABEL substrWhileCycle
+    JUMPIFEQ substrCheckPassed LF@substrCounter%% int@0
+    GETCHAR LF@substrChar%% LF@string%% LF@startIndex%%
+    CONCAT LF@retVal%% LF@retVal%% LF@substrChar%%
+    ADD LF@startIndex%% LF@startIndex%% int@1
+    SUB LF@substrCounter%% LF@substrCounter%% int@1
+    JUMP substrWhileCycle
+    LABEL substrCheckFailed
+    MOVE LF@retVal%% nil@nil
+    LABEL substrCheckPassed
+    POPFRAME
+RETURN
+
+LABEL ifjstrcmp
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    DEFVAR LF@str1Length%%
+    DEFVAR LF@str2Length%%
+    DEFVAR LF@usedLength%%
+    DEFVAR LF@string1%%
+    DEFVAR LF@string2%%
+    DEFVAR LF@strcmpInfo%% ## 0 - equal, 1 - str1 > str2, 2 - str1 < str2
+
+    POPS LF@string2%%
+    POPS LF@string1%%
+    STRLEN LF@str1Length%% LF@string1%%
+    STRLEN LF@str2Length%% LF@string2%%
+    DEFVAR LF@strcmpBool%%
+    EQ LF@strcmpBool%% LF@str1Length%% LF@str2Length%%
+    JUMPIFEQ strcmpLengthsEqual LF@strcmpBool%% bool@true
+    LT LF@strcmpBool%% LF@str1Length%% LF@str2Length%%
+    JUMPIFEQ strcmpLength1Smaller LF@strcmpBool%% bool@true
+
+    LABEL strcmpLength1Greater
+    MOVE LF@usedLength%% LF@str2Length%%
+    MOVE LF@strcmpInfo%% int@1
+    JUMP strcmpCycle
+    LABEL strcmpLength1Smaller
+    MOVE LF@usedLength%% LF@str1Length%%
+    MOVE LF@strcmpInfo%% int@-1
+    JUMP strcmpCycle
+    LABEL strcmpLengthsEqual
+    MOVE LF@usedLength%% LF@str1Length%%
+    MOVE LF@strcmpInfo%% int@0
+
+    LABEL strcmpCycle
+    DEFVAR LF@strcmpChar1%%
+    DEFVAR LF@strcmpChar2%%
+    DEFVAR LF@strcmpIndex%%
+    MOVE LF@strcmpIndex%% int@0
+
+    JUMPIFEQ strcmpEnd LF@usedLength%% int@0
+    STRI2INT LF@strcmpChar1%% LF@string1%% LF@strcmpIndex%%
+    STRI2INT LF@strcmpChar2%% LF@string2%% LF@strcmpIndex%%
+    DPRINT LF@strcmpIndex%%
+    EQ LF@strcmpBool%% LF@strcmpChar1%% LF@strcmpChar2%%
+    JUMPIFEQ strcmpCycleDiff LF@strcmpBool%% bool@false
+    ADD LF@strcmpIndex%% LF@strcmpIndex%% int@1
+    SUB LF@usedLength%% LF@usedLength%% int@1
+    JUMP strcmpCycle
+
+    LABEL strcmpCycleDiff
+    LT LF@strcmpBool%% LF@strcmpChar1%% LF@strcmpChar2%%
+    JUMPIFEQ strcmpString1Less LF@strcmpBool%% bool@true
+    MOVE LF@retVal%% int@1
+    POPFRAME
+    RETURN
+
+    LABEL strcmpString1Less
+    MOVE LF@retVal%% int@-1
+    POPFRAME
+    RETURN
+
+    LABEL strcmpEnd
+    MOVE LF@retVal%% LF@strcmpInfo%%
+    POPFRAME
+RETURN
+
+LABEL ifjord
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    DEFVAR LF@string%%
+    DEFVAR LF@index%%
+    DEFVAR LF@strLen%%
+
+    POPS LF@index%%
+    POPS LF@string%%
+    STRLEN LF@strLen%% LF@string%%
+
+    DEFVAR LF@indexCheck%%
+    EQ LF@indexCheck%% LF@strLen%% int@0
+    JUMPIFEQ ordCheckFailed LF@indexCheck%% bool@true
+    LT LF@indexCheck%% LF@index%% LF@strLen%%
+    JUMPIFEQ ordCheckFailed LF@indexCheck%% bool@false
+    LT LF@indexCheck%% LF@index%% int@0
+    JUMPIFEQ ordCheckFailed LF@indexCheck%% bool@true
+
+    STRI2INT LF@retVal%% LF@string%% LF@index%%
+    POPFRAME
+    RETURN
+
+    LABEL ordCheckFailed
+    MOVE LF@retVal%% int@0
+    POPFRAME
+RETURN
+
+LABEL ifjchr 
+    CREATEFRAME
+    PUSHFRAME
+    
+    DEFVAR LF@retVal%%
+    DEFVAR LF@char%%
+    POPS LF@char%%
+    INT2CHAR LF@retVal%% LF@char%%
+    
+    POPFRAME
+RETURN
+
+LABEL main
+    CREATEFRAME
+    PUSHFRAME
+
+    PUSHS int@97
+    CALL ifjchr
+    
+    BREAK
+    #PUSHS TF@toPrint
+    #CALL int2float
+    
+    #DEFVAR TF@toPrint
+    #MOVE TF@toPrint TF@retVal
+    WRITE TF@retVal%%
