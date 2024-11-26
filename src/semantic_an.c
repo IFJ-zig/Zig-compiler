@@ -35,7 +35,7 @@ void exitScope() {
 
 int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 	symbol_t *symbol = htab_find(list->last, name);
-	if (symbol != NULL){
+	if (symbol != NULL) {
 		fprintf(stderr, "Error: Symbol '%s' is already defined at depth %d\n", name, getCurrentDepth(list));
 		return REDEFINITION_ERROR;
 	}

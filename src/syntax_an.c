@@ -242,7 +242,7 @@ int checkImport() {
 		fprintf(stderr, "Error: Expected ';'\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	if(!imported){
+	if (!imported) {
 		loadIFJ24();
 		imported = true;
 	}
@@ -254,13 +254,13 @@ void loadIFJ24() {
 	symbol_t *fnSymbol;
 	defineSymbol("ifj.write", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.write");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "value", .kw = id}, (Token) {.kw = dtflt}, false);
-	fnSymbol->params[0]->type = ANYTYPE;	//Anytype is allowed, we don't have a keyword for that however, so a little hack because, because this is happens only once in the entire program
-	
+	assignFunctionParameter(fnSymbol, (Token){.s = "value", .kw = id}, (Token){.kw = dtflt}, false);
+	fnSymbol->params[0]->type = ANYTYPE; //Anytype is allowed, we don't have a keyword for that however, so a little hack because, because this is happens only once in the entire program
+
 	defineSymbol("ifj.readstr", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readstr");
 	fnSymbol->returnType = STRING;
-	
+
 	defineSymbol("ifj.readi32", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readi32");
 	fnSymbol->returnType = INT;
@@ -271,52 +271,52 @@ void loadIFJ24() {
 
 	defineSymbol("ifj.string", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.string");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
 
 	defineSymbol("ifj.concat", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.concat");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "str1", .kw = id}, (Token) {.kw = dtstr}, false);
-	assignFunctionParameter(fnSymbol, (Token) {.s = "str2", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "str1", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "str2", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
 
 	defineSymbol("ifj.length", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.length");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = INT;
 
 	defineSymbol("ifj.i2f", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.i2f");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = FLOAT;
 
 	defineSymbol("ifj.f2i", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.f2i");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtflt}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtflt}, false);
 	fnSymbol->returnType = INT;
 
 	defineSymbol("ifj.substring", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.substring");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
-	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
-	assignFunctionParameter(fnSymbol, (Token) {.s = "j", .kw = id}, (Token) {.kw = dtint}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "j", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = STRING;
 
 	defineSymbol("ifj.ord", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.ord");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
-	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = INT;
 
 	defineSymbol("ifj.chr", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.chr");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = STRING;
 
 	defineSymbol("ifj.strcmp", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.strcmp");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s1", .kw = id}, (Token) {.kw = dtstr}, false);
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s2", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "s1", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "s2", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = INT;
 	fprintf(stderr, "Done loading IFJ24 functions\n\n");
 }
@@ -374,11 +374,7 @@ int function_analysis() {
 		if (statusCode != 0) {
 			return statusCode;
 		}
-		if (tokenWasGiven) {
-			tokenWasGiven = false;
-		} else {
-			read_token();
-		}
+		read_token();
 	}
 
 
@@ -458,12 +454,6 @@ int return_type() {
 }
 
 int code() {
-	if (!tokenWasGiven) {
-		tokenWasGiven = false;
-	} else {
-		read_token();
-	}
-
 	int statusCode;
 	switch (token.kw) {
 		case constant:
@@ -547,71 +537,33 @@ int if_else() {
 	}
 	exitScope(); //Exit the scope of the if statement has to be here since we can't have the unwrapped value reach the else block
 	read_token();
-	if (token.kw == _else) {
-		enterScope();
-		read_token();
-		if (token.kw != lblock) {
-			fprintf(stderr, "Error: Expected '{' after else\n");
-			return SYNTACTIC_ANALYSIS_ERROR;
-		}
-		read_token();
-		while (token.kw != rblock) {
-			statusCode = code();
-			if (statusCode != 0)
-				return statusCode;
-			read_token();
-		}
-		exitScope();
-	} else {
-		tokenWasGiven = true;
+	if (token.kw != _else) {
+		fprintf(stderr, "Error: Expected 'else' after if block\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	return 0;
-}
+	enterScope();
+	read_token();
+	if (token.kw != lblock) {
+		fprintf(stderr, "Error: Expected '{' after else\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	read_token();
 
-int skip_expression() {
-	int statusCode;
-	while (token.kw != rbracket) {
+	while (token.kw != rblock) {
+		statusCode = code();
+		if (statusCode != 0)
+			return statusCode;
 		read_token();
-		if (token.kw == lbracket) {
-			statusCode = skip_expression();
-			if (statusCode != 0)
-				return statusCode;
-		}
 	}
-	return 0;
-}
+	exitScope();
 
-//This function is a hack just to get if_else working without a working precedent_an
-//Skips the expression and returns the type of the first ID it finds, VOID if no ID is found, or if the id does not exist in the symtable
-//I am not particularly proud of this function, but it works for now
-symbol_t *skip_expression_get_symbol() {
-	int statusCode;
-	symbol_t *foundSymbol = NULL;
-	while (token.kw != rbracket) {
-		read_token();
-		if (token.kw == lbracket) {
-			statusCode = skip_expression();
-			if (statusCode != 0)
-				return 0;
-		}
-		if (token.kw == id) {
-			symbol_t *symbol = getSymbol(token.s);
-			if (symbol == NULL) {
-				fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
-			} else
-				foundSymbol = symbol;
-		}
-	}
-	return foundSymbol;
+	return 0;
 }
 
 int return_syntax() {
-	// TODO: SEMANTHIC CHECKS, BOTTOM UP EXPRESSION ANALYSIS AND CODE GENERATION
-
-	//skip placeholder
-	while (token.kw != next && token.kw != end && token.kw != LEXEM) {
-		read_token();
-	}
+	int statusCode = expressionParser();
+	if (statusCode != 0)
+		return statusCode;
 	return 0;
 }
 
@@ -627,7 +579,6 @@ int inbuild_function() {
 		fprintf(stderr, "Error: Expected library call\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-
 	statusCode = function_call(true);
 	if (statusCode != 0)
 		return statusCode;
@@ -704,12 +655,6 @@ bool isLiteralOrId(Token t) {
 }
 
 int function_call(bool expectNext) {
-
-	symbol_t *sym = getSymbol(token.s);
-	if (sym == NULL) {
-		fprintf(stderr, "Error: Function %s has not been defined\n", token.s);
-		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
-	}
 	read_token();
 	if (token.kw != lbracket) {
 		fprintf(stderr, "Error: Expected '(' after function call\n");
@@ -780,6 +725,7 @@ int while_syntax() {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	read_token();
+
 	while (token.kw != rblock) {
 		statusCode = code();
 		if (statusCode != 0)
