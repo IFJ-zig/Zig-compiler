@@ -138,13 +138,8 @@ typedef struct ast_default_node
 
 
 void ast_init(ast_default_node_t *astRoot);
-void ast_insertToRoot(ast_default_node_t *astRoot, ast_default_node_t *node);
-void ast_insertToFnDef(ast_node_fn_def_t *fnDef, ast_default_node_t *node);
-void ast_insertToFnCall(ast_node_fn_call_t *fnCall, ast_node_exp_t *node);
-void ast_insertToFnReturn(ast_node_fn_return_t *fnReturn, ast_node_exp_t *node);
-void ast_insertToIf(ast_node_if_else_t *ifBlock, ast_default_node_t *node);
-void ast_insertToElse(ast_node_if_else_t *elseBlock, ast_default_node_t *node);
-void ast_insertToWhile(ast_node_while_t *whileBlock, ast_default_node_t *node);
+void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node);
+ast_default_node_t *ast_createNode(ast_node_type type);
 
 void ast_insertToExp(ast_node_exp_t *exp, ast_node_exp_t *node);
 /*
