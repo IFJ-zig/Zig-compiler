@@ -71,7 +71,6 @@ int precedentTableTranslator(int token) // Returns position of element in preced
 }
 
 int getOperation(int tokenStack, int tokenInput) {
-	printf("Stack: %d, Input: %d\n", tokenStack, tokenInput);
 	int i = precedentTableTranslator(tokenStack);
 	if (i == -1) {
 		fprintf(stderr, "Error: Invalid token value\n");
@@ -101,16 +100,24 @@ int expressionParser() {
 		return statusCode;
 	}
 	while (1) {
-		printStack(&stack);
+		//printStack(&stack);
 		//temporarily handle inbuild functions
 		if (token.kw == inbuild) {
-			read_token();
+			statusCode = read_token();
+			if (statusCode != 0) {
+				stackClear(&stack);
+				return statusCode;
+			}
 			if (token.kw != dot) {
 				fprintf(stderr, "Error: Unexpected library usage %d\n", token.kw);
 				stackClear(&stack);
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
-			read_token();
+			statusCode = read_token();
+			if (statusCode != 0) {
+				stackClear(&stack);
+				return statusCode;
+			}
 			if (token.kw != id) {
 				fprintf(stderr, "Error: Expected library call\n");
 				stackClear(&stack);
