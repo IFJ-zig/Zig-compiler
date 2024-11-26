@@ -13,6 +13,7 @@
 #include "semantic_an.h"
 #include "symtable.h" //For varType
 #include "tokens.h"
+#include "ast.h"
 
 int syntax_analyzer(/*List *L*/);
 int code();
@@ -31,8 +32,9 @@ int inbuild_function();
 int return_syntax();
 int call_or_assignment();
 int variable_definition(bool isConst);
-int skip_expression();
+int empty_variable();
 int read_token();
+void loadIFJ24();
 
 
 //Helper functions

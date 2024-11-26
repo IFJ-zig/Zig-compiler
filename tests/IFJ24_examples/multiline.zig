@@ -3,12 +3,12 @@ const ifj = @import("ifj24.zig");
 
 pub fn main() void {
   const s1 : []u8 = ifj.string( 
-    \\Toto 
-    \\ je 
+    \\To\tto 
+   \\ je 
     \\
-    \\ nejaky 
-                        \\ text  // ve viceradkovem retezcovem literalu nelze mit komentar
-    ); // ukoncujici uvozovky ovlivnuji implicitni odsazeni vnitrnich radku retezce
+    \\ nejaky\n 
+\\  text  // ve viceradkovem retezcovem literalu nelze mit komentar
+    ); // bile znaky za \\ jsou soucasti retezce, posledni EOL ne; escape sekvence nejsou interpretovany
   ifj.write(s1);
 }
 

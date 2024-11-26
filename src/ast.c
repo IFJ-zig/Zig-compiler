@@ -4,17 +4,40 @@
 *********************************************/
 
 #include "ast.h"
-#include "errors_enum.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-/*
 
-void ast_init(ast_t *ast){
-    ast->root = NULL;
-    ast->activeNode = NULL;
-    ast->nodeCount = 0;
+#include "errors_enum.h"
+
+void ast_init(ast_default_node_t *astRoot) {
+	astRoot->type = AST_NODE_DEFAULT;
+	astRoot->data_t.body_t.nodes = NULL;
+	astRoot->data_t.body_t.nodeCount = 0;
 }
 
+void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
+    astRoot->data_t.body_t.nodeCount++;
+    astRoot->data_t.body_t.nodes = (ast_default_node_t **)realloc(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount * sizeof(ast_default_node_t *));
+    if (astRoot->data_t.body_t.nodes == NULL) {
+        fprintf(stderr, "Error: Memory allocation for ast failed\n");
+        exit(INTERNAL_COMPILER_ERROR);
+    }
+    astRoot->data_t.body_t.nodes[astRoot->data_t.body_t.nodeCount - 1] = node;
+}
+
+ast_default_node_t *ast_create_node(ast_node_type type) {
+    ast_default_node_t *newNode = (ast_default_node_t *)malloc(sizeof(ast_default_node_t));
+    if (newNode == NULL) {
+        fprintf(stderr, "Error: Memory allocation for ast failed\n");
+        exit(INTERNAL_COMPILER_ERROR);
+    }
+    newNode->type = type;
+    return newNode;
+}
+
+
+/*
 void ast_insert(ast_t *ast, bool insertLeft, Token *token){
     ast_node_t *newNode = (ast_node_t *)malloc(sizeof(ast_node_t));
     if (newNode == NULL)

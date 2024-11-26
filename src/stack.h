@@ -6,6 +6,7 @@
 #ifndef HSTACK_H__
 #define HSTACK_H__
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "errors_enum.h"
@@ -15,7 +16,7 @@ typedef enum
 {
 	TERMINAL,
 	NON_TERMINAL,
-	PRECEDENT_LESS
+	PRECEDENT_LESS,
 } stackElementType;
 
 typedef struct Stack

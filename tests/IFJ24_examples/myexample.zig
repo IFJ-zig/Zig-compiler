@@ -1,7 +1,7 @@
 // Program 2: Vypocet faktorialu (rekurzivne)
 const ifj = @import("ifj24.zig");
 // Hlavni funkce
-pub fn test_fn() void {}
+pub fn test_fn(n: i32, m: i32) void {}
 pub fn main() void {
     var x = (2+2)*2;
     x = x / 8;
@@ -13,10 +13,7 @@ pub fn main() void {
 
     while(2*(x+6)/2){}
 
-    test_fn(dasdas);
+    test_fn(x,2);
 
-    ifj.write("\n");
-
-    x = ifj.concat(str1, str2);
-    x = ifj.concat(str1, str2)+2;
+    x = test_fn(2, 9)+2;
 }
