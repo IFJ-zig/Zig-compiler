@@ -8,7 +8,6 @@
 #include "tokens.h"
 
 int main() {
-	semanticInit();
 	//TODO další kontroly a generace kodu
 
 	int err = syntax_analyzer();

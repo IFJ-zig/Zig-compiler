@@ -13,6 +13,7 @@
 #include "semantic_an.h"
 #include "symtable.h" //For varType
 #include "tokens.h"
+#include "ast.h"
 
 int syntax_analyzer(/*List *L*/);
 int code();

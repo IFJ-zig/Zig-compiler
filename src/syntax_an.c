@@ -28,6 +28,13 @@ int rewind_stdin() {
 
 int syntax_analyzer() {
 	int statusCode;
+	semanticInit();
+	ast_default_node_t *astRoot = (ast_default_node_t *)malloc(sizeof(ast_default_node_t));
+	if (astRoot == NULL) {
+		fprintf(stderr, "Error: Memory allocation for ast failed\n");
+		return INTERNAL_COMPILER_ERROR;
+	}
+	ast_init(astRoot);
 	statusCode = seekHeaders();
 
 	if (statusCode != 0)
