@@ -31,7 +31,7 @@ int inbuild_function();
 int return_syntax();
 int call_or_assignment();
 int variable_definition(bool isConst);
-int skip_expression();
+int empty_variable();
 int read_token();
 void loadIFJ24();
 

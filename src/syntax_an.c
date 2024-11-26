@@ -601,11 +601,31 @@ int code() {
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		case underscore:
+			statusCode = empty_variable();
+			if (statusCode != 0)
+				return statusCode;
+			break;
 		default:
 			fprintf(stderr, "Error: Expected command but found: %d\n", token.kw);
-			return 1;
+			return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
+	return 0;
+}
+
+int empty_variable() {
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (token.kw != equal) {
+		fprintf(stderr, "Error: Expected = after _\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	statusCode = expressionParser(false);
+	if (statusCode != 0)
+		return statusCode;
 	return 0;
 }
 
