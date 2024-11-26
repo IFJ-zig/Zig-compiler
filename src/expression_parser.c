@@ -46,7 +46,7 @@ int precedentTableTranslator(int token) // Returns position of element in preced
 			return 7;
 		case more:
 			return 8;
-		case equal:
+		case compare_equal:
 			return 9;
 		case lequal:
 			return 10;
@@ -62,6 +62,7 @@ int precedentTableTranslator(int token) // Returns position of element in preced
 		case num:
 		case decim:
 		case text:
+		case _null:
 			return 14;
 		default:
 			fprintf(stderr, "\nInvalid input token value\n");
@@ -85,31 +86,40 @@ int getOperation(int tokenStack, int tokenInput) {
 
 extern Token token;
 
-int expressionParser() {
+int expressionParser(bool tokenRead) {
 	int statusCode;
-
 	t_Stack stack;
 	stackInit(&stack);
 	statusCode = stackPush(&stack, TERMINAL, next);
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	statusCode = read_token();
-	if (statusCode != 0) {
-		stackClear(&stack);
-		return statusCode;
+	if (!tokenRead) {
+		statusCode = read_token();
+		if (statusCode != 0) {
+			stackClear(&stack);
+			return statusCode;
+		}
 	}
 	while (1) {
 		//printStack(&stack);
 		//temporarily handle inbuild functions
 		if (token.kw == inbuild) {
-			read_token();
+			statusCode = read_token();
+			if (statusCode != 0) {
+				stackClear(&stack);
+				return statusCode;
+			}
 			if (token.kw != dot) {
 				fprintf(stderr, "Error: Unexpected library usage %d\n", token.kw);
 				stackClear(&stack);
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
-			read_token();
+			statusCode = read_token();
+			if (statusCode != 0) {
+				stackClear(&stack);
+				return statusCode;
+			}
 			if (token.kw != id) {
 				fprintf(stderr, "Error: Expected library call\n");
 				stackClear(&stack);
@@ -121,6 +131,22 @@ int expressionParser() {
 				return statusCode;
 			}
 			token.kw = id;
+		} else if (token.kw == id) {
+			symbol_t *sym = getSymbol(token.s);
+			if (sym == NULL) {
+				fprintf(stderr, "Error: Undefined symbol %s\n", token.s);
+				stackClear(&stack);
+				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+			}
+			if (sym->type == FUNCTION) {
+				statusCode = function_call(false);
+				if (statusCode != 0) {
+					stackClear(&stack);
+					return statusCode;
+				}
+				printf("Function call %d\n", token.kw);
+				token.kw = id;
+			}
 		}
 
 		int operation = getOperation(topTerminal(&stack)->keyword, token.kw);
@@ -164,8 +190,15 @@ int expressionParser() {
 				}
 				break;
 			case 1:
+				if (stackTop(&stack)->type == NON_TERMINAL) {
+					stackPop(&stack);
+					if (stackTop(&stack)->keyword == next) {
+						stackClear(&stack);
+						return 0;
+					}
+				}
 				stackClear(&stack);
-				return 0;
+				return SYNTACTIC_ANALYSIS_ERROR;
 				break;
 			case 0:
 				stackClear(&stack);
@@ -206,7 +239,7 @@ int tryToMatchRule(t_Stack *stack) {
 	}
 	//Match rules 3-7
 	if (temp->type == TERMINAL) {
-		if (temp->keyword == id || temp->keyword == num || temp->keyword == decim || temp->keyword == text) {
+		if (temp->keyword == id || temp->keyword == num || temp->keyword == decim || temp->keyword == text || temp->keyword == _null) {
 			stackPop(stack);
 			temp = stackTop(stack);
 			if (temp == NULL) {

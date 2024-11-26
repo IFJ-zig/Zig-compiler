@@ -107,7 +107,7 @@ void printStack(t_Stack *stack) {
 
 
 char mapTokenToChar(KeyWord kw) {
-	if (kw == num || kw == decim || kw == text || kw == id) {
+	if (kw == num || kw == decim || kw == text || kw == id || kw == _null) {
 		return 'x';
 	}
 

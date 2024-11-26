@@ -11,14 +11,14 @@
 #include <stdlib.h>
 
 #include "errors_enum.h"
+#include "semantic_an.h"
 #include "stack.h"
 #include "syntax_an.h"
 #include "tokens.h"
 
 int precedentTableTranslator(int token);
 int getOperation(int tokenStack, int tokenInput);
-int expressionParser();
-int getTokenPrec();
+int expressionParser(bool tokenRead);
 int tryToMatchRule(t_Stack *stack);
 
 #endif // HEXP_H__

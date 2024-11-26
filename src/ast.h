@@ -6,21 +6,23 @@
 #ifndef AST_T
 #define AST_T
 
-#include "tokens.h" //Token
-#include "symtable.h" //varType
 #include <stdbool.h>
 
-typedef enum {
-    AST_NODE_FN_PARAM,
-    AST_NODE_FN_DEF,
-    AST_NODE_FN_RETURN,
-    AST_NODE_FN_CALL,   
-    AST_NODE_EXP,       
-    AST_NODE_VAR_DEF,
-    AST_NODE_VAR_ASSIGN,
-    AST_NODE_IF_ELSE,
-    AST_NODE_WHILE,
-    AST_NODE_DEFAULT,   //Default node for the AST
+#include "symtable.h" //varType
+#include "tokens.h"   //Token
+
+typedef enum
+{
+	AST_NODE_FN_PARAM,
+	AST_NODE_FN_DEF,
+	AST_NODE_FN_RETURN,
+	AST_NODE_FN_CALL,
+	AST_NODE_EXP,
+	AST_NODE_VAR_DEF,
+	AST_NODE_VAR_ASSIGN,
+	AST_NODE_IF_ELSE,
+	AST_NODE_WHILE,
+	AST_NODE_DEFAULT, //Default node for the AST
 } ast_node_type;
 
 typedef struct ast_node_fn_param{
@@ -39,96 +41,109 @@ typedef struct ast_node_fn_def{
 } ast_node_fn_def_t;
 
 
-typedef struct ast_node_fn_call{
-    ast_node_type type;
-    Token *token;
-    char *name;
-    struct ast_node_exp **args;
-    unsigned int argCount;
+typedef struct ast_node_fn_call
+{
+	ast_node_type type;
+	Token *token;
+	char *name;
+	struct ast_node_exp **args;
+	unsigned int argCount;
 } ast_node_fn_call_t;
 
 
-typedef struct ast_node_fn_return{
-    ast_node_type type;
-    Token *token;
-    varType returnType;
-    struct ast_node_exp *expression;
-    unsigned int returnCount;
+typedef struct ast_node_fn_return
+{
+	ast_node_type type;
+	Token *token;
+	varType returnType;
+	struct ast_node_exp *expression;
+	unsigned int returnCount;
 } ast_node_fn_return_t;
 
 
-typedef struct ast_node_exp{
-    ast_node_type type;
-    Token *token;
-    varType dataType;
-    struct{
-        struct{
-            struct ast_node_exp *exp;
-        } unary_op;
-        struct{
-            struct ast_node_exp *left;
-            struct ast_node_exp *right;
-        } binary_op;
-        struct ast_node_fn_call *fnCall;
-    } data_t;
+typedef struct ast_node_exp
+{
+	ast_node_type type;
+	Token *token;
+	varType dataType;
+	struct
+	{
+		struct
+		{
+			struct ast_node_exp *exp;
+		} unary_op;
+		struct
+		{
+			struct ast_node_exp *left;
+			struct ast_node_exp *right;
+		} binary_op;
+		struct ast_node_fn_call *fnCall;
+	} data_t;
 } ast_node_exp_t;
 
 
-typedef struct ast_node_var_assign{
-    ast_node_type type;
-    Token *token;
-    char *name;
-    symbol_t *symbol;
-    struct ast_node_exp *expression;
-    unsigned int assignCount;
+typedef struct ast_node_var_assign
+{
+	ast_node_type type;
+	Token *token;
+	char *name;
+	symbol_t *symbol;
+	struct ast_node_exp *expression;
+	unsigned int assignCount;
 } ast_node_var_assign_t;
 
 
-typedef struct ast_node_var_def{
-    ast_node_type type;
-    Token *token;
-    char *name;
-    symbol_t *symbol;
-    struct ast_node_var_assign *assignment;
+typedef struct ast_node_var_def
+{
+	ast_node_type type;
+	Token *token;
+	char *name;
+	symbol_t *symbol;
+	struct ast_node_var_assign *assignment;
 } ast_node_var_def_t;
 
 
-typedef struct ast_node_if_else{
-    ast_node_type type;
-    struct ast_node_exp *conditionExp;
-    struct ast_default_node **ifBlock;
-    struct ast_default_node **elseBlock;
-    unsigned int ifCount;
-    unsigned int elseCount;
+typedef struct ast_node_if_else
+{
+	ast_node_type type;
+	struct ast_node_exp *conditionExp;
+	struct ast_default_node **ifBlock;
+	struct ast_default_node **elseBlock;
+	unsigned int ifCount;
+	unsigned int elseCount;
 } ast_node_if_else_t;
 
 
-typedef struct ast_node_while{
-    ast_node_type type;
-    struct ast_node_exp *conditionExp;
-    struct ast_default_node **block;
-    unsigned int blockCount;
+typedef struct ast_node_while
+{
+	ast_node_type type;
+	struct ast_node_exp *conditionExp;
+	struct ast_default_node **block;
+	unsigned int blockCount;
 } ast_node_while_t;
 
 
-typedef struct ast_default_node{
-    ast_node_type type;
-    union {
-        struct ast_node_fn_param *fnParam;
-        struct ast_node_fn_def *fnDef;
-        struct ast_node_fn_call *fnCall;
-        struct ast_node_fn_return *fnReturn;
-        struct ast_node_fn_exp *exp;
-        struct ast_node_var_assign *varAssign;
-        struct ast_node_var_def *varDef;
-        struct ast_node_if_else *ifElse;
-        struct ast_node_while *While;
+typedef struct ast_default_node
+{
+	ast_node_type type;
+	union
+	{
+		struct ast_node_fn_param *fnParam;
+		struct ast_node_fn_def *fnDef;
+		struct ast_node_fn_call *fnCall;
+		struct ast_node_fn_return *fnReturn;
+		struct ast_node_fn_exp *exp;
+		struct ast_node_var_assign *varAssign;
+		struct ast_node_var_def *varDef;
+		struct ast_node_if_else *ifElse;
+		struct ast_node_while *While;
 
-        struct body{
-            struct ast_default_node **nodes;
-            unsigned int nodeCount;
-        } body_t;
-    } data_t;
+		struct body
+		{
+			struct ast_default_node **nodes;
+			unsigned int nodeCount;
+		} body_t;
+	} data_t;
 } ast_default_node_t;
 
 

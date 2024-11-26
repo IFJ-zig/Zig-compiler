@@ -12,6 +12,7 @@ int read_token() {
 	token = get_token();
 	if (token.kw == LEXEM) {
 		fprintf(stderr, "Error: Lexical error\n");
+		return LEXEM_ERROR;
 	}
 	return 0;
 }
@@ -46,19 +47,28 @@ int seekHeaders() {
 	int statusCode = checkImport();
 	if (statusCode != 0)
 		return statusCode;
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	while (token.kw != end) {
 
 		if (token.kw != _pub) {
 			fprintf(stderr, "Error: Expected function definiton starting with `pub`\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw != _fn) {
 			fprintf(stderr, "Error: Expected keyword 'fn' in header\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw != id && token.kw != _main) {
 			fprintf(stderr, "Error: Expected function id in header\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
@@ -80,20 +90,27 @@ int seekHeaders() {
 		} else {
 			fprintf(stderr, "ID: %s\n", token.s);
 		}
-		free(token.s);
 
-
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw != lbracket) {
 			fprintf(stderr, "Error: Expected '(' after function id in header, got %s\n", getTokenName(token));
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		while (token.kw != rbracket) { //Process the parameters
 			if (token.kw == id) {
 				fprintf(stderr, "Param ID: %s\n", token.s);
 				Token paramID = token;
-				read_token();
+				statusCode = read_token();
+				if (statusCode != 0) {
+					return statusCode;
+				}
 				if (token.kw != colon) {
 					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
@@ -101,13 +118,19 @@ int seekHeaders() {
 				data_type();
 
 				assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
-				read_token();
+				statusCode = read_token();
+				if (statusCode != 0) {
+					return statusCode;
+				}
 				if (token.kw != comma && token.kw != rbracket) {
 					fprintf(stderr, "Error: Expected ',' or ')' after parameter data type, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
 				if (token.kw == comma)
-					read_token();
+					statusCode = read_token();
+				if (statusCode != 0) {
+					return statusCode;
+				}
 			} else {
 				fprintf(stderr, "Error: Expected parameter id, got %s\n", getTokenName(token));
 				return SYNTACTIC_ANALYSIS_ERROR;
@@ -120,19 +143,28 @@ int seekHeaders() {
 			fprintf(stderr, "Error: Expected ')' after param list in function header, got %s\n", getTokenName(token));
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (isValidReturnType(token.kw)) {
 			fnSymbol->returnType = kwToVarType(token.kw); //Save the return type of the function
 		} else {
 			fprintf(stderr, "Error: Invalid return type of function %s\n", fnSymbol->key);
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 
 		statusCode = skip_function_body();
 		if (statusCode != 0)
 			return statusCode;
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 	}
 	if (getSymbol("main") == NULL) {
 		fprintf(stderr, "Error: Main function is not defined\n");
@@ -150,7 +182,10 @@ int program() {
 
 	// TODO: SOME CODE GENERATION STUFF
 	while (1) {
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw == _pub) {
 			statusCode = function_analysis();
 			if (statusCode != 0)
@@ -180,7 +215,10 @@ int skip_function_body() {
 				break;
 		}
 
-		read_token();
+		int statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 	} while (braceCount != 0 && token.kw != end);
 
 	if (braceCount == 0) {
@@ -192,67 +230,174 @@ int skip_function_body() {
 
 
 int checkImport() {
-	read_token();
+	static bool imported = false;
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != constant) {
 		fprintf(stderr, "Error: Expected keyword 'constant' as start of an import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != inbuild) {
 		fprintf(stderr, "Error: Expected identifier `ifj` for import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != equal) {
 		fprintf(stderr, "Error: Expected '=' after import identifier\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != at) {
 		fprintf(stderr, "Error: Expected '@' before import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != _import) {
 		fprintf(stderr, "Error: Expected keyword 'import' in import\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != lbracket) {
 
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != text && strcmp(token.s, "ifj24.zig")) {
 		fprintf(stderr, "Error: Expected 'ifj24.zig' as name of the package\n");
-		free(token.s);
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	free(token.s);
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != rbracket) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != next) {
 		fprintf(stderr, "Error: Expected ';'\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-
+	if (!imported) {
+		loadIFJ24();
+		imported = true;
+	}
 	return 0;
+}
+
+void loadIFJ24() {
+	fprintf(stderr, "Loading IFJ24 functions\n");
+	symbol_t *fnSymbol;
+	defineSymbol("ifj.write", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.write");
+	assignFunctionParameter(fnSymbol, (Token){.s = "value", .kw = id}, (Token){.kw = dtflt}, false);
+	fnSymbol->params[0]->type = ANYTYPE; //Anytype is allowed, we don't have a keyword for that however, so a little hack because, because this is happens only once in the entire program
+
+	defineSymbol("ifj.readstr", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.readstr");
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.readi32", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.readi32");
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.readf64", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.readf64");
+	fnSymbol->returnType = FLOAT;
+
+	defineSymbol("ifj.string", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.string");
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.concat", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.concat");
+	assignFunctionParameter(fnSymbol, (Token){.s = "str1", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "str2", .kw = id}, (Token){.kw = dtstr}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.length", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.length");
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.i2f", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.i2f");
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
+	fnSymbol->returnType = FLOAT;
+
+	defineSymbol("ifj.f2i", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.f2i");
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtflt}, false);
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.substring", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.substring");
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "j", .kw = id}, (Token){.kw = dtint}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.ord", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.ord");
+	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.chr", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.chr");
+	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.strcmp", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.strcmp");
+	assignFunctionParameter(fnSymbol, (Token){.s = "s1", .kw = id}, (Token){.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token){.s = "s2", .kw = id}, (Token){.kw = dtstr}, false);
+	fnSymbol->returnType = INT;
+	fprintf(stderr, "Done loading IFJ24 functions\n\n");
 }
 
 int function_analysis() {
 	enterScope();
 	int statusCode = 0;
 
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != _fn) {
 		fprintf(stderr, "Error: Expected fn keyword\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != id && token.kw != _main) {
 		fprintf(stderr, "Error: Expected function id\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -284,22 +429,26 @@ int function_analysis() {
 	if (statusCode != 0)
 		return statusCode;
 
-	free(token.s);
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != lblock) {
 		fprintf(stderr, "Error: Expected '{' after function definition\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	while (token.kw != rblock) {
 		statusCode = code();
 		if (statusCode != 0) {
 			return statusCode;
 		}
-		if (tokenWasGiven) {
-			tokenWasGiven = false;
-		} else {
-			read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
 		}
 	}
 
@@ -312,7 +461,10 @@ int function_analysis() {
 int param_list() {
 	//Expect to already be in the function scope
 	int statusCode;
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != lbracket) {
 		fprintf(stderr, "Error: Expected parameter list after function id\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -320,7 +472,11 @@ int param_list() {
 
 	while (token.kw != rbracket) {
 		fprintf(stderr, "PARAM LIST\n");
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			free(token.s);
+			return statusCode;
+		}
 		if (token.kw == rbracket) {
 			break;
 		}
@@ -329,7 +485,11 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		Token paramID = token;
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			free(token.s);
+			return statusCode;
+		}
 		if (token.kw != colon) {
 			fprintf(stderr, "Error: Expected ':' after parameter id\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
@@ -342,7 +502,11 @@ int param_list() {
 		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
 																																		   : "STRING",
 				getSymbol(paramID.s)->depth);
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			free(token.s);
+			return statusCode;
+		}
 		if (token.kw != comma && token.kw != rbracket) {
 			fprintf(stderr, "Error: Expected ',' or ')' after parameter data type\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
@@ -353,10 +517,26 @@ int param_list() {
 }
 
 int data_type() {
-	read_token();
-	if (token.kw == square_brackets) {
-		read_token();
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		free(token.s);
+		return statusCode;
 	}
+	if (token.kw == question_mark) {
+		statusCode = read_token();
+		if (statusCode != 0) {
+			free(token.s);
+			return statusCode;
+		}
+	}
+	if (token.kw == square_brackets) {
+		statusCode = read_token();
+		if (statusCode != 0) {
+			free(token.s);
+			return statusCode;
+		}
+	}
+
 	if (token.kw != dtint && token.kw != dtstr && token.kw != dtflt) {
 		fprintf(stderr, "Error: Expected data type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -371,7 +551,11 @@ bool isValidReturnType(KeyWord kw) {
 }
 
 int return_type() {
-	read_token();
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		free(token.s);
+		return statusCode;
+	}
 	if (!isValidReturnType(token.kw)) {
 		fprintf(stderr, "Error: Expected return type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -380,12 +564,6 @@ int return_type() {
 }
 
 int code() {
-	if (!tokenWasGiven) {
-		tokenWasGiven = false;
-	} else {
-		read_token();
-	}
-
 	int statusCode;
 	switch (token.kw) {
 		case constant:
@@ -423,11 +601,31 @@ int code() {
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		case underscore:
+			statusCode = empty_variable();
+			if (statusCode != 0)
+				return statusCode;
+			break;
 		default:
 			fprintf(stderr, "Error: Expected command but found: %d\n", token.kw);
-			return 1;
+			return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
+	return 0;
+}
+
+int empty_variable() {
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (token.kw != equal) {
+		fprintf(stderr, "Error: Expected = after _\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	statusCode = expressionParser(false);
+	if (statusCode != 0)
+		return statusCode;
 	return 0;
 }
 
@@ -435,139 +633,149 @@ int if_else() {
 	int statusCode;
 	enterScope();
 
-	statusCode = expressionParser();
+	statusCode = expressionParser(false);
 
-	if (statusCode != 0)
+	if (statusCode != 0) {
 		return statusCode;
+	}
+
 	if (token.kw == vertical_bar) {
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
+
+
 		if (token.kw != id) {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
 		defineSymbol(token.s, INT, false, false);
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 	}
 
 	if (token.kw != lblock) {
 		fprintf(stderr, "Error: Expected '{' after if condition\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 
 	while (token.kw != rblock) {
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 	}
 	exitScope(); //Exit the scope of the if statement has to be here since we can't have the unwrapped value reach the else block
-	read_token();
-	if (token.kw == _else) {
-		enterScope();
-		read_token();
-		if (token.kw != lblock) {
-			fprintf(stderr, "Error: Expected '{' after else\n");
-			return SYNTACTIC_ANALYSIS_ERROR;
-		}
-		read_token();
-		while (token.kw != rblock) {
-			statusCode = code();
-			if (statusCode != 0)
-				return statusCode;
-			read_token();
-		}
-		exitScope();
-	} else {
-		tokenWasGiven = true;
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
 	}
-	return 0;
-}
+	if (token.kw != _else) {
+		fprintf(stderr, "Error: Expected 'else' after if block\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	enterScope();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (token.kw != lblock) {
+		fprintf(stderr, "Error: Expected '{' after else\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 
-int skip_expression() {
-	int statusCode;
-	while (token.kw != rbracket) {
-		read_token();
-		if (token.kw == lbracket) {
-			statusCode = skip_expression();
-			if (statusCode != 0)
-				return statusCode;
+	while (token.kw != rblock) {
+		statusCode = code();
+		if (statusCode != 0)
+			return statusCode;
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
 		}
 	}
-	return 0;
-}
+	exitScope();
 
-//This function is a hack just to get if_else working without a working precedent_an
-//Skips the expression and returns the type of the first ID it finds, VOID if no ID is found, or if the id does not exist in the symtable
-//I am not particularly proud of this function, but it works for now
-symbol_t *skip_expression_get_symbol() {
-	int statusCode;
-	symbol_t *foundSymbol = NULL;
-	while (token.kw != rbracket) {
-		read_token();
-		if (token.kw == lbracket) {
-			statusCode = skip_expression();
-			if (statusCode != 0)
-				return 0;
-		}
-		if (token.kw == id) {
-			symbol_t *symbol = getSymbol(token.s);
-			if (symbol == NULL) {
-				fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
-			} else
-				foundSymbol = symbol;
-		}
-	}
-	return foundSymbol;
+	return 0;
 }
 
 int return_syntax() {
-	// TODO: SEMANTHIC CHECKS, BOTTOM UP EXPRESSION ANALYSIS AND CODE GENERATION
-
-	//skip placeholder
-	while (token.kw != next && token.kw != end && token.kw != LEXEM) {
-		read_token();
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
 	}
+	if (token.kw == next) {
+		return 0;
+	}
+	statusCode = expressionParser(true);
+	if (statusCode != 0)
+		return statusCode;
 	return 0;
 }
 
 int inbuild_function() {
 	int statusCode;
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != dot) {
 		fprintf(stderr, "Error: Unexpected library usage\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != id) {
 		fprintf(stderr, "Error: Expected library call\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-
 	statusCode = function_call(true);
 	if (statusCode != 0)
 		return statusCode;
-
 	return 0;
 }
 
 int variable_definition(bool isConst) {
 	bool isNullable = false; //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 	int statusCode = 0;
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	if (token.kw != id) {
 		fprintf(stderr, "Error: Expected variable id\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	Token varID = token;
 	fprintf(stderr, "Variable ID: %s\n", varID.s);
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
 	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
 		isDefined = true;
@@ -576,19 +784,22 @@ int variable_definition(bool isConst) {
 			return statusCode;
 		fprintf(stderr, "trying to define symbol %s\n", varID.s);
 		defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 	}
 
 	if (token.kw != equal) {
 		fprintf(stderr, "Error: Expected '=' after variable type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	if(!isDefined)
+	if (!isDefined)
 		statusCode = defineSymbol(varID.s, INT, isConst, isNullable);
 	if (statusCode != 0)
 		return statusCode;
 
-	statusCode = expressionParser();
+	statusCode = expressionParser(false);
 
 	if (statusCode != 0)
 		return statusCode;
@@ -596,6 +807,7 @@ int variable_definition(bool isConst) {
 	return 0;
 };
 int call_or_assignment() {
+	int statusCode;
 	// TODO: SEMANTHIC ANALYSIS
 	// I need semanthic analysis to define if id is a function or variable
 
@@ -607,12 +819,15 @@ int call_or_assignment() {
 	if (sym->type == FUNCTION) {
 		return function_call(true);
 	} else {
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw != equal) {
 			fprintf(stderr, "Error: Expected '=' after variable id\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		int statusCode = expressionParser();
+		int statusCode = expressionParser(false);
 		if (statusCode != 0)
 			return statusCode;
 	}
@@ -620,62 +835,116 @@ int call_or_assignment() {
 	return 0;
 };
 
+bool isLiteralOrId(Token t) {
+	if (t.kw == text || t.kw == decim || t.kw == num || t.kw == id)
+		return true;
+	return false;
+}
+
 int function_call(bool expectNext) {
-	int unclosedBrackets = 0;
-	while (token.kw != end) {
-		if (token.kw == lbracket) {
-			unclosedBrackets++;
-		} else if (token.kw == rbracket) {
-			unclosedBrackets--;
-			if (unclosedBrackets == 0) {
-				if (expectNext) {
-					read_token();
-					if (token.kw != next) {
-						fprintf(stderr, "Error: Expected ';' after function call\n");
-						return SYNTACTIC_ANALYSIS_ERROR;
-					}
-				}
-				return 0;
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (token.kw != lbracket) {
+		fprintf(stderr, "Error: Expected '(' after function call\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+
+	bool isPastFirstTerm = false;
+	do {
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
+		if (!isPastFirstTerm) {
+			if (token.kw == comma) {
+				fprintf(stderr, "Error: Unexpected ',' at the beginning of function call\n");
+				return SYNTACTIC_ANALYSIS_ERROR;
 			}
 		}
-		read_token();
+		if (token.kw == rbracket) {
+			break;
+		}
+		if (!isLiteralOrId(token)) {
+			fprintf(stderr, "Error: Expected literal or id in function call\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		isPastFirstTerm = true;
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
+	} while (token.kw == comma);
+
+	if (token.kw != rbracket) {
+		fprintf(stderr, "Error: Expected ')' after function call\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	return SYNTACTIC_ANALYSIS_ERROR;
+
+	if (expectNext) {
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
+		if (token.kw != next) {
+			fprintf(stderr, "Error: Expected ';' after function call\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+	}
+
+	return 0;
 }
 
 int while_syntax() {
 	int statusCode;
 	enterScope();
 
-	statusCode = expressionParser();
+	statusCode = expressionParser(false);
 
 	if (statusCode != 0)
 		return statusCode;
 	if (token.kw == vertical_bar) {
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw != id) {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
 		defineSymbol(token.s, INT, false, false);
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		if (token.kw != vertical_bar) {
 			fprintf(stderr, "Error: Expected '|' after unwrapped value id\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 	}
 	if (token.kw != lblock) {
 		fprintf(stderr, "Error: Expected '{' after while condition\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	read_token();
+	statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
+
 	while (token.kw != rblock) {
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
-		read_token();
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
 	}
 	exitScope();
 	return 0;
