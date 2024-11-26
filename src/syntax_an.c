@@ -269,18 +269,18 @@ void loadIFJ24() {
 
 	defineSymbol("ifj.string", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.string");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = STRING}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
 
 	defineSymbol("ifj.concat", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.concat");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "str1", .kw = id}, (Token) {.kw = STRING}, false);
-	assignFunctionParameter(fnSymbol, (Token) {.s = "str2", .kw = id}, (Token) {.kw = STRING}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "str1", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "str2", .kw = id}, (Token) {.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
 
 	defineSymbol("ifj.length", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.length");
-	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = STRING}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
 	fnSymbol->returnType = INT;
 
 	defineSymbol("ifj.i2f", FUNCTION, false, false);
