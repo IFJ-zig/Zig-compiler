@@ -25,18 +25,20 @@ typedef enum
 	AST_NODE_DEFAULT, //Default node for the AST
 } ast_node_type;
 
-typedef struct ast_node_fn_param{
-    ast_node_type type;
-    symbol_t *symbol;
+typedef struct ast_node_fn_param
+{
+	ast_node_type type;
+	symbol_t *symbol;
 } ast_node_fn_param_t;
 
 
-typedef struct ast_node_fn_def{
-    Token *token;
-    ast_node_type type;
-    struct ast_default_node **body;
-    symbol_t *fnSymbol;
-    varType returnType;
+typedef struct ast_node_fn_def
+{
+	Token *token;
+	ast_node_type type;
+	struct ast_default_node **body;
+	symbol_t *fnSymbol;
+	varType returnType;
 
 } ast_node_fn_def_t;
 
