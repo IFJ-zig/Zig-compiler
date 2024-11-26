@@ -13,6 +13,9 @@
 
 typedef enum
 {
+	LEXEM,
+	INTERNAL,
+	//pro chybu v lexemu
 	num,
 	text,
 	decim,
@@ -26,21 +29,6 @@ typedef enum
 	variable,
 	_null,
 	//i32, u8,    f64,   void,   const, var,  null
-	inord,
-	inchr,
-	inlen,
-	inssub,
-	inccat,
-	inu2s,
-	inscmp,
-	//ord, chr, length, substring, concat, string, strcmp
-	inres,
-	inrei,
-	inref,
-	inwrt,
-	ini2f,
-	inf2i,
-	//readstr, readi32, readf64, write, i2f,   f2i
 	_if,
 	_else,
 	_while,
@@ -79,58 +67,29 @@ typedef enum
 	rbracket,
 	lblock,
 	rblock,
-	end
+	end,
 	//(,    ),      {,     },     konec
+	EMPTY = -1,
 } KeyWord;
 
 typedef struct SToken
 {
 	KeyWord kw;
-	int *i;
-	double *f;
+	int i;
+	double f;
 	char *s;
-	struct SToken *next;
 } Token;
 
-typedef struct SList
-{
-	Token *first;
-	Token *active;
-	Token *last;
-} List;
+KeyWord LGetKeyWAct(Token T);
 
-void ListInit(List *L);
+int LGetNumAct(Token T);
 
-int LInsertLast(List *L, KeyWord key, int *a, double *b, char *c);
+double LGetFloatAct(Token T);
 
-void LActFirst(List *L);
+char *LGetStrAct(Token *T);
 
-void LActNext(List *L);
+Token get_token();
 
-Token *LGetFirst(List *L);
-
-Token *LGetAct(List *L);
-
-KeyWord LGetKeyWFirst(List *L);
-
-KeyWord LGetKeyWAct(List *L);
-
-int *LGetNumFirst(List *L);
-
-int *LGetNumAct(List *L);
-
-double *LGetFloatFirst(List *L);
-
-double *LGetFloatAct(List *L);
-
-char *LGetStrFirst(List *L);
-
-char *LGetStrAct(List *L);
-
-void LDeleteFirst(List *L);
-
-void LDestroy(List *L);
-
-int Lexem_analyzer(List *L);
+char *getTokenName(Token T);
 
 #endif // TOKENS_H

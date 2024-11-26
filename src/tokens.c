@@ -6,119 +6,122 @@
 
 #include "errors_enum.h"
 
-void ListInit(List *L) {
-	//nastaví pointry na null
-	L->first = NULL;
-	L->active = NULL;
-	L->last = NULL;
+
+KeyWord LGetKeyWAct(Token T) {
+	return T.kw;
 }
 
-int LInsertLast(List *L, KeyWord key, int *i, double *f, char *s) {
-	//přidá token na konec, pokud je list prázdný, je přidaný i prvním
-	Token *new = (Token *)malloc(sizeof(Token));
-	if (new == NULL) {
-		return LEXEM_ERROR;
-	} else {
-		new->kw = key;
-		new->i = i;
-		new->f = f;
-		new->s = s;
-		if (L->last != NULL) {
-			new->next = L->last->next;
-			L->last->next = new;
-			L->last = new;
-		} else {
-			new->next = L->last;
-			L->first = new;
-			L->last = new;
-		}
+int LGetNumAct(Token T) {
+	return T.i;
+}
+
+double LGetFloatAct(Token T) {
+	return T.f;
+}
+
+char *LGetStrAct(Token *T) {
+	return T->s;
+}
+
+char *getTokenName(Token T){
+	switch(T.kw){
+		case LEXEM:
+			return "LEXEM";
+		case INTERNAL:
+			return "INTERNAL";
+		case num:
+			return "num";
+		case text:
+			return "text";
+		case decim:
+			return "decim";
+		case id:
+			return "id";
+		case dtint:
+			return "dtint";
+		case dtstr:
+			return "dtstr";
+		case dtflt:
+			return "dtflt";
+		case dtvoid:
+			return "dtvoid";
+		case constant:
+			return "constant";
+		case variable:	
+			return "variable";
+		case _null:
+			return "_null";
+		case _if:
+			return "_if";
+		case _else:
+			return "_else";
+		case _while:
+			return "_while";
+		case _fn:
+			return "_fn";
+		case _return:
+			return "_return";
+		case _pub:
+			return "_pub";
+		case _main:
+			return "_main";
+		case inbuild:
+			return "inbuild";
+		case _import:
+			return "_import";
+		case colon:
+			return "colon";
+		case comma:
+			return "comma";
+		case next:
+			return "next";
+		case underscore:
+			return "underscore";
+		case dot:
+			return "dot";
+		case plus:
+			return "plus";
+		case minus:
+			return "minus";
+		case multiply:
+			return "multiply";
+		case division:
+			return "division";
+		case question_mark:
+			return "question_mark";
+		case at:
+			return "at";
+		case vertical_bar:
+			return "vertical_bar";
+		case square_brackets:
+			return "square_brackets";
+		case equal:
+			return "equal";
+		case less:
+			return "less";
+		case more:
+			return "more";
+		case lequal:
+			return "lequal";
+		case mequal:
+			return "mequal";
+		case compare_equal:
+			return "compare_equal";
+		case nequal:
+			return "nequal";
+		case lbracket:
+			return "lbracket";
+		case rbracket:
+			return "rbracket";
+		case lblock:
+			return "lblock";
+		case rblock:
+			return "rblock";
+		case end:
+			return "end";
+		case EMPTY:
+			return "EMPTY";
+		default:
+			return "UNKNOWN KEYWORD";
 	}
-	return 0;
-}
-
-void LActFirst(List *L) {
-	//zaktivuje první prvek
-	L->active = L->first;
-}
-
-void LActNext(List *L) {
-	//pokud je list aktivní, přesune aktivitu na následující prvek
-	if (L->active != NULL) {
-		L->active = L->active->next;
-	}
-}
-
-Token *LGetFirst(List *L) {
-	//vrátí první token nebo NULL
-	return L->first;
-}
-
-Token *LGetAct(List *L) {
-	//vrátí první token nebo NULL
-	return L->active;
-}
-
-KeyWord LGetKeyWFirst(List *L) {
-	return L->first->kw;
-}
-
-KeyWord LGetKeyWAct(List *L) {
-	return L->active->kw;
-}
-
-int *LGetNumFirst(List *L) {
-	return L->first->i;
-}
-
-int *LGetNumAct(List *L) {
-	return L->active->i;
-}
-
-double *LGetFloatFirst(List *L) {
-	return L->first->f;
-}
-
-double *LGetFloatAct(List *L) {
-	return L->active->f;
-}
-
-char *LGetStrFirst(List *L) {
-	return L->first->s;
-}
-
-char *LGetStrAct(List *L) {
-	return L->active->s;
-}
-
-void LDeleteFirst(List *L) {
-	//uvolní token a případné parametry
-	if (L->first != NULL) {
-		if (L->first == L->active) {
-			L->active = NULL;
-		}
-		if (L->first == L->last) {
-			L->last = NULL;
-		}
-		Token *Elem = L->first;
-		L->first = L->first->next;
-		if (Elem->i != NULL) {
-			free(Elem->i);
-		}
-		if (Elem->f != NULL) {
-			free(Elem->f);
-		}
-		if (Elem->s != NULL) {
-			free(Elem->s);
-		}
-		free(Elem);
-	}
-}
-
-void LDestroy(List *L) {
-	while (L->first != NULL) {
-		L->active = L->first->next;
-		LDeleteFirst(L);
-		L->first = L->active;
-	}
-	L->last = NULL;
 }

@@ -7,87 +7,132 @@
 
 static htabs_l *list;
 
-void semanticInit(){
-    list = symtable_init();
-    enterScope(list);
+void semanticInit() {
+	list = symtable_init();
+	htab_t *t = htab_init(getCurrentDepth(list));
+	t->previous = NULL;
+	t->depth = 0;
+	htab_insertLast(list, t);
 }
 
-void enterScope(){
-    htab_t *t = htab_init(getCurrentDepth(list));
-    htab_insertLast(list, t);
+void semanticDestroy() {
+	while (list->tablesCount > 0) {
+		htab_removeLast(list);
+	}
+	free(list);
 }
 
-void exitScope(){
-    htab_removeLast(list);
+
+void enterScope() {
+	htab_t *t = htab_init(getCurrentDepth(list));
+	t->depth = getCurrentDepth(list) + 1;
+	htab_insertLast(list, t);
 }
 
-int defineSymbol(char *name, varType type, bool isConst, bool isNullable){
-    symbol_t *symbol = htab_find(list->last, name);
-    if(symbol != NULL)
-        return REDEFINITION_ERROR;
-    symbol = htab_define(list->last, name);
-    symbol->type = type;
-    symbol->isDefined = false;
-    symbol->isConst = isConst;
-    symbol->isNullable = isNullable;
-    return 0;
+void exitScope() {
+	htab_removeLast(list);
 }
 
-symbol_t *getSymbol(char *name){
-    symbol_t *symbol = NULL;
-    htab_t *t = list->last;
-    while(symbol == NULL && t != NULL){
-        symbol = htab_find(t, name);
-        t = t->previous;
-    }
-    return symbol;
+int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
+	symbol_t *symbol = htab_find(list->last, name);
+	if (symbol != NULL){
+		fprintf(stderr, "Error: Symbol '%s' is already defined at depth %d\n", name, getCurrentDepth(list));
+		return REDEFINITION_ERROR;
+	}
+	symbol = htab_define(list->last, name);
+	symbol->type = type;
+	symbol->isDefined = false;
+	symbol->isConst = isConst;
+	symbol->isNullable = isNullable;
+	symbol->paramCount = 0;
+	symbol->params = NULL;
+	symbol->depth = getCurrentDepth(list);
+	fprintf(stderr, "Symbol '%s' defined at depth %d, isConst=%s, isNullable=%s, type=%s\n", name, getCurrentDepth(list), isConst ? "true" : "false", isNullable ? "true" : "false", type == INT ? "INT" : type == FLOAT ? "FLOAT"
+																																																   : type == STRING      ? "STRING"
+																																																   : type == FUNCTION    ? "FUNCTION"
+																																																						 : "VOID");
+	return 0;
 }
 
-bool assignSymbol(char *name, KeyWord kw){
-    symbol_t *symbol = getSymbol(name);
-    if(symbol == NULL)
-        return false;   //Symbol does not exist
-    symbol->isDefined = true;
-    if(symbol->isNullable == true){
-        if(kw == _null)
-            return true;
-    }
-    if(symbol->type == INT){
-        if(kw == dtint){
-            return true;
-        }
-    }
-    else if(symbol->type == FLOAT){
-        if(kw == dtflt || kw == dtint){
-            return true;
-        }
-    }
-    else if(symbol->type == STRING)
-        if(kw == dtstr){
-            return true;
-        }
-    return false;
+symbol_t *getSymbol(char *name) {
+	symbol_t *symbol = NULL;
+	htab_t *t = list->last;
+	while (symbol == NULL && t != NULL) {
+		symbol = htab_find(t, name);
+		t = t->previous;
+	}
+	return symbol;
+}
+
+bool assignSymbol(char *name, KeyWord kw) {
+	symbol_t *symbol = getSymbol(name);
+	if (symbol == NULL)
+		return false; //Symbol does not exist
+	symbol->isDefined = true;
+	if (symbol->isNullable == true) {
+		if (kw == _null)
+			return true;
+	}
+	if (symbol->type == INT) {
+		if (kw == dtint) {
+			return true;
+		}
+	} else if (symbol->type == FLOAT) {
+		if (kw == dtflt || kw == dtint) {
+			return true;
+		}
+	} else if (symbol->type == STRING)
+		if (kw == dtstr) {
+			return true;
+		}
+	return false;
 }
 
 //Entering function, get 3 tokens from which extract paramName and paramType, this functions expects to already be shifted into the function scope
-int processParam(Token paramName, Token paramType, bool isNullable){
-	if(!isValidParamType(paramType.kw)){
+int processParam(Token paramName, Token paramType, bool isNullable) {
+	if (!isValidParamType(paramType.kw)) {
 		fprintf(stderr, "Error: %s is not a valid parameter type\n", paramType.s);
-        return(PARAM_ERROR);
-    }
-    varType type;
-    if(paramType.kw == dtint)
-        type = INT;
-    if(paramType.kw == dtflt)
-        type = FLOAT;
-    if(paramType.kw == dtstr)
-        type = STRING;
-    defineSymbol(paramName.s, type, false, isNullable); //Function can also return a nullable thing, figure this out later
-    return 0;
+		return (PARAM_ERROR);
+	}
+	varType type;
+	if (paramType.kw == dtint)
+		type = INT;
+	if (paramType.kw == dtflt)
+		type = FLOAT;
+	if (paramType.kw == dtstr)
+		type = STRING;
+	defineSymbol(paramName.s, type, false, isNullable); //Function can also return a nullable thing, figure this out later
+	return 0;
 }
 
-bool isValidParamType(KeyWord kw){
-    if(kw == dtint || kw == dtstr || kw == dtflt)
-        return true;
-    return false;
+bool isValidParamType(KeyWord kw) {
+	if (kw == dtint || kw == dtstr || kw == dtflt)
+		return true;
+	return false;
+}
+
+
+//This function creates a memore leak, because the symbols created for params are never freed, fix before final version TODO
+void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable) {
+	fprintf(stderr, "Function %s has a parameter %s of type %d isNullable=%s\n", function->key, paramName.s, paramType.kw, isNullable ? "true" : "false");
+	function->paramCount++;
+	function->params = realloc(function->params, function->paramCount * sizeof(symbol_t *));
+	symbol_t *param = malloc(sizeof(symbol_t));
+	param->key = paramName.s;
+	param->type = kwToVarType(paramType.kw);
+	param->isNullable = isNullable;
+	param->isConst = false;
+	param->isDefined = false;
+	param->depth = -1;
+	function->params[function->paramCount - 1] = param;
+}
+
+varType kwToVarType(KeyWord kw) {
+	if (kw == dtint)
+		return INT;
+	if (kw == dtflt)
+		return FLOAT;
+	if (kw == dtstr)
+		return STRING;
+	return VOID;
 }
