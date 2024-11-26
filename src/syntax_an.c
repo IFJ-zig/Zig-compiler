@@ -10,6 +10,7 @@ bool tokenWasGiven = 0;
 
 int read_token() {
 	token = get_token();
+	printf("Token: %d, %s\n", token.kw, token.s);
 	if (token.kw == LEXEM) {
 		fprintf(stderr, "Error: Lexical error\n");
 		return LEXEM_ERROR;
@@ -554,7 +555,6 @@ int inbuild_function() {
 	statusCode = function_call(true);
 	if (statusCode != 0)
 		return statusCode;
-
 	return 0;
 }
 
@@ -621,27 +621,59 @@ int call_or_assignment() {
 	return 0;
 };
 
+bool isLiteralOrId(Token t) {
+	if (t.kw == text || t.kw == decim || t.kw == num || t.kw == id)
+		return true;
+	return false;
+}
+
 int function_call(bool expectNext) {
-	int unclosedBrackets = 0;
-	while (token.kw != end) {
-		if (token.kw == lbracket) {
-			unclosedBrackets++;
-		} else if (token.kw == rbracket) {
-			unclosedBrackets--;
-			if (unclosedBrackets == 0) {
-				if (expectNext) {
-					read_token();
-					if (token.kw != next) {
-						fprintf(stderr, "Error: Expected ';' after function call\n");
-						return SYNTACTIC_ANALYSIS_ERROR;
-					}
-				}
-				return 0;
+
+	symbol_t *sym = getSymbol(token.s);
+	if (sym == NULL) {
+		fprintf(stderr, "Error: Function %s has not been defined\n", token.s);
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+	}
+	read_token();
+	if (token.kw != lbracket) {
+		fprintf(stderr, "Error: Expected '(' after function call\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+
+	bool isPastFirstTerm = false;
+	do {
+		read_token();
+		if (!isPastFirstTerm) {
+			if (token.kw == comma) {
+				fprintf(stderr, "Error: Unexpected ',' at the beginning of function call\n");
+				return SYNTACTIC_ANALYSIS_ERROR;
 			}
 		}
+		if (token.kw == rbracket) {
+			break;
+		}
+		if (!isLiteralOrId(token)) {
+			fprintf(stderr, "Error: Expected literal or id in function call\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		isPastFirstTerm = true;
 		read_token();
+	} while (token.kw == comma);
+
+	if (token.kw != rbracket) {
+		fprintf(stderr, "Error: Expected ')' after function call\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	return SYNTACTIC_ANALYSIS_ERROR;
+
+	if (expectNext) {
+		read_token();
+		if (token.kw != next) {
+			fprintf(stderr, "Error: Expected ';' after function call\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+	}
+
+	return 0;
 }
 
 int while_syntax() {

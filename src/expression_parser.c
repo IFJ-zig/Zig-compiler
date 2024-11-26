@@ -89,7 +89,6 @@ extern Token token;
 
 int expressionParser() {
 	int statusCode;
-
 	t_Stack stack;
 	stackInit(&stack);
 	statusCode = stackPush(&stack, TERMINAL, next);
@@ -125,12 +124,18 @@ int expressionParser() {
 			token.kw = id;
 		} else if (token.kw == id) {
 			symbol_t *sym = getSymbol(token.s);
+			if (sym == NULL) {
+				fprintf(stderr, "Error: Undefined symbol %s\n", token.s);
+				stackClear(&stack);
+				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+			}
 			if (sym->type == FUNCTION) {
 				statusCode = function_call(false);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;
 				}
+				printf("Function call %d\n", token.kw);
 				token.kw = id;
 			}
 		}
