@@ -4,9 +4,11 @@
 *********************************************/
 
 #include "ast.h"
-#include "errors_enum.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "errors_enum.h"
 /*
 
 void ast_init(ast_t *ast){

@@ -24,6 +24,7 @@ typedef enum
 	STRING,
 	BOOL,
 	FUNCTION,
+	ANYTYPE,
 	VOID
 } varType;
 

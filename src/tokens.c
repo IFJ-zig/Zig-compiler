@@ -23,8 +23,8 @@ char *LGetStrAct(Token *T) {
 	return T->s;
 }
 
-char *getTokenName(Token T){
-	switch(T.kw){
+char *getTokenName(Token T) {
+	switch (T.kw) {
 		case LEXEM:
 			return "LEXEM";
 		case INTERNAL:
@@ -47,7 +47,7 @@ char *getTokenName(Token T){
 			return "dtvoid";
 		case constant:
 			return "constant";
-		case variable:	
+		case variable:
 			return "variable";
 		case _null:
 			return "_null";

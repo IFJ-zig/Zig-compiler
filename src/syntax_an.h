@@ -33,6 +33,7 @@ int call_or_assignment();
 int variable_definition(bool isConst);
 int skip_expression();
 int read_token();
+void loadIFJ24();
 
 
 //Helper functions
