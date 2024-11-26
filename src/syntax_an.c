@@ -194,6 +194,7 @@ int skip_function_body() {
 
 
 int checkImport() {
+	static bool imported = false;
 	read_token();
 	if (token.kw != constant) {
 		fprintf(stderr, "Error: Expected keyword 'constant' as start of an import\n");
@@ -241,8 +242,83 @@ int checkImport() {
 		fprintf(stderr, "Error: Expected ';'\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-
+	if(!imported){
+		loadIFJ24();
+		imported = true;
+	}
 	return 0;
+}
+
+void loadIFJ24() {
+	fprintf(stderr, "Loading IFJ24 functions\n");
+	symbol_t *fnSymbol;
+	defineSymbol("ifj.write", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.write");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "value", .kw = id}, (Token) {.kw = dtflt}, false);
+	fnSymbol->params[0]->type = ANYTYPE;	//Anytype is allowed, we don't have a keyword for that however, so a little hack because, because this is happens only once in the entire program
+	
+	defineSymbol("ifj.readstr", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.readstr");
+	fnSymbol->returnType = STRING;
+	
+	defineSymbol("ifj.readi32", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.readi32");
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.readf64", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.readf64");
+	fnSymbol->returnType = FLOAT;
+
+	defineSymbol("ifj.string", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.string");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.concat", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.concat");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "str1", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "str2", .kw = id}, (Token) {.kw = dtstr}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.length", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.length");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.i2f", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.i2f");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
+	fnSymbol->returnType = FLOAT;
+
+	defineSymbol("ifj.f2i", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.f2i");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtflt}, false);
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.substring", FUNCTION, false, true);
+	fnSymbol = getSymbol("ifj.substring");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "j", .kw = id}, (Token) {.kw = dtint}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.ord", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.ord");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
+	fnSymbol->returnType = INT;
+
+	defineSymbol("ifj.chr", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.chr");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "i", .kw = id}, (Token) {.kw = dtint}, false);
+	fnSymbol->returnType = STRING;
+
+	defineSymbol("ifj.strcmp", FUNCTION, false, false);
+	fnSymbol = getSymbol("ifj.strcmp");
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s1", .kw = id}, (Token) {.kw = dtstr}, false);
+	assignFunctionParameter(fnSymbol, (Token) {.s = "s2", .kw = id}, (Token) {.kw = dtstr}, false);
+	fnSymbol->returnType = INT;
+	fprintf(stderr, "Done loading IFJ24 functions\n\n");
 }
 
 int function_analysis() {
