@@ -11,10 +11,10 @@
 #include "errors_enum.h"
 
 
-void ast_init(ast_default_node_t *ast){
-    ast->type = AST_NODE_DEFAULT;
-    ast->data_t.body_t.nodes = NULL;
-    ast->data_t.body_t.nodeCount = 0;
+void ast_init(ast_default_node_t *ast) {
+	ast->type = AST_NODE_DEFAULT;
+	ast->data_t.body_t.nodes = NULL;
+	ast->data_t.body_t.nodeCount = 0;
 }
 /*
 void ast_insert(ast_t *ast, bool insertLeft, Token *token){
