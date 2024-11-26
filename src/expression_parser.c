@@ -86,7 +86,7 @@ int getOperation(int tokenStack, int tokenInput) {
 
 extern Token token;
 
-int expressionParser() {
+int expressionParser(bool tokenRead) {
 	int statusCode;
 	t_Stack stack;
 	stackInit(&stack);
@@ -94,10 +94,12 @@ int expressionParser() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	statusCode = read_token();
-	if (statusCode != 0) {
-		stackClear(&stack);
-		return statusCode;
+	if (!tokenRead) {
+		statusCode = read_token();
+		if (statusCode != 0) {
+			stackClear(&stack);
+			return statusCode;
+		}
 	}
 	while (1) {
 		//printStack(&stack);

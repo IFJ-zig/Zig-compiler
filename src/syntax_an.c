@@ -522,6 +522,13 @@ int data_type() {
 		free(token.s);
 		return statusCode;
 	}
+	if (token.kw == question_mark) {
+		statusCode = read_token();
+		if (statusCode != 0) {
+			free(token.s);
+			return statusCode;
+		}
+	}
 	if (token.kw == square_brackets) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -529,6 +536,7 @@ int data_type() {
 			return statusCode;
 		}
 	}
+
 	if (token.kw != dtint && token.kw != dtstr && token.kw != dtflt) {
 		fprintf(stderr, "Error: Expected data type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
@@ -605,7 +613,7 @@ int if_else() {
 	int statusCode;
 	enterScope();
 
-	statusCode = expressionParser();
+	statusCode = expressionParser(false);
 
 	if (statusCode != 0) {
 		return statusCode;
@@ -694,7 +702,14 @@ int if_else() {
 }
 
 int return_syntax() {
-	int statusCode = expressionParser();
+	int statusCode = read_token();
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (token.kw == next) {
+		return 0;
+	}
+	statusCode = expressionParser(true);
 	if (statusCode != 0)
 		return statusCode;
 	return 0;
@@ -764,7 +779,7 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0)
 		return statusCode;
 
-	statusCode = expressionParser();
+	statusCode = expressionParser(false);
 
 	if (statusCode != 0)
 		return statusCode;
@@ -792,7 +807,7 @@ int call_or_assignment() {
 			fprintf(stderr, "Error: Expected '=' after variable id\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		int statusCode = expressionParser();
+		int statusCode = expressionParser(false);
 		if (statusCode != 0)
 			return statusCode;
 	}
@@ -865,7 +880,7 @@ int while_syntax() {
 	int statusCode;
 	enterScope();
 
-	statusCode = expressionParser();
+	statusCode = expressionParser(false);
 
 	if (statusCode != 0)
 		return statusCode;
