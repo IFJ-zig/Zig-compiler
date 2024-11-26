@@ -7,7 +7,7 @@
 #include "errors_enum.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+/*
 
 void ast_init(ast_t *ast){
     ast->root = NULL;
@@ -62,3 +62,4 @@ void ast_destroy_node(ast_node_t *node){
     }
     free(node);
 }
+*/
