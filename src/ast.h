@@ -50,7 +50,7 @@ typedef struct ast_node_fn_return
 	ast_node_type type;
 	Token *token;
 	varType returnType;
-	struct ast_node_exp **expression;
+	struct ast_node_exp *expression;
 	unsigned int returnCount;
 } ast_node_fn_return_t;
 
