@@ -248,7 +248,7 @@ ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol) {
 	}
 	newNode->type = AST_NODE_FN_CALL;
 	newNode->fnSymbol = fnSymbol;
-	newNode->args = NULL;
+	newNode->args = malloc(sizeof(ast_node_exp_t *));
 	newNode->argCount = 0;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.fnCall = newNode;
