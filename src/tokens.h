@@ -92,4 +92,6 @@ Token get_token();
 
 char *getTokenName(Token T);
 
+Token *allocateToken(Token tkn);
+
 #endif // TOKENS_H
