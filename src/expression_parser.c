@@ -5,8 +5,6 @@
 
 #include "expression_parser.h"
 
-#include <_string.h>
-
 
 char precedentTable[TABLE_SIZE * TABLE_SIZE + 1] = {
 		//  +     -     *     /     (     )     i     <     >     ==    <=    >=    !=    ;, x
