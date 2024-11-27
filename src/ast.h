@@ -138,7 +138,7 @@ void ast_init(ast_default_node_t *astRoot);
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node);
 
 ast_default_node_t *ast_createDefaultNode(ast_node_type type);
-ast_node_fn_def_t *ast_createFnDefNode(symbol_t *fnSymbol);
+ast_default_node_t *ast_createFnDefNode(symbol_t *fnSymbol);
 ast_node_fn_call_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount);
 ast_node_fn_return_t *ast_createFnReturnNode(Token *token, varType returnType, ast_node_exp_t *expression);
 ast_node_exp_t *ast_createExpNode(Token *token, varType dataType);

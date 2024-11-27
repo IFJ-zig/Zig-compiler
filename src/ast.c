@@ -42,6 +42,7 @@ void ast_print(ast_default_node_t *astRoot){
 }
 
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
+    fprintf(stderr, "Inserting node into AST\n");
     astRoot->data_t.body_t.nodeCount++;
     astRoot->data_t.body_t.nodes = (ast_default_node_t **)realloc(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount * sizeof(ast_default_node_t *));
     if (astRoot->data_t.body_t.nodes == NULL) {
@@ -61,7 +62,7 @@ ast_default_node_t *ast_create_node(ast_node_type type) {
     return newNode;
 }
 
-ast_node_fn_def_t *ast_createFnDefNode(symbol_t *fnSymbol) {
+ast_default_node_t *ast_createFnDefNode(symbol_t *fnSymbol) {
     ast_node_fn_def_t *newNode = (ast_node_fn_def_t *)malloc(sizeof(ast_node_fn_def_t));
     if (newNode == NULL) {
         fprintf(stderr, "Error: Memory allocation for ast failed\n");
@@ -71,7 +72,9 @@ ast_node_fn_def_t *ast_createFnDefNode(symbol_t *fnSymbol) {
     newNode->fnSymbol = fnSymbol;
     newNode->body = malloc(sizeof(ast_default_node_t *));
     newNode->bodyCount = 0;
-    return newNode;
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.fnDef = newNode;
+    return defaultNode;
 }
 
 ast_node_fn_call_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount) {
