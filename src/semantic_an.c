@@ -128,11 +128,11 @@ void assignFunctionParameter(symbol_t *function, Token paramName, Token paramTyp
 }
 
 varType kwToVarType(KeyWord kw) {
-	if (kw == dtint)
+	if (kw == dtint || kw == num)
 		return INT;
-	if (kw == dtflt)
+	if (kw == dtflt || kw == decim)
 		return FLOAT;
-	if (kw == dtstr)
+	if (kw == dtstr || kw == text)
 		return STRING;
 	return VOID;
 }
