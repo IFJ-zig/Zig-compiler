@@ -33,8 +33,8 @@ In root run
 
 ```bash
 cd ./tests
-chmod +x ./IFJ-tests/test.sh
 git clone https://github.com/jansko03/IFJ24-tests.git
+chmod +x ./IFJ-tests/test.sh
 cd ..
 ```
 
