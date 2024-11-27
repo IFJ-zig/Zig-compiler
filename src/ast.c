@@ -331,6 +331,7 @@ ast_default_node_t *ast_createIfElseNode(ast_node_exp_t *conditionExp) {
 	newNode->elseBlock = malloc(sizeof(ast_default_node_t *));
 	newNode->ifCount = 0;
 	newNode->elseCount = 0;
+	newNode->elseBlockActive = false;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.ifElse = newNode;
 	defaultNode->type = AST_NODE_IF_ELSE;
