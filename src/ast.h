@@ -150,6 +150,8 @@ ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
 void ast_print(ast_default_node_t *astRoot, int depth);
 void ast_printRoot(ast_default_node_t *astRoot);
 
+void ast_insertParam(ast_default_node_t *astRoot, ast_node_exp_t *expNode);
+
 ast_default_node_t *ast_wrapVarAssignNode(ast_node_var_assign_t *assignNode);
 ast_default_node_t *ast_wrapExpNode(ast_node_exp_t *expNode);
 
