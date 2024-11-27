@@ -85,6 +85,10 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		}
 	} else if (astRoot->type == AST_NODE_FN_CALL) {
 		fprintf(stderr, "%sFunction call - %s, argCount(Node)=%d\n", indentNode(depth), astRoot->data_t.fnCall->fnSymbol->key, astRoot->data_t.fnCall->argCount);
+		for(unsigned int i = 0; i < astRoot->data_t.fnCall->argCount; i++){
+			varType type = astRoot->data_t.fnCall->args[i]->dataType;
+			fprintf(stderr, "%s->arg[%d] = %s", indentNode(depth+2), i, type == INT ? "INT" : type == FLOAT ? "FLOAT" : type == STRING ? "STRING" : type == ANYTYPE ? "ANYTYPE" : "VOID");
+		}
 	} else if (astRoot->type == AST_NODE_FN_RETURN) {
 		fprintf(stderr, "%sFunction return\n", indentNode(depth));
 		fprintf(stderr, "%s->expression = ", indentNode(depth+1));
