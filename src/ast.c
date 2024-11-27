@@ -18,12 +18,16 @@ void ast_init(ast_default_node_t *astRoot) {
 }
 
 void ast_print(ast_default_node_t *astRoot) {
+	printf("Printing AST %d %d\n", astRoot->type, astRoot->data_t.body_t.nodeCount);
 	if (astRoot->type == AST_NODE_DEFAULT) {
 		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
 			ast_print(astRoot->data_t.body_t.nodes[i]);
 		}
 	} else if (astRoot->type == AST_NODE_FN_DEF) {
 		printf("Function definition\n");
+		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
+			ast_print(astRoot->data_t.body_t.nodes[i]);
+		}
 	} else if (astRoot->type == AST_NODE_FN_CALL) {
 		printf("Function call\n");
 	} else if (astRoot->type == AST_NODE_FN_RETURN) {
@@ -181,7 +185,7 @@ ast_default_node_t *ast_createIfElseNode(ast_node_exp_t *conditionExp) {
 	newNode->elseCount = 0;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.ifElse = newNode;
-	defaultNode->type = AST_NODE_FN_CALL;
+	defaultNode->type = AST_NODE_IF_ELSE;
 	return defaultNode;
 }
 
@@ -197,6 +201,6 @@ ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
 	newNode->blockCount = 0;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.While = newNode;
-	defaultNode->type = AST_NODE_FN_CALL;
+	defaultNode->type = AST_NODE_WHILE;
 	return defaultNode;
 }

@@ -200,6 +200,7 @@ int program() {
 				return statusCode;
 			fprintf(stderr, "\n");
 		} else if (token.kw == end) {
+			ast_print(astRoot);
 			fprintf(stderr, "Compilation successfully finished \n");
 			return 0;
 		} else {
@@ -432,9 +433,6 @@ int function_analysis() {
 	ast_default_node_t *functionDefNode = ast_createFnDefNode(getSymbol(fnName));
 	ast_insert(astRoot, functionDefNode);
 
-
-	ast_print(astRoot);
-
 	statusCode = param_list(); //done semantic
 	if (statusCode != 0)
 		return statusCode;
@@ -663,7 +661,6 @@ int if_else() {
 			return statusCode;
 		}
 
-
 		if (token.kw != id) {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
@@ -697,6 +694,7 @@ int if_else() {
 	}
 
 	while (token.kw != rblock) {
+		astRoot->activeNode = ifElseNode;
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
@@ -729,6 +727,7 @@ int if_else() {
 	}
 
 	while (token.kw != rblock) {
+		astRoot->activeNode = ifElseNode;
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
@@ -777,7 +776,15 @@ int inbuild_function() {
 		fprintf(stderr, "Error: Expected library call\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	symbol_t *fnSymbol = getSymbol(strcat("ifj.", token.s));
+	char *prefix = malloc(strlen("ifj.") + strlen(token.s) + 1);
+	if (prefix == NULL) {
+		fprintf(stderr, "Error: Memory allocation failed\n");
+		return INTERNAL_COMPILER_ERROR;
+	}
+	strcpy(prefix, "ifj.");
+	strcat(prefix, token.s);
+	symbol_t *fnSymbol = getSymbol(prefix);
+	free(prefix);
 	if (fnSymbol == NULL) {
 		fprintf(stderr, "Error: Function %s is not defined\n", token.s);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
@@ -985,6 +992,7 @@ int while_syntax() {
 	}
 
 	while (token.kw != rblock) {
+		astRoot->activeNode = whileNode;
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
