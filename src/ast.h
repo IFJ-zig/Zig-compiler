@@ -112,6 +112,7 @@ typedef struct ast_node_while
 typedef struct ast_default_node
 {
 	ast_node_type type;
+	struct ast_default_node *activeNode;
 	union
 	{
 		struct ast_node_fn_def *fnDef;

@@ -14,6 +14,7 @@ void ast_init(ast_default_node_t *astRoot) {
 	astRoot->type = AST_NODE_DEFAULT;
 	astRoot->data_t.body_t.nodes = NULL;
 	astRoot->data_t.body_t.nodeCount = 0;
+    astRoot->activeNode = NULL;
 }
 
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
