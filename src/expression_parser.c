@@ -160,7 +160,7 @@ int expressionParser(bool tokenRead) {
 					stackClear(&stack);
 					return statusCode;
 				}
-				printf("Function call %d\n", token.kw);
+				fprintf(stderr, "Function call %d\n", token.kw);
 				token.kw = id;
 			}
 		}

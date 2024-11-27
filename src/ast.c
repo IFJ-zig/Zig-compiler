@@ -31,44 +31,6 @@ char *indentNode(int depth) {
 	return indent;
 }
 
-void ast_printRoot(ast_default_node_t *astRoot){
-	int depth = 0;
-	for(unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++){
-		switch(astRoot->data_t.body_t.nodes[i]->type){
-			case AST_NODE_DEFAULT:
-				fprintf(stderr, "%sDefault node\n", indentNode(depth));
-				break;
-			case AST_NODE_FN_DEF:
-				fprintf(stderr, "%sFunction definition\n", indentNode(depth));
-				break;
-			case AST_NODE_FN_CALL:	
-				fprintf(stderr, "%sFunction call\n", indentNode(depth));
-				break;
-			case AST_NODE_FN_RETURN:
-				fprintf(stderr, "%sFunction return\n", indentNode(depth));
-				break;
-			case AST_NODE_EXP:
-				fprintf(stderr, "%sExpression\n", indentNode(depth));
-				break;
-			case AST_NODE_VAR_DEF:
-				fprintf(stderr, "%sVariable definition\n", indentNode(depth));
-				break;
-			case AST_NODE_VAR_ASSIGN:
-				fprintf(stderr, "%sVariable assignment\n", indentNode(depth));
-				break;
-			case AST_NODE_IF_ELSE:
-				fprintf(stderr, "%sIf-else\n", indentNode(depth));
-				break;
-			case AST_NODE_WHILE:
-				fprintf(stderr, "%sWhile\n", indentNode(depth));
-				break;
-			default:
-				fprintf(stderr, "%sUnknown node\n", indentNode(depth));
-				break;
-		}
-	}
-}
-
 void ast_print(ast_default_node_t *astRoot, int depth) {
 	//fprintf(stderr, "Printing AST %d %d\n", astRoot->type, astRoot->data_t.body_t.nodeCount);
 	if(astRoot == NULL) {
@@ -153,10 +115,8 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 }
 
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
-	fprintf(stderr, "Inserting node into AST, rootType=%d type=%d\n", astRoot->type, node->type);
 	switch (astRoot->type) {
 		case AST_NODE_DEFAULT:
-			fprintf(stderr, "Inserting into default node (root)\n");
 			astRoot->data_t.body_t.nodeCount++;
 			astRoot->data_t.body_t.nodes = (ast_default_node_t **)realloc(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount * sizeof(ast_default_node_t *));
 			if (astRoot->data_t.body_t.nodes == NULL) {
@@ -166,7 +126,6 @@ void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
 			astRoot->data_t.body_t.nodes[astRoot->data_t.body_t.nodeCount - 1] = node;
 			break;
 		case AST_NODE_FN_DEF:
-			fprintf(stderr, "Inserting into function definition node\n");
 			astRoot->data_t.fnDef->bodyCount++;
 			astRoot->data_t.fnDef->body = (ast_default_node_t **)realloc(astRoot->data_t.fnDef->body, astRoot->data_t.fnDef->bodyCount * sizeof(ast_default_node_t *));
 			if (astRoot->data_t.fnDef->body == NULL) {
