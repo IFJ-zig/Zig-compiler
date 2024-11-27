@@ -31,8 +31,6 @@ typedef struct ast_node_fn_def
 	struct ast_default_node **body;
 	unsigned int bodyCount;
 	symbol_t *fnSymbol;
-	varType returnType;
-
 } ast_node_fn_def_t;
 
 
@@ -50,8 +48,7 @@ typedef struct ast_node_fn_return
 	ast_node_type type;
 	Token *token;
 	varType returnType;
-	struct ast_node_exp **expression;
-	unsigned int returnCount;
+	struct ast_node_exp *expression;
 } ast_node_fn_return_t;
 
 
@@ -117,7 +114,6 @@ typedef struct ast_default_node
 	ast_node_type type;
 	union
 	{
-		struct ast_node_fn_param *fnParam;
 		struct ast_node_fn_def *fnDef;
 		struct ast_node_fn_call *fnCall;
 		struct ast_node_fn_return *fnReturn;
@@ -139,12 +135,16 @@ typedef struct ast_default_node
 
 void ast_init(ast_default_node_t *astRoot);
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node);
-ast_default_node_t *ast_createNode(ast_node_type type);
 
-void ast_insertToExp(ast_node_exp_t *exp, ast_node_exp_t *node);
-/*
-void ast_insert(ast_t *ast, bool insertLeft, Token *token);   //Diverging from IAL2, we don't need a key since this will not be a balanced tree and determining whether to go right or left will be done somewhere else
-void ast_destroy(ast_t *ast);
-void ast_destroy_node(ast_node_t *node); //Helper function for ast_destroy so that we don't need to use a stack here
-*/
+ast_default_node_t *ast_createDefaultNode(ast_node_type type);
+ast_node_fn_def_t *ast_createFnDefNode(symbol_t *fnSymbol);
+ast_node_fn_call_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount);
+ast_node_fn_return_t *ast_createFnReturnNode(Token *token, varType returnType, ast_node_exp_t *expression);
+ast_node_exp_t *ast_createExpNode(Token *token, varType dataType);
+ast_node_var_assign_t *ast_createVarAssignNode(symbol_t *symbol, ast_node_exp_t *expression);
+ast_node_var_def_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t *assignment);
+ast_node_if_else_t *ast_createIfElseNode(ast_node_exp_t *conditionExp);
+ast_node_while_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
+
+
 #endif // AST_T
