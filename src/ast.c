@@ -74,10 +74,11 @@ ast_default_node_t *ast_createFnDefNode(symbol_t *fnSymbol) {
     newNode->bodyCount = 0;
     ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
     defaultNode->data_t.fnDef = newNode;
+    defaultNode->type = AST_NODE_FN_DEF;
     return defaultNode;
 }
 
-ast_node_fn_call_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount) {
+ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount) {
     ast_node_fn_call_t *newNode = (ast_node_fn_call_t *)malloc(sizeof(ast_node_fn_call_t));
     if (newNode == NULL) {
         fprintf(stderr, "Error: Memory allocation for ast failed\n");
@@ -87,10 +88,13 @@ ast_node_fn_call_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **ar
     newNode->fnSymbol = fnSymbol;
     newNode->args = args;
     newNode->argCount = argCount;
-    return newNode;
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.fnCall = newNode;
+    defaultNode->type = AST_NODE_FN_CALL;
+    return defaultNode;
 }
 
-ast_node_fn_return_t *ast_createFnReturnNode(Token *token, varType returnType, ast_node_exp_t *expression) {
+ast_default_node_t *ast_createFnReturnNode(Token *token, varType returnType, ast_node_exp_t *expression) {
     ast_node_fn_return_t *newNode = (ast_node_fn_return_t *)malloc(sizeof(ast_node_fn_return_t));
     if (newNode == NULL) {
         fprintf(stderr, "Error: Memory allocation for ast failed\n");
@@ -100,7 +104,10 @@ ast_node_fn_return_t *ast_createFnReturnNode(Token *token, varType returnType, a
     newNode->token = token;
     newNode->returnType = returnType;
     newNode->expression = expression;
-    return newNode;
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.fnReturn = newNode;
+    defaultNode->type = AST_NODE_FN_RETURN;
+    return defaultNode;
 }
 
 ast_node_exp_t *ast_createExpNode(Token *token, varType dataType) {
@@ -119,6 +126,13 @@ ast_node_exp_t *ast_createExpNode(Token *token, varType dataType) {
     return newNode;
 }
 
+ast_default_node_t *ast_wrapExpNode(ast_node_exp_t *expNode) {
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.exp = expNode;
+    defaultNode->type = AST_NODE_EXP;
+    return defaultNode;
+}
+
 ast_node_var_assign_t *ast_createVarAssignNode(symbol_t *symbol, ast_node_exp_t *expression) {
     ast_node_var_assign_t *newNode = (ast_node_var_assign_t *)malloc(sizeof(ast_node_var_assign_t));
     if (newNode == NULL) {
@@ -131,7 +145,14 @@ ast_node_var_assign_t *ast_createVarAssignNode(symbol_t *symbol, ast_node_exp_t 
     return newNode;
 }
 
-ast_node_var_def_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t *assignment) {
+ast_default_node_t *ast_wrapVarAssignNode(ast_node_var_assign_t *assignNode) {
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.varAssign = assignNode;
+    defaultNode->type = AST_NODE_VAR_ASSIGN;
+    return defaultNode;
+}
+
+ast_default_node_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t *assignment) {
     ast_node_var_def_t *newNode = (ast_node_var_def_t *)malloc(sizeof(ast_node_var_def_t));
     if (newNode == NULL) {
         fprintf(stderr, "Error: Memory allocation for ast failed\n");
@@ -140,10 +161,13 @@ ast_node_var_def_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t
     newNode->type = AST_NODE_VAR_DEF;
     newNode->symbol = symbol;
     newNode->assignment = assignment;
-    return newNode;
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.varDef = newNode;
+    defaultNode->type = AST_NODE_VAR_DEF;
+    return defaultNode;
 }
 
-ast_node_if_else_t *ast_createIfElseNode(ast_node_exp_t *conditionExp) {
+ast_default_node_t *ast_createIfElseNode(ast_node_exp_t *conditionExp) {
     ast_node_if_else_t *newNode = (ast_node_if_else_t *)malloc(sizeof(ast_node_if_else_t));
     if (newNode == NULL) {
         fprintf(stderr, "Error: Memory allocation for ast failed\n");
@@ -155,10 +179,13 @@ ast_node_if_else_t *ast_createIfElseNode(ast_node_exp_t *conditionExp) {
     newNode->elseBlock = malloc(sizeof(ast_default_node_t *));
     newNode->ifCount = 0;
     newNode->elseCount = 0;
-    return newNode;
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.fnCall = newNode;
+    defaultNode->type = AST_NODE_FN_CALL;
+    return defaultNode;
 }
 
-ast_node_while_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
+ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
     ast_node_while_t *newNode = (ast_node_while_t *)malloc(sizeof(ast_node_while_t));
     if (newNode == NULL) {
         fprintf(stderr, "Error: Memory allocation for ast failed\n");
@@ -168,5 +195,9 @@ ast_node_while_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
     newNode->conditionExp = conditionExp;
     newNode->block = malloc(sizeof(ast_default_node_t *));
     newNode->blockCount = 0;
-    return newNode;
+    ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
+    defaultNode->data_t.fnCall = newNode;
+    defaultNode->type = AST_NODE_FN_CALL;
+    return defaultNode;
 }
+

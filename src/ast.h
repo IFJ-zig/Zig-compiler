@@ -148,5 +148,8 @@ ast_node_if_else_t *ast_createIfElseNode(ast_node_exp_t *conditionExp);
 ast_node_while_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
 void ast_print(ast_default_node_t *astRoot);
 
+ast_default_node_t *ast_wrapVarAssignNode(ast_node_var_assign_t *assignNode);
+ast_default_node_t *ast_wrapExpNode(ast_node_exp_t *expNode);
+
 
 #endif // AST_T
