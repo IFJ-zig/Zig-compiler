@@ -31,6 +31,12 @@ Compiler for imperative language Zig. Built using C.
 
 In root run
 
+```bash
+git clone https://github.com/jansko03/IFJ24-tests.git
+```
+
+Then
+
 Linux/Mac:
 
 ```bash
