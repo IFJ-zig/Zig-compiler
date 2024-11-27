@@ -128,7 +128,7 @@ ast_node_exp_t *ast_createExpNode(Token *token, varType dataType) {
 
 ast_default_node_t *ast_wrapExpNode(ast_node_exp_t *expNode) {
     ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
-    defaultNode->data_t.exp = expNode;
+    defaultNode->data_t.exp = (struct ast_node_fn_exp *)expNode;
     defaultNode->type = AST_NODE_EXP;
     return defaultNode;
 }
@@ -180,7 +180,7 @@ ast_default_node_t *ast_createIfElseNode(ast_node_exp_t *conditionExp) {
     newNode->ifCount = 0;
     newNode->elseCount = 0;
     ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
-    defaultNode->data_t.fnCall = newNode;
+    defaultNode->data_t.ifElse = newNode;
     defaultNode->type = AST_NODE_FN_CALL;
     return defaultNode;
 }
@@ -196,7 +196,7 @@ ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
     newNode->block = malloc(sizeof(ast_default_node_t *));
     newNode->blockCount = 0;
     ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
-    defaultNode->data_t.fnCall = newNode;
+    defaultNode->data_t.While = newNode;
     defaultNode->type = AST_NODE_FN_CALL;
     return defaultNode;
 }

@@ -139,13 +139,13 @@ void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node);
 
 ast_default_node_t *ast_createDefaultNode(ast_node_type type);
 ast_default_node_t *ast_createFnDefNode(symbol_t *fnSymbol);
-ast_node_fn_call_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount);
-ast_node_fn_return_t *ast_createFnReturnNode(Token *token, varType returnType, ast_node_exp_t *expression);
+ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount);
+ast_default_node_t *ast_createFnReturnNode(Token *token, varType returnType, ast_node_exp_t *expression);
 ast_node_exp_t *ast_createExpNode(Token *token, varType dataType);
 ast_node_var_assign_t *ast_createVarAssignNode(symbol_t *symbol, ast_node_exp_t *expression);
-ast_node_var_def_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t *assignment);
-ast_node_if_else_t *ast_createIfElseNode(ast_node_exp_t *conditionExp);
-ast_node_while_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
+ast_default_node_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t *assignment);
+ast_default_node_t *ast_createIfElseNode(ast_node_exp_t *conditionExp);
+ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
 void ast_print(ast_default_node_t *astRoot);
 
 ast_default_node_t *ast_wrapVarAssignNode(ast_node_var_assign_t *assignNode);
