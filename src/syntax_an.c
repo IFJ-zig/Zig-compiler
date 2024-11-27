@@ -201,8 +201,10 @@ int program() {
 			fprintf(stderr, "\n");
 		} else if (token.kw == end) {
 			fprintf(stderr, "---Begin print astRoot---\n");
+			ast_printRoot(astRoot);
+			fprintf(stderr, "\n---Begin print ast complete---\n");
 			ast_print(astRoot, 0);
-			fprintf(stderr, "---End print astRoot---\n\n");
+			fprintf(stderr, "---End print---\n\n");
 			fprintf(stderr, "Compilation successfully finished \n");
 			return 0;
 		} else {
@@ -434,7 +436,6 @@ int function_analysis() {
 	}
 	ast_default_node_t *functionDefNode = ast_createFnDefNode(getSymbol(fnName));
 	ast_insert(astRoot, functionDefNode);
-	//astRoot->activeNode = functionDefNode;
 
 	statusCode = param_list(); //done semantic
 	if (statusCode != 0)

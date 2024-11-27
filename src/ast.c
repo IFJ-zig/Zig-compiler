@@ -31,6 +31,44 @@ char *indentNode(int depth) {
 	return indent;
 }
 
+void ast_printRoot(ast_default_node_t *astRoot){
+	int depth = 0;
+	for(unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++){
+		switch(astRoot->data_t.body_t.nodes[i]->type){
+			case AST_NODE_DEFAULT:
+				fprintf(stderr, "%sDefault node\n", indentNode(depth));
+				break;
+			case AST_NODE_FN_DEF:
+				fprintf(stderr, "%sFunction definition\n", indentNode(depth));
+				break;
+			case AST_NODE_FN_CALL:	
+				fprintf(stderr, "%sFunction call\n", indentNode(depth));
+				break;
+			case AST_NODE_FN_RETURN:
+				fprintf(stderr, "%sFunction return\n", indentNode(depth));
+				break;
+			case AST_NODE_EXP:
+				fprintf(stderr, "%sExpression\n", indentNode(depth));
+				break;
+			case AST_NODE_VAR_DEF:
+				fprintf(stderr, "%sVariable definition\n", indentNode(depth));
+				break;
+			case AST_NODE_VAR_ASSIGN:
+				fprintf(stderr, "%sVariable assignment\n", indentNode(depth));
+				break;
+			case AST_NODE_IF_ELSE:
+				fprintf(stderr, "%sIf-else\n", indentNode(depth));
+				break;
+			case AST_NODE_WHILE:
+				fprintf(stderr, "%sWhile\n", indentNode(depth));
+				break;
+			default:
+				fprintf(stderr, "%sUnknown node\n", indentNode(depth));
+				break;
+		}
+	}
+}
+
 void ast_print(ast_default_node_t *astRoot, int depth) {
 	//printf("Printing AST %d %d\n", astRoot->type, astRoot->data_t.body_t.nodeCount);
 	if(astRoot == NULL) {
@@ -38,18 +76,15 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 	}
 	if (astRoot->type == AST_NODE_DEFAULT) {
 		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
-			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
+			ast_print(astRoot->data_t.body_t.nodes[i], depth);
 		}
 	} else if (astRoot->type == AST_NODE_FN_DEF) {
-		fprintf(stderr, "%sFunction definition -\n", indentNode(depth));;
-		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
-			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
+		fprintf(stderr, "%sFunction definition - %s\n", indentNode(depth), astRoot->data_t.fnDef->fnSymbol->key);
+		for (unsigned int i = 0; i < astRoot->data_t.fnDef->bodyCount; i++) {
+			ast_print(astRoot->data_t.fnDef->body[i], depth + 1);
 		}
 	} else if (astRoot->type == AST_NODE_FN_CALL) {
 		fprintf(stderr, "%sFunction call - %s, argCount(Node)=%d\n", indentNode(depth), astRoot->data_t.fnCall->fnSymbol->key, astRoot->data_t.fnCall->argCount);
-		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
-			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
-		}
 	} else if (astRoot->type == AST_NODE_FN_RETURN) {
 		fprintf(stderr, "%sFunction return\n", indentNode(depth));
 		fprintf(stderr, "%s->expression = ", indentNode(depth+1));
@@ -76,8 +111,8 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 	} else if (astRoot->type == AST_NODE_VAR_ASSIGN) {
 		printf("%sVariable assignment\n", indentNode(depth));
 		printf("%s->expression = ", indentNode(depth+2));
-		if(astRoot->data_t.varDef->assignment->expression != NULL) {
-			printf("%d\n", astRoot->data_t.varDef->assignment->expression->token->kw);
+		if(astRoot->data_t.varAssign->expression != NULL) {
+			printf("%d\n", astRoot->data_t.varAssign->expression->token->kw);
 		} else {
 			printf("NULL\n");
 		}
@@ -113,14 +148,41 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 }
 
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
-	fprintf(stderr, "Inserting node into AST\n");
-	astRoot->data_t.body_t.nodeCount++;
-	astRoot->data_t.body_t.nodes = (ast_default_node_t **)realloc(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount * sizeof(ast_default_node_t *));
-	if (astRoot->data_t.body_t.nodes == NULL) {
-		fprintf(stderr, "Error: Memory allocation for ast failed\n");
-		exit(INTERNAL_COMPILER_ERROR);
+	fprintf(stderr, "Inserting node into AST, rootType=%d type=%d\n", astRoot->type, node->type);
+	switch (astRoot->type) {
+		case AST_NODE_DEFAULT:
+			fprintf(stderr, "Inserting into default node (root)\n");
+			astRoot->data_t.body_t.nodeCount++;
+			astRoot->data_t.body_t.nodes = (ast_default_node_t **)realloc(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount * sizeof(ast_default_node_t *));
+			if (astRoot->data_t.body_t.nodes == NULL) {
+				fprintf(stderr, "Error: Memory allocation for ast failed\n");
+				exit(INTERNAL_COMPILER_ERROR);
+			}
+			astRoot->data_t.body_t.nodes[astRoot->data_t.body_t.nodeCount - 1] = node;
+			break;
+		case AST_NODE_FN_DEF:
+			fprintf(stderr, "Inserting into function definition node\n");
+			astRoot->data_t.fnDef->bodyCount++;
+			astRoot->data_t.fnDef->body = (ast_default_node_t **)realloc(astRoot->data_t.fnDef->body, astRoot->data_t.fnDef->bodyCount * sizeof(ast_default_node_t *));
+			if (astRoot->data_t.fnDef->body == NULL) {
+				fprintf(stderr, "Error: Memory allocation for ast failed\n");
+				exit(INTERNAL_COMPILER_ERROR);
+			}
+			astRoot->data_t.fnDef->body[astRoot->data_t.fnDef->bodyCount - 1] = node;
+			break;
+		case AST_NODE_WHILE:
+			astRoot->data_t.While->blockCount++;
+			astRoot->data_t.While->block = (ast_default_node_t **)realloc(astRoot->data_t.While->block, astRoot->data_t.While->blockCount * sizeof(ast_default_node_t *));
+			if (astRoot->data_t.While->block == NULL) {
+				fprintf(stderr, "Error: Memory allocation for ast failed\n");
+				exit(INTERNAL_COMPILER_ERROR);
+			}
+			astRoot->data_t.While->block[astRoot->data_t.While->blockCount - 1] = node;
+			break;
+		default:
+			fprintf(stderr, "Error: Inserting into node type %d not supported by this function\n", astRoot->type);
+			//exit(INTERNAL_COMPILER_ERROR);
 	}
-	astRoot->data_t.body_t.nodes[astRoot->data_t.body_t.nodeCount - 1] = node;
 }
 
 ast_default_node_t *ast_create_node(ast_node_type type) {
