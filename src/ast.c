@@ -44,7 +44,7 @@ ast_node_fn_def_t *ast_createFnDefNode(symbol_t *fnSymbol) {
     }
     newNode->type = AST_NODE_FN_DEF;
     newNode->fnSymbol = fnSymbol;
-    newNode->body = NULL;
+    newNode->body = malloc(sizeof(ast_default_node_t *));
     newNode->bodyCount = 0;
     return newNode;
 }
@@ -123,8 +123,8 @@ ast_node_if_else_t *ast_createIfElseNode(ast_node_exp_t *conditionExp) {
     }
     newNode->type = AST_NODE_IF_ELSE;
     newNode->conditionExp = conditionExp;
-    newNode->ifBlock = NULL;
-    newNode->elseBlock = NULL;
+    newNode->ifBlock = malloc(sizeof(ast_default_node_t *));
+    newNode->elseBlock = malloc(sizeof(ast_default_node_t *));
     newNode->ifCount = 0;
     newNode->elseCount = 0;
     return newNode;
@@ -138,7 +138,7 @@ ast_node_while_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
     }
     newNode->type = AST_NODE_WHILE;
     newNode->conditionExp = conditionExp;
-    newNode->block = NULL;
+    newNode->block = malloc(sizeof(ast_default_node_t *));
     newNode->blockCount = 0;
     return newNode;
 }
