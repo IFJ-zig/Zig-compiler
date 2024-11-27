@@ -18,7 +18,6 @@ void ast_init(ast_default_node_t *astRoot) {
 }
 
 char *indentNode(int depth) {
-	fprintf(stderr, "Indenting node\n");
 	depth *= 2;
 	char *indent = (char *)malloc(depth + 1);
 	if (indent == NULL) {
@@ -42,7 +41,7 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
 		}
 	} else if (astRoot->type == AST_NODE_FN_DEF) {
-		fprintf(stderr, "%sFunction definition - %s\n", indentNode(depth), astRoot->data_t.fnDef->fnSymbol->key);
+		fprintf(stderr, "%sFunction definition -\n", indentNode(depth));;
 		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
 			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
 		}

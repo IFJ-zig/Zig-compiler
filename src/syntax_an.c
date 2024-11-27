@@ -434,6 +434,7 @@ int function_analysis() {
 	}
 	ast_default_node_t *functionDefNode = ast_createFnDefNode(getSymbol(fnName));
 	ast_insert(astRoot, functionDefNode);
+	//astRoot->activeNode = functionDefNode;
 
 	statusCode = param_list(); //done semantic
 	if (statusCode != 0)
