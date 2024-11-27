@@ -5,6 +5,8 @@
 
 #include "expression_parser.h"
 
+#include <_string.h>
+
 
 char precedentTable[TABLE_SIZE * TABLE_SIZE + 1] = {
 		//  +     -     *     /     (     )     i     <     >     ==    <=    >=    !=    ;, x
@@ -85,6 +87,7 @@ int getOperation(int tokenStack, int tokenInput) {
 }
 
 extern Token token;
+extern ast_default_node_t *astRoot;
 
 int expressionParser(bool tokenRead) {
 	int statusCode;
@@ -125,7 +128,21 @@ int expressionParser(bool tokenRead) {
 				stackClear(&stack);
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
-			statusCode = function_call(false);
+			char *prefix = malloc(strlen("ifj.") + strlen(token.s) + 1);
+			if (prefix == NULL) {
+				fprintf(stderr, "Error: Memory allocation failed\n");
+				return INTERNAL_COMPILER_ERROR;
+			}
+			strcpy(prefix, "ifj.");
+			strcat(prefix, token.s);
+			symbol_t *fnSymbol = getSymbol(prefix);
+			free(prefix);
+			if (fnSymbol == NULL) {
+				fprintf(stderr, "Error: Function %s is not defined\n", token.s);
+				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+			}
+			ast_default_node_t *fnCallNode = ast_createFnCallNode(fnSymbol);
+			statusCode = function_call(false, fnCallNode);
 			if (statusCode != 0) {
 				stackClear(&stack);
 				return statusCode;
@@ -139,7 +156,8 @@ int expressionParser(bool tokenRead) {
 				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 			}
 			if (sym->type == FUNCTION) {
-				statusCode = function_call(false);
+				ast_default_node_t *fnCallNode = ast_createFnCallNode(sym);
+				statusCode = function_call(false, fnCallNode);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;

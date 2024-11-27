@@ -614,7 +614,7 @@ int code() {
 				return statusCode;
 			break;
 		case inbuild:
-			statusCode = inbuild_function();
+			statusCode = inbuild_function(true);
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -761,7 +761,7 @@ int return_syntax() {
 	return 0;
 }
 
-int inbuild_function() {
+int inbuild_function(bool expectNext) {
 	int statusCode;
 	statusCode = read_token();
 	if (statusCode != 0) {
@@ -794,7 +794,7 @@ int inbuild_function() {
 	}
 	ast_default_node_t *fnCallNode = ast_createFnCallNode(fnSymbol);
 	ast_insert(astRoot->activeNode, fnCallNode);
-	statusCode = function_call(true, fnCallNode);
+	statusCode = function_call(expectNext, fnCallNode);
 	if (statusCode != 0)
 		return statusCode;
 	return 0;
@@ -852,6 +852,7 @@ int variable_definition(bool isConst) {
 	return 0;
 };
 int call_or_assignment() {
+	printf("Call or assignment\n");
 	int statusCode;
 	// TODO: SEMANTHIC ANALYSIS
 	// I need semanthic analysis to define if id is a function or variable
@@ -894,6 +895,7 @@ bool isLiteralOrId(Token t) {
 }
 
 int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
+	printf("Function call %s\n", fnCallNode->data_t.fnCall->fnSymbol->key);
 	int statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -940,7 +942,6 @@ int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
 		} else {
 			dataType = kwToVarType(allocatedTkn->kw);
 		}
-
 		ast_node_exp_t *expNode = ast_createExpNode(allocatedTkn, dataType);
 		ast_insertParam(fnCallNode, expNode);
 
