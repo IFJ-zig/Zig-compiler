@@ -32,7 +32,9 @@ Compiler for imperative language Zig. Built using C.
 In root run
 
 ```bash
+cd ./tests
 git clone https://github.com/jansko03/IFJ24-tests.git
+cd ..
 ```
 
 Then
