@@ -17,31 +17,99 @@ void ast_init(ast_default_node_t *astRoot) {
 	astRoot->activeNode = NULL;
 }
 
-void ast_print(ast_default_node_t *astRoot) {
-	printf("Printing AST %d %d\n", astRoot->type, astRoot->data_t.body_t.nodeCount);
+char *indentNode(int depth) {
+	fprintf(stderr, "Indenting node\n");
+	depth *= 2;
+	char *indent = (char *)malloc(depth + 1);
+	if (indent == NULL) {
+		fprintf(stderr, "Error: Memory allocation for ast failed\n");
+		exit(INTERNAL_COMPILER_ERROR);
+	}
+	for (int i = 0; i < depth; i++) {
+		indent[i] = ' ';
+	}
+	indent[depth] = '\0';
+	return indent;
+}
+
+void ast_print(ast_default_node_t *astRoot, int depth) {
+	//printf("Printing AST %d %d\n", astRoot->type, astRoot->data_t.body_t.nodeCount);
+	if(astRoot == NULL) {
+		fprintf(stderr, "AST IS NULL!\n");
+	}
 	if (astRoot->type == AST_NODE_DEFAULT) {
 		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
-			ast_print(astRoot->data_t.body_t.nodes[i]);
+			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
 		}
 	} else if (astRoot->type == AST_NODE_FN_DEF) {
-		printf("Function definition\n");
+		fprintf(stderr, "%sFunction definition - %s\n", indentNode(depth), astRoot->data_t.fnDef->fnSymbol->key);
 		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
-			ast_print(astRoot->data_t.body_t.nodes[i]);
+			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
 		}
 	} else if (astRoot->type == AST_NODE_FN_CALL) {
-		printf("Function call\n");
+		fprintf(stderr, "%sFunction call - %s, argCount(Node)=%d\n", indentNode(depth), astRoot->data_t.fnCall->fnSymbol->key, astRoot->data_t.fnCall->argCount);
+		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
+			ast_print(astRoot->data_t.body_t.nodes[i], depth + 1);
+		}
 	} else if (astRoot->type == AST_NODE_FN_RETURN) {
-		printf("Function return\n");
+		fprintf(stderr, "%sFunction return\n", indentNode(depth));
+		fprintf(stderr, "%s->expression = ", indentNode(depth+1));
+		if(astRoot->data_t.fnReturn->expression != NULL) {
+			fprintf(stderr, "%d\n", astRoot->data_t.fnReturn->expression->token->kw);
+		} else {
+			fprintf(stderr, "NULL\n");
+		}
 	} else if (astRoot->type == AST_NODE_EXP) {
-		printf("Expression\n");
+		fprintf(stderr, "%sExpression\n", indentNode(depth));
 	} else if (astRoot->type == AST_NODE_VAR_DEF) {
-		printf("Variable definition\n");
+		fprintf(stderr, "%sVariable definition\n", indentNode(depth));
+		if(astRoot->data_t.varDef->assignment != NULL) {
+			fprintf(stderr, "%s Variable assignment\n", indentNode(depth+1));
+			fprintf(stderr, "%s->expression = ", indentNode(depth+2));
+			if(astRoot->data_t.varDef->assignment->expression != NULL) {
+				fprintf(stderr, "%d\n", astRoot->data_t.varDef->assignment->expression->token->kw);
+			} else {
+				fprintf(stderr, "NULL\n");
+			}
+		} else {
+			printf("%s->assignment = NULL\n", indentNode(depth+1));
+		}
 	} else if (astRoot->type == AST_NODE_VAR_ASSIGN) {
-		printf("Variable assignment\n");
+		printf("%sVariable assignment\n", indentNode(depth));
+		printf("%s->expression = ", indentNode(depth+2));
+		if(astRoot->data_t.varDef->assignment->expression != NULL) {
+			printf("%d\n", astRoot->data_t.varDef->assignment->expression->token->kw);
+		} else {
+			printf("NULL\n");
+		}
 	} else if (astRoot->type == AST_NODE_IF_ELSE) {
-		printf("If-else\n");
+		printf("%sIf-else - ifBlockCount=%d, elseBlockCount=%d\n", indentNode(depth), astRoot->data_t.ifElse->ifCount, astRoot->data_t.ifElse->elseCount);
+		printf("%sifBlock\n", indentNode(depth+1));
+		if(astRoot->data_t.ifElse->ifCount != 0){
+			for (unsigned int i = 0; i < astRoot->data_t.ifElse->ifCount; i++) {
+				ast_print(astRoot->data_t.ifElse->ifBlock[i], depth + 1);
+			}
+		}
+		else
+			printf("%s->Empty\n", indentNode(depth+2));
+		printf("%selseBlock\n", indentNode(depth+1));
+		if(astRoot->data_t.ifElse->elseCount != 0){
+			for (unsigned int i = 0; i < astRoot->data_t.ifElse->elseCount; i++) {
+				ast_print(astRoot->data_t.ifElse->elseBlock[i], depth + 1);
+			}
+		}
+		else
+			printf("%s->Empty\n", indentNode(depth+2));
 	} else if (astRoot->type == AST_NODE_WHILE) {
-		printf("While\n");
+		printf("%sWhile\n", indentNode(depth));
+		printf("%sBlock\n", indentNode(depth+1));
+		if(astRoot->data_t.While->blockCount != 0){
+			for (unsigned int i = 0; i < astRoot->data_t.While->blockCount; i++) {
+				ast_print(astRoot->data_t.While->block[i], depth + 1);
+			}
+		}
+		else
+			printf("%s->Empty\n", indentNode(depth+2));
 	}
 }
 

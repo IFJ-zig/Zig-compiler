@@ -200,7 +200,9 @@ int program() {
 				return statusCode;
 			fprintf(stderr, "\n");
 		} else if (token.kw == end) {
-			ast_print(astRoot);
+			fprintf(stderr, "---Begin print astRoot---\n");
+			ast_print(astRoot, 0);
+			fprintf(stderr, "---End print astRoot---\n\n");
 			fprintf(stderr, "Compilation successfully finished \n");
 			return 0;
 		} else {
