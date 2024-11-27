@@ -179,6 +179,25 @@ void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
 			}
 			astRoot->data_t.While->block[astRoot->data_t.While->blockCount - 1] = node;
 			break;
+		case AST_NODE_IF_ELSE:
+			if(astRoot->data_t.ifElse->elseBlockActive){
+				astRoot->data_t.ifElse->elseCount++;
+				astRoot->data_t.ifElse->elseBlock = (ast_default_node_t **)realloc(astRoot->data_t.ifElse->elseBlock, astRoot->data_t.ifElse->elseCount * sizeof(ast_default_node_t *));
+				if (astRoot->data_t.ifElse->elseBlock == NULL) {
+					fprintf(stderr, "Error: Memory allocation for ast failed\n");
+					exit(INTERNAL_COMPILER_ERROR);
+				}
+				astRoot->data_t.ifElse->elseBlock[astRoot->data_t.ifElse->elseCount - 1] = node;
+			} else {
+				astRoot->data_t.ifElse->ifCount++;
+				astRoot->data_t.ifElse->ifBlock = (ast_default_node_t **)realloc(astRoot->data_t.ifElse->ifBlock, astRoot->data_t.ifElse->ifCount * sizeof(ast_default_node_t *));
+				if (astRoot->data_t.ifElse->ifBlock == NULL) {
+					fprintf(stderr, "Error: Memory allocation for ast failed\n");
+					exit(INTERNAL_COMPILER_ERROR);
+				}
+				astRoot->data_t.ifElse->ifBlock[astRoot->data_t.ifElse->ifCount - 1] = node;
+			}
+			break;
 		default:
 			fprintf(stderr, "Error: Inserting into node type %d not supported by this function\n", astRoot->type);
 			//exit(INTERNAL_COMPILER_ERROR);

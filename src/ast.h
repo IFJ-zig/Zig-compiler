@@ -95,6 +95,7 @@ typedef struct ast_node_if_else
 	struct ast_node_exp *conditionExp;
 	struct ast_default_node **ifBlock;
 	struct ast_default_node **elseBlock;
+	bool elseBlockActive;
 	unsigned int ifCount;
 	unsigned int elseCount;
 } ast_node_if_else_t;
