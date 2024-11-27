@@ -204,6 +204,16 @@ void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
 	}
 }
 
+void ast_insertParam(ast_default_node_t *astRoot, ast_node_exp_t *expNode) {
+	astRoot->data_t.fnCall->args = (ast_node_exp_t **)realloc(astRoot->data_t.fnCall->args, (astRoot->data_t.fnCall->argCount + 1) * sizeof(ast_node_exp_t *));
+	if (astRoot->data_t.fnCall->args == NULL) {
+		fprintf(stderr, "Error: Memory allocation for ast failed\n");
+		exit(INTERNAL_COMPILER_ERROR);
+	}
+	astRoot->data_t.fnCall->args[astRoot->data_t.fnCall->argCount] = expNode;
+	astRoot->data_t.fnCall->argCount++;
+}
+
 ast_default_node_t *ast_create_node(ast_node_type type) {
 	ast_default_node_t *newNode = (ast_default_node_t *)malloc(sizeof(ast_default_node_t));
 	if (newNode == NULL) {
@@ -230,7 +240,7 @@ ast_default_node_t *ast_createFnDefNode(symbol_t *fnSymbol) {
 	return defaultNode;
 }
 
-ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **args, unsigned int argCount) {
+ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol) {
 	ast_node_fn_call_t *newNode = (ast_node_fn_call_t *)malloc(sizeof(ast_node_fn_call_t));
 	if (newNode == NULL) {
 		fprintf(stderr, "Error: Memory allocation for ast failed\n");
@@ -238,8 +248,8 @@ ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol, ast_node_exp_t **ar
 	}
 	newNode->type = AST_NODE_FN_CALL;
 	newNode->fnSymbol = fnSymbol;
-	newNode->args = args;
-	newNode->argCount = argCount;
+	newNode->args = NULL;
+	newNode->argCount = 0;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.fnCall = newNode;
 	defaultNode->type = AST_NODE_FN_CALL;
