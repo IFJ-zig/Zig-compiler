@@ -17,6 +17,30 @@ void ast_init(ast_default_node_t *astRoot) {
     astRoot->activeNode = NULL;
 }
 
+void ast_print(ast_default_node_t *astRoot){
+    if (astRoot->type == AST_NODE_DEFAULT) {
+        for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
+            ast_print(astRoot->data_t.body_t.nodes[i]);
+        }
+    } else if (astRoot->type == AST_NODE_FN_DEF) {
+        printf("Function definition\n");
+    } else if (astRoot->type == AST_NODE_FN_CALL) {
+        printf("Function call\n");
+    } else if (astRoot->type == AST_NODE_FN_RETURN) {
+        printf("Function return\n");
+    } else if (astRoot->type == AST_NODE_EXP) {
+        printf("Expression\n");
+    } else if (astRoot->type == AST_NODE_VAR_DEF) {
+        printf("Variable definition\n");
+    } else if (astRoot->type == AST_NODE_VAR_ASSIGN) {
+        printf("Variable assignment\n");
+    } else if (astRoot->type == AST_NODE_IF_ELSE) {
+        printf("If-else\n");
+    } else if (astRoot->type == AST_NODE_WHILE) {
+        printf("While\n");
+    }
+}
+
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
     astRoot->data_t.body_t.nodeCount++;
     astRoot->data_t.body_t.nodes = (ast_default_node_t **)realloc(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount * sizeof(ast_default_node_t *));
