@@ -258,13 +258,20 @@ LABEL main
     CREATEFRAME
     PUSHFRAME
 
-    PUSHS int@97
-    CALL ifjchr
-    
+    DEFVAR LF@yolo
+    move LF@yolo string@ahoj
+    PUSHS int@1
+    PUSHS int@1
+    #CALL ifjchr
+    EQS
+    Pushs bool@true
+    JUMPIFEQS yolo
     BREAK
     #PUSHS TF@toPrint
     #CALL int2float
-    
+    LABEL yolo
+    BREAK
     #DEFVAR TF@toPrint
     #MOVE TF@toPrint TF@retVal
-    WRITE TF@retVal%%
+    #WRITE TF@retVal%%
+    EXIT int@0

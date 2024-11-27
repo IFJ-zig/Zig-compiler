@@ -8,8 +8,17 @@
 unsigned int labelCounter = 0;
 //unsigned int ifCounter = 0;
 
-void stringToSlice(char* ){
-    
+void stringToSlice(char* s){
+    printf("PUSHS string@");
+    for (size_t i = 0; i < strlen(s); i++)
+    {
+        if((s[i] >= 0 && s[i] <= 32) || s[i] == 35 || s[i] == 92){
+            printf("\\%03d", s[i]);
+        }else{
+            printf("%c", s[i]);
+        }
+    }
+    printf("\n");
 }
 
 void write(Token* token){
@@ -22,7 +31,7 @@ void write(Token* token){
         break;
     case text:
         printf("WRITE string@");
-        for (int i = 0; i < strlen(token->s); i++)
+        for (size_t i = 0; i < strlen(token->s); i++)
         {
             if((token->s[i] >= 0 && token->s[i] <= 32) || token->s[i] == 35 || token->s[i] == 92){
                 printf("\\%03d", token->s[i]);
@@ -58,15 +67,25 @@ void functionDef(ast_node_fn_def_t *fn){
     }
     codebody(fn->body);
     printf("POPFRAME\n");
-    if (fn->fnSymbol->key == "main"){
+    if (strcmp(fn->fnSymbol->key, "main")==0){
         printf("EXIT int@0\n");
     }else{
         printf("RETURN\n");
     }
 }
 
+void removeChar(char *str, char garbage) {
+
+    char *src, *dst;
+    for (src = dst = str; *src != '\0'; src++) {
+        *dst = *src;
+        if (*dst != garbage) dst++;
+    }
+    *dst = '\0';
+}
+
 void functionCall(ast_node_fn_call_t *fn){
-    for(int i=0; i<fn->argCount; i++){
+    for(unsigned int i=0; i<fn->argCount; i++){
         if (fn->args[i]->token->kw == id){
             printf("PUSHS LF@%s\n", fn->args[i]->token->s);
         }else if(fn->args[i]->token->kw == num){
@@ -75,7 +94,7 @@ void functionCall(ast_node_fn_call_t *fn){
             printf("PUSHS float@%a\n", fn->args[i]->token->f);
         }else if(fn->args[i]->token->kw == text){
             printf("PUSHS string@");
-            for (int j = 0; j < strlen(fn->args[i]->token->s); j++)
+            for (size_t j = 0; j < strlen(fn->args[i]->token->s); j++)
             {
                 if((fn->args[i]->token->s[j] >= 0 && fn->args[i]->token->s[j] <= 32) || fn->args[i]->token->s[j] == 35 || fn->args[i]->token->s[j] == 92){
                     printf("\\%03d", fn->args[i]->token->s[j]);
@@ -86,7 +105,19 @@ void functionCall(ast_node_fn_call_t *fn){
             printf("\n");
         }
     }
-    printf("CALL %s\n", fn->fnSymbol->key);
+    if(strncmp(fn->fnSymbol->key, "ifj.", 4) == 0){
+        if(strcmp(fn->fnSymbol->key, "ifj.write") == 0){
+            write(fn->args[0]->token);
+        }else if(strcmp(fn->fnSymbol->key, "ifj.string") == 0){
+            stringToSlice(fn->args[0]->token->s);
+        } else {
+            char* ifj = (char* )fn->fnSymbol->key;
+            removeChar(ifj, '.');
+            printf("CALL %s\n", ifj);
+        }
+    }else{
+        printf("CALL %s\n", fn->fnSymbol->key);
+    }
 }
 
 void functionReturn(ast_node_fn_return_t *fn){
@@ -146,12 +177,37 @@ void bst_postorder(ast_node_exp_t *tree, bst_items_t *items)
 void expression(ast_node_exp_t* exp){
     bst_items_t* items = bst_init_items();
     bst_postorder(exp, items);
+    bool foundi32 = false;
+    bool foundf64 = false;
+    for(int i=0; i<items->size; i++){
+        if(items->nodes[i]->token->kw == num){
+            foundi32 = true;
+        }else if(items->nodes[i]->token->kw == decim){
+            foundf64 = true;
+        }else if(items->nodes[i]->token->kw == id){
+            if(items->nodes[i]->dataType == INT){
+                foundi32 = true;
+            }else if(items->nodes[i]->dataType == FLOAT){
+                foundf64 = true;
+            } else if (items->nodes[i]->dataType == FUNCTION){
+                if(items->nodes[i]->data_t.fnCall->fnSymbol->returnType == INT){
+                    foundi32 = true;
+                }else if(items->nodes[i]->data_t.fnCall->fnSymbol->returnType == FLOAT){
+                    foundf64 = true;
+                }
+            }
+        }
+    }
+
 
     for(int i=0; i<items->size; i++){
         switch (items->nodes[i]->token->kw)
         {
         case num:
             printf("PUSHS int@%d\n", items->nodes[i]->token->i);
+            if(foundf64){
+                printf("INT2FLOATS\n");
+            }
             break;
         
         case decim:
@@ -162,8 +218,15 @@ void expression(ast_node_exp_t* exp){
                 functionCall(items->nodes[i]->data_t.fnCall);
                 printf("PUSHS TF@retval%%\n");
             }else{
+
                 printf("PUSHS LF@%s\n", items->nodes[i]->token->s);
+                if(items->nodes[i]->dataType == INT && foundf64){
+                    printf("INT2FLOATS\n");
+                }
             }
+            break;
+        case _null:
+            printf("PUSHS nil@nil\n");
             break;
         case plus:
             printf("ADDS\n");
@@ -175,54 +238,59 @@ void expression(ast_node_exp_t* exp){
             printf("MULS\n");
             break;
         case division:
-            printf("DIVS\n");
+            if(!foundf64){
+                printf("IDIVS\n");
+            }else{
+                printf("DIVS\n");
+            }
             break;
         
         default:
             break;
         }
     }
-
 }
 
-/*void whileLoop(ast_node_while_t* loop){
-    printf("CREATEFRAME\n");
-    printf("PUSHFRAME\n");
-    printf("LABEL WHILE%d\n", labelCounter);
+void whileLoop(ast_node_while_t* loop){
+    
 
     unsigned int internalLabelCounter = labelCounter;
     labelCounter++;
 
-    printf("DEFVAR LF@leftside%d\n", internalLabelCounter);
-    printf("DEFVAR LF@rightside%d\n", internalLabelCounter);
-    printf("DEFVAR LF@result%d\n", internalLabelCounter);
+    printf("LABEL WHILE%d\n", labelCounter);
+    expression(loop->conditionExp->data_t.binary_op.left);
+    expression(loop->conditionExp->data_t.binary_op.right);
 
-
-    
     switch(loop->conditionExp->token->kw){
         case compare_equal:
-            printf("EQ LF@result%d LF@leftside%d LF@rightside%d\n", internalLabelCounter, internalLabelCounter, internalLabelCounter);
-            printf("JUMPIFNEQ WHILEEND%d LF@result bool@true\n", internalLabelCounter);
+            printf("EQS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
             break; 
         case nequal:
-            printf("EQ LF@result%d LF@leftside%d LF@rightside%d\n", internalLabelCounter, internalLabelCounter, internalLabelCounter);
-            printf("JUMPIFEQ WHILEEND%d LF@result bool@true\n", internalLabelCounter);
+            printf("EQS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
             break;
         case less:
-            printf("LT LF@result%d LF@leftside%d LF@rightside%d\n", internalLabelCounter, internalLabelCounter, internalLabelCounter);
-            printf("JUMPIFNEQ WHILEEND%d LF@result bool@true\n", internalLabelCounter);
+            printf("LTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
             break;
         case more:
-            printf("GT LF@result%d LF@leftside%d LF@rightside%d\n", internalLabelCounter, internalLabelCounter, internalLabelCounter);
-            printf("JUMPIFNEQ WHILEEND%d LF@result bool@true\n", internalLabelCounter);
+            printf("GTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
             break;
         case lequal:
-            printf("GT LF@result%d LF@leftside%d LF@rightside%d\n", internalLabelCounter, internalLabelCounter, internalLabelCounter);
-            printf("JUMPIFEQ WHILEEND%d LF@result bool@true\n", internalLabelCounter);
+            printf("GTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
             break;
         case mequal:
-            printf("LT LF@result%d LF@leftside%d LF@rightside%d\n", internalLabelCounter, internalLabelCounter, internalLabelCounter);
-            printf("JUMPIFEQ WHILEEND%d LF@result bool@true\n", internalLabelCounter);
+            printf("LTS\n");
+            printf("PUSHS bool@true\n");
+            printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
             break;
         default:
             break;
@@ -230,8 +298,7 @@ void expression(ast_node_exp_t* exp){
     codebody(loop->block);
     printf("JUMP WHILE%d\n", internalLabelCounter);
     printf("LABEL WHILEEND%d\n", internalLabelCounter);
-    printf("POPFRAME\n");
-}*/
+}
 
 
 void codebody(ast_default_node_t **nodes){
@@ -512,7 +579,7 @@ void printHeader() {
             POPFRAME\n\
         RETURN\n\
         \
-        LABEL ifjchr\n\ 
+        LABEL ifjchr\n\
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
