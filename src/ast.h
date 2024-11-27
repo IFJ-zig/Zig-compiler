@@ -146,6 +146,7 @@ ast_node_var_assign_t *ast_createVarAssignNode(symbol_t *symbol, ast_node_exp_t 
 ast_node_var_def_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t *assignment);
 ast_node_if_else_t *ast_createIfElseNode(ast_node_exp_t *conditionExp);
 ast_node_while_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
+void ast_print(ast_default_node_t *astRoot);
 
 
 #endif // AST_T
