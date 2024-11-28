@@ -64,7 +64,7 @@ void functionDef(ast_node_fn_def_t *fn) {
 		printf("DEFVAR LF@%s\n", fn->fnSymbol->params[i]->key);
 		printf("POPS LF@%s\n", fn->fnSymbol->params[i]->key);
 	}
-	codebody(fn->body);
+	codebody(fn->body, fn->bodyCount);
 	printf("POPFRAME\n");
 	if (strcmp(fn->fnSymbol->key, "main") == 0) {
 		printf("EXIT int@0\n");
@@ -145,8 +145,8 @@ void variableAssignment(ast_node_var_assign_t *var) {
 
 bst_items_t *bst_init_items() {
 	bst_items_t *items = (bst_items_t *)malloc(sizeof(bst_items_t));
-	items->capacity = 0;
-	items->nodes = NULL;
+	items->capacity = 32;
+	items->nodes = (ast_node_exp_t **)malloc(sizeof(ast_node_exp_t *) * items->capacity);
 	items->size = 0;
 	return items;
 }
@@ -293,7 +293,7 @@ void whileLoop(ast_node_while_t *loop) {
 		default:
 			break;
 	}
-	codebody(loop->block);
+	codebody(loop->block, loop->blockCount);
 	printf("JUMP WHILE%d\n", internalLabelCounter);
 	printf("LABEL WHILEEND%d\n", internalLabelCounter);
 }
@@ -339,10 +339,10 @@ void ifElse(ast_node_if_else_t *ifelse) {
 			default:
 				break;
 		}
-		codebody(ifelse->ifBlock);
+		codebody(ifelse->ifBlock, ifelse->ifCount);
 		printf("JUMP IFEND%d\n", internalLabelCounter);
 		printf("LABEL ELSE%d\n", internalLabelCounter);
-		codebody(ifelse->elseBlock);
+		codebody(ifelse->elseBlock, ifelse->elseCount);
 		printf("LABEL IFEND%d\n", internalLabelCounter);
 	} else {
 		unsigned int internalLabelCounter = labelCounter;
@@ -354,15 +354,17 @@ void ifElse(ast_node_if_else_t *ifelse) {
 		printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
 		printf("DEFVAR LF@%s\n", ifelse->noNullPayload->key);
 		printf("MOVE LF@%s LF@%s\n", ifelse->noNullPayload->key, ifelse->conditionExp->token->s);
-		codebody(ifelse->ifBlock);
+		codebody(ifelse->ifBlock, ifelse->ifCount);
 		printf("JUMP IFEND%d\n", internalLabelCounter);
 		printf("LABEL ELSE%d\n", internalLabelCounter);
-		codebody(ifelse->elseBlock);
+		codebody(ifelse->elseBlock, ifelse->elseCount);
 		printf("LABEL IFEND%d\n", internalLabelCounter);
 	}
 }
-void codebody(ast_default_node_t **nodes) {
-	while (*nodes != NULL) {
+void codebody(ast_default_node_t **nodes, unsigned int nodeCount) {
+    
+	for(unsigned int i = 0; i < nodeCount; i++) {
+        //printf("halal\n");
 		switch ((*nodes)->type) {
 			case AST_NODE_FN_DEF:
 				functionDef((*nodes)->data_t.fnDef);
@@ -371,6 +373,7 @@ void codebody(ast_default_node_t **nodes) {
 				functionReturn((*nodes)->data_t.fnReturn);
 				break;
 			case AST_NODE_FN_CALL:
+                //printf("halalE\n");
 				functionCall((*nodes)->data_t.fnCall);
 				break;
 			case AST_NODE_EXP:
@@ -389,7 +392,7 @@ void codebody(ast_default_node_t **nodes) {
 				whileLoop((*nodes)->data_t.While);
 				break;
 			case AST_NODE_DEFAULT:
-				codebody((*nodes)->data_t.body_t.nodes);
+				//codebody((*nodes)->data_t.body_t.nodes);
 				break;
 		}
 		nodes++;

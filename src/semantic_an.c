@@ -30,7 +30,7 @@ void enterScope() {
 }
 
 void exitScope() {
-	htab_removeLast(list);
+	//htab_removeLast(list);
 }
 
 int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {

@@ -47,6 +47,8 @@ int syntax_analyzer() {
 	statusCode = program();
 	if (statusCode != 0)
 		return statusCode;
+	printHeader();
+	codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
 	return 0;
 };
 
