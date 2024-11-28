@@ -41,6 +41,9 @@ int getDepthOfLeftmost(ast_node_exp_t *expNode) {
 }
 
 void ast_exprintin(ast_node_exp_t *expNode, int spacing){
+	if (expNode == NULL) {
+		return;
+	}
 	fprintf(stderr, "%s%s", indentNode(spacing), getTokenName(*expNode->token));
 	ast_exprintin(expNode->data_t.binary_op.left, spacing/2);
 	ast_exprintin(expNode->data_t.binary_op.right, spacing/2);
