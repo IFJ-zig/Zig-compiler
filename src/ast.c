@@ -22,34 +22,40 @@ void printIndent(int depth) {
         fputc(' ', stderr);
     }
 }
+// Recursive function to print the AST
+void ast_printTree(ast_node_exp_t *node, int depth) {
+    if (node == NULL) {
+        printIndent(depth);
+        fprintf(stderr, "NULL\n");
+        return;
+    }
 
-int getDepthOfLeftmost(ast_node_exp_t *expNode) {
-	int depth = 0;
-	while(expNode->data_t.binary_op.left != NULL) {
-		depth++;
-		expNode = expNode->data_t.binary_op.left;
-	}
-	return depth;
+    // Print the current node's token name
+    printIndent(depth);
+    fprintf(stderr, "%s\n", getTokenName(*node->token));
+
+    // Determine if the node is unary or binary
+    if (node->data_t.binary_op.left != NULL || node->data_t.binary_op.right != NULL) {
+        // Binary node: Print left and right subtrees
+        ast_printTree(node->data_t.binary_op.left, depth + 1);
+        ast_printTree(node->data_t.binary_op.right, depth + 1);
+    } else if (node->data_t.unary_op.exp != NULL) {
+        // Unary node: Print the single operand
+        ast_printTree(node->data_t.unary_op.exp, depth + 1);
+    } else {
+        // Leaf node
+        printIndent(depth + 1);
+        fprintf(stderr, "Leaf (no children)\n");
+    }
 }
 
-void ast_exprintin(ast_node_exp_t *expNode, int spacing){
-	if (expNode == NULL) {
-		return;
-	}
-	printIndent(spacing);
-	fprintf(stderr, "%s", getTokenName(*expNode->token));
-	ast_exprintin(expNode->data_t.binary_op.left, spacing/2);
-	ast_exprintin(expNode->data_t.binary_op.right, spacing/2);
-	fprintf(stderr, "\n");
-}
-
+// Top-level function to print the AST
 void ast_printExp(ast_node_exp_t *expNode) {
-	if (expNode == NULL) {
-		fprintf(stderr, "Expression is NULL\n");
-		return;
-	}
-	int depth = getDepthOfLeftmost(expNode);
-	ast_exprintin(expNode, depth);
+    if (expNode == NULL) {
+        fprintf(stderr, "Expression is NULL\n");
+        return;
+    }
+    ast_printTree(expNode, 0); // Start printing from depth 0
 }
 
 void ast_print(ast_default_node_t *astRoot, int depth) {
