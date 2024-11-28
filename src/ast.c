@@ -17,18 +17,10 @@ void ast_init(ast_default_node_t *astRoot) {
 	astRoot->activeNode = NULL;
 }
 
-char *indentNode(int depth) {
-	depth *= 4;
-	char *indent = (char *)malloc(depth + 1);
-	if (indent == NULL) {
-		fprintf(stderr, "Error: Memory allocation for ast failed\n");
-		exit(INTERNAL_COMPILER_ERROR);
-	}
-	for (int i = 0; i < depth; i++) {
-		indent[i] = ' ';
-	}
-	indent[depth] = '\0';
-	return indent;
+void printIndent(int depth) {
+	for (int i = 0; i < depth * 4; i++) { // Each depth level indented by 4 spaces
+        fputc(' ', stderr);
+    }
 }
 
 int getDepthOfLeftmost(ast_node_exp_t *expNode) {
@@ -44,7 +36,8 @@ void ast_exprintin(ast_node_exp_t *expNode, int spacing){
 	if (expNode == NULL) {
 		return;
 	}
-	fprintf(stderr, "%s%s", indentNode(spacing), getTokenName(*expNode->token));
+	printIndent(spacing);
+	fprintf(stderr, "%s", getTokenName(*expNode->token));
 	ast_exprintin(expNode->data_t.binary_op.left, spacing/2);
 	ast_exprintin(expNode->data_t.binary_op.right, spacing/2);
 	fprintf(stderr, "\n");
@@ -69,76 +62,100 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 			ast_print(astRoot->data_t.body_t.nodes[i], depth);
 		}
 	} else if (astRoot->type == AST_NODE_FN_DEF) {
-		fprintf(stderr, "%sFunction definition - %s\n", indentNode(depth), astRoot->data_t.fnDef->fnSymbol->key);
+		printIndent(depth);
+		fprintf(stderr, "Function definition - %s\n", astRoot->data_t.fnDef->fnSymbol->key);
 		for (unsigned int i = 0; i < astRoot->data_t.fnDef->bodyCount; i++) {
 			ast_print(astRoot->data_t.fnDef->body[i], depth + 1);
 		}
 	} else if (astRoot->type == AST_NODE_FN_CALL) {
-		fprintf(stderr, "%sFunction call - %s, argCount(Node)=%d\n", indentNode(depth), astRoot->data_t.fnCall->fnSymbol->key, astRoot->data_t.fnCall->argCount);
+		printIndent(depth);
+		fprintf(stderr, "Function call - %s, argCount(Node)=%d\n", astRoot->data_t.fnCall->fnSymbol->key, astRoot->data_t.fnCall->argCount);
 		for(unsigned int i = 0; i < astRoot->data_t.fnCall->argCount; i++){
 			varType type = astRoot->data_t.fnCall->args[i]->dataType;
-			fprintf(stderr, "%s->arg[%d] = %s", indentNode(depth+2), i, type == INT ? "INT" : type == FLOAT ? "FLOAT" : type == STRING ? "STRING" : type == ANYTYPE ? "ANYTYPE" : "VOID");
+			printIndent(depth+2);
+			fprintf(stderr, "->arg[%d] = %s", i, type == INT ? "INT" : type == FLOAT ? "FLOAT" : type == STRING ? "STRING" : type == ANYTYPE ? "ANYTYPE" : "VOID");
 		}
 		fprintf(stderr, "\n");
 	} else if (astRoot->type == AST_NODE_FN_RETURN) {
-		fprintf(stderr, "%sFunction return\n", indentNode(depth));
-		fprintf(stderr, "%s->expression = ", indentNode(depth+1));
+		printIndent(depth);
+		fprintf(stderr, "Function return\n");
+		printIndent(depth+1);
+		fprintf(stderr, "->expression = ");
 		if(astRoot->data_t.fnReturn->expression != NULL) {
+			fprintf(stderr, "%d\n", astRoot->data_t.fnReturn->expression->token->kw);
 			ast_printExp(astRoot->data_t.varDef->assignment->expression);
 		} else {
 			fprintf(stderr, "NULL\n");
 		}
 	} else if (astRoot->type == AST_NODE_EXP) {
-		fprintf(stderr, "%sExpression\n", indentNode(depth));
+		printIndent(depth);
+		fprintf(stderr, "Expression\n");
 	} else if (astRoot->type == AST_NODE_VAR_DEF) {
-		fprintf(stderr, "%sVariable definition\n", indentNode(depth));
+		printIndent(depth);
+		fprintf(stderr, "Variable definition\n");
 		if(astRoot->data_t.varDef->assignment != NULL) {
-			fprintf(stderr, "%s Variable assignment\n", indentNode(depth+1));
-			fprintf(stderr, "%s->expression = ", indentNode(depth+2));
+			printIndent(depth+1);
+			fprintf(stderr, " Variable assignment\n");
+			printIndent(depth+2);
+			fprintf(stderr, "->expression = ");
 			if(astRoot->data_t.varDef->assignment->expression != NULL) {
 				ast_printExp(astRoot->data_t.varDef->assignment->expression);
 			} else {
 				fprintf(stderr, "NULL\n");
 			}
 		} else {
-			fprintf(stderr, "%s->assignment = NULL\n", indentNode(depth+1));
+			printIndent(depth+1);
+			fprintf(stderr, "->assignment = NULL\n");
 		}
 	} else if (astRoot->type == AST_NODE_VAR_ASSIGN) {
-		fprintf(stderr, "%sVariable assignment\n", indentNode(depth));
-		fprintf(stderr, "%s->expression = ", indentNode(depth+1));
+		printIndent(depth);
+		fprintf(stderr, "Variable assignment\n");
+		printIndent(depth+1);
+		fprintf(stderr, "->expression = ");
 		if(astRoot->data_t.varAssign->expression != NULL) {
 			fprintf(stderr, "%d\n", astRoot->data_t.varAssign->expression->token->kw);
 		} else {
 			fprintf(stderr, "NULL\n");
 		}
 	} else if (astRoot->type == AST_NODE_IF_ELSE) {
-		fprintf(stderr, "%sIf-else - ifBlockCount=%d, elseBlockCount=%d\n", indentNode(depth), astRoot->data_t.ifElse->ifCount, astRoot->data_t.ifElse->elseCount);
-		fprintf(stderr, "%sifBlock\n", indentNode(depth+1));
+		printIndent(depth);
+		fprintf(stderr, "If-else - ifBlockCount=%d, elseBlockCount=%d\n", astRoot->data_t.ifElse->ifCount, astRoot->data_t.ifElse->elseCount);
+		printIndent(depth+1);
+		fprintf(stderr, "ifBlock\n");
 		if(astRoot->data_t.ifElse->ifCount != 0){
 			for (unsigned int i = 0; i < astRoot->data_t.ifElse->ifCount; i++) {
 				ast_print(astRoot->data_t.ifElse->ifBlock[i], depth + 2);
 			}
 		}
-		else
-			fprintf(stderr, "%s->Empty\n", indentNode(depth+2));
-		fprintf(stderr, "%selseBlock\n", indentNode(depth+1));
+		else{
+			printIndent(depth+2);
+			fprintf(stderr, "->Empty\n");
+		}
+		printIndent(depth+1);
+		fprintf(stderr, "elseBlock\n");
 		if(astRoot->data_t.ifElse->elseCount != 0){
 			for (unsigned int i = 0; i < astRoot->data_t.ifElse->elseCount; i++) {
 				ast_print(astRoot->data_t.ifElse->elseBlock[i], depth + 2);
 			}
 		}
-		else
-			fprintf(stderr, "%s->Empty\n", indentNode(depth+2));
+		else{
+			printIndent(depth+2);
+			fprintf(stderr, "->Empty\n");
+		}
 	} else if (astRoot->type == AST_NODE_WHILE) {
-		fprintf(stderr, "%sWhile\n", indentNode(depth));
-		fprintf(stderr, "%sBlock\n", indentNode(depth+1));
+		printIndent(depth);
+		fprintf(stderr, "While\n");
+		printIndent(depth+1);
+		fprintf(stderr, "Block\n");
 		if(astRoot->data_t.While->blockCount != 0){
 			for (unsigned int i = 0; i < astRoot->data_t.While->blockCount; i++) {
 				ast_print(astRoot->data_t.While->block[i], depth + 1);
 			}
 		}
-		else
-			fprintf(stderr, "%s->Empty\n", indentNode(depth+2));
+		else{
+			printIndent(depth+2);
+			fprintf(stderr, "->Empty\n");
+		}
 	}
 }
 
@@ -282,7 +299,7 @@ ast_node_exp_t *ast_createExpNode(Token *token, varType dataType) {
 
 ast_default_node_t *ast_wrapExpNode(ast_node_exp_t *expNode) {
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
-	defaultNode->data_t.exp = (struct ast_node_fn_exp *)expNode;
+	defaultNode->data_t.exp = (struct ast_node_exp *)expNode;
 	defaultNode->type = AST_NODE_EXP;
 	return defaultNode;
 }

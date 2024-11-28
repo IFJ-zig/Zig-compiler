@@ -120,7 +120,7 @@ typedef struct ast_default_node
 		struct ast_node_fn_def *fnDef;
 		struct ast_node_fn_call *fnCall;
 		struct ast_node_fn_return *fnReturn;
-		struct ast_node_fn_exp *exp;
+		struct ast_node_exp *exp;
 		struct ast_node_var_assign *varAssign;
 		struct ast_node_var_def *varDef;
 		struct ast_node_if_else *ifElse;
@@ -149,7 +149,7 @@ ast_default_node_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t
 ast_default_node_t *ast_createIfElseNode(ast_node_exp_t *conditionExp);
 ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
 
-char *indentNode(int depth);
+void printIndent(int depth);
 void ast_print(ast_default_node_t *astRoot, int depth);
 void ast_printExp(ast_node_exp_t *expNode);
 
