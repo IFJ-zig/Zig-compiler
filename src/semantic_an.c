@@ -30,7 +30,8 @@ void enterScope() {
 }
 
 void exitScope() {
-	htab_removeLast(list);
+	//htab_removeLast(list);
+	//TODO ALLOCATE SYMBOLS IN AST TREE AND KEEP THIS AS IT WAS! IT WILL BE FINE, TRUST
 }
 
 int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
