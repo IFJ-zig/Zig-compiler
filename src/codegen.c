@@ -198,7 +198,9 @@ void expression(ast_node_exp_t* exp){
             }
         }
     }
-
+    if(!foundi32){
+        (void)foundi32;
+    }
 
     for(int i=0; i<items->size; i++){
         switch (items->nodes[i]->token->kw)
@@ -300,7 +302,70 @@ void whileLoop(ast_node_while_t* loop){
     printf("LABEL WHILEEND%d\n", internalLabelCounter);
 }
 
+void ifElse(ast_node_if_else_t* ifelse){
+    if(ifelse->noNullPayload == NULL){
+        unsigned int internalLabelCounter = labelCounter;
+        labelCounter++;
+        printf("LABEL IF%d\n", internalLabelCounter);
+        expression(ifelse->conditionExp->data_t.binary_op.left);
+        expression(ifelse->conditionExp->data_t.binary_op.right);
+        switch(ifelse->conditionExp->token->kw){
+            case compare_equal:
+                printf("EQS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFNEQS ELSE%d\n", internalLabelCounter);
+                break; 
+            case nequal:
+                printf("EQS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
+                break;
+            case less:
+                printf("LTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFNEQS ELSE%d\n", internalLabelCounter);
+                break;
+            case more:
+                printf("GTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFNEQS ELSE%d\n", internalLabelCounter);
+                break;
+            case lequal:
+                printf("GTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
+                break;
+            case mequal:
+                printf("LTS\n");
+                printf("PUSHS bool@true\n");
+                printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
+                break;
+            default:
+                break;
+        }
+        codebody(ifelse->ifBlock);
+        printf("JUMP IFEND%d\n", internalLabelCounter);
+        printf("LABEL ELSE%d\n", internalLabelCounter);
+        codebody(ifelse->elseBlock);
+        printf("LABEL IFEND%d\n", internalLabelCounter);
+    }else{
+        unsigned int internalLabelCounter = labelCounter;
+        labelCounter++;
+        printf("LABEL IF%d\n", internalLabelCounter);
+        expression(ifelse->conditionExp);
+        printf("PUSHS nil@nil\n");
+        printf("EQS\n");
+        printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
+        printf("DEFVAR LF@%s\n", ifelse->noNullPayload->key);
+        printf("MOVE LF@%s LF@%s\n", ifelse->noNullPayload->key, ifelse->conditionExp->token->s);
+        codebody(ifelse->ifBlock);
+        printf("JUMP IFEND%d\n", internalLabelCounter);
+        printf("LABEL ELSE%d\n", internalLabelCounter);
+        codebody(ifelse->elseBlock);
+        printf("LABEL IFEND%d\n", internalLabelCounter);
 
+    }
+}
 void codebody(ast_default_node_t **nodes){
     while(*nodes != NULL){
         switch((*nodes)->type){
@@ -314,6 +379,7 @@ void codebody(ast_default_node_t **nodes){
                 functionCall((*nodes)->data_t.fnCall);
                 break;
             case AST_NODE_EXP:
+                expression((*nodes)->data_t.exp);
                 break;
             case AST_NODE_VAR_DEF:
                 variableDefinition((*nodes)->data_t.varDef);
@@ -322,6 +388,7 @@ void codebody(ast_default_node_t **nodes){
                 variableAssignment((*nodes)->data_t.varAssign);
                 break;
             case AST_NODE_IF_ELSE:
+                ifElse((*nodes)->data_t.ifElse);
                 break;
             case AST_NODE_WHILE:
                 whileLoop((*nodes)->data_t.While);

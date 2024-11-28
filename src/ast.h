@@ -94,10 +94,12 @@ typedef struct ast_node_var_def
 
 typedef struct ast_node_if_else
 {
+	symbol_t *noNullPayload;
 	ast_node_type type;
 	struct ast_node_exp *conditionExp;
 	struct ast_default_node **ifBlock;
 	struct ast_default_node **elseBlock;
+	bool elseBlockActive;
 	unsigned int ifCount;
 	unsigned int elseCount;
 } ast_node_if_else_t;
@@ -121,7 +123,7 @@ typedef struct ast_default_node
 		struct ast_node_fn_def *fnDef;
 		struct ast_node_fn_call *fnCall;
 		struct ast_node_fn_return *fnReturn;
-		struct ast_node_fn_exp *exp;
+		struct ast_node_exp *exp;
 		struct ast_node_var_assign *varAssign;
 		struct ast_node_var_def *varDef;
 		struct ast_node_if_else *ifElse;
