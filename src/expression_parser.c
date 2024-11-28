@@ -408,7 +408,7 @@ int createBinaryExp(t_Stack *stack) {
 	newNode->data_t.binary_op.right = expRightNode;
 
 	stackPush(stack, NON_TERMINAL, NULL, newNode);
-	printf("Binary exp created\n");
+	fprintf(stderr, "Binary exp created\n");
 	return 0;
 };
 int createUnaryExp(t_Stack *stack) {

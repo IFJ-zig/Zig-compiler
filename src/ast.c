@@ -69,7 +69,7 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		}
 	} else if (astRoot->type == AST_NODE_FN_DEF) {
 		printIndent(depth);
-		fprintf(stderr, "Function definition - %s\n", astRoot->data_t.fnDef->fnSymbol->key);
+		fprintf(stderr, "Function definition - %s, paramCount=%d\n", astRoot->data_t.fnDef->fnSymbol->key, astRoot->data_t.fnDef->fnSymbol->paramCount);
 		for (unsigned int i = 0; i < astRoot->data_t.fnDef->bodyCount; i++) {
 			ast_print(astRoot->data_t.fnDef->body[i], depth + 1);
 		}

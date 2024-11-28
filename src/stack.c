@@ -96,15 +96,15 @@ void printStack(t_Stack *stack) {
 
 	while (temp != NULL) {
 		if (temp->type == TERMINAL) {
-			printf("%c", mapTokenToChar(temp->token->kw));
+			fprintf(stderr, "%c", mapTokenToChar(temp->token->kw));
 		} else if (temp->type == NON_TERMINAL) {
-			printf("E");
+			fprintf(stderr, "E");
 		} else {
-			printf("<");
+			fprintf(stderr, "<");
 		}
 		temp = temp->next;
 	}
-	printf("\n");
+	fprintf(stderr, "\n");
 }
 
 
@@ -127,16 +127,16 @@ char mapTokenToChar(KeyWord kw) {
 		case more:
 			return '>';
 		case compare_equal:
-			printf("=");
+			fprintf(stderr, "=");
 			return '=';
 		case nequal:
-			printf("!");
+			fprintf(stderr, "!");
 			return '=';
 		case lequal:
-			printf("<");
+			fprintf(stderr, "<");
 			return '=';
 		case mequal:
-			printf(">");
+			fprintf(stderr, ">");
 			return '=';
 		case lbracket:
 			return '(';
