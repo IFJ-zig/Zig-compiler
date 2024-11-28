@@ -84,7 +84,7 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		fprintf(stderr, "%sFunction return\n", indentNode(depth));
 		fprintf(stderr, "%s->expression = ", indentNode(depth+1));
 		if(astRoot->data_t.fnReturn->expression != NULL) {
-			fprintf(stderr, "%d\n", astRoot->data_t.fnReturn->expression->token->kw);
+			ast_printExp(astRoot->data_t.varDef->assignment->expression);
 		} else {
 			fprintf(stderr, "NULL\n");
 		}
@@ -96,7 +96,7 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 			fprintf(stderr, "%s Variable assignment\n", indentNode(depth+1));
 			fprintf(stderr, "%s->expression = ", indentNode(depth+2));
 			if(astRoot->data_t.varDef->assignment->expression != NULL) {
-				fprintf(stderr, "%d\n", astRoot->data_t.varDef->assignment->expression->token->kw);
+				ast_printExp(astRoot->data_t.varDef->assignment->expression);
 			} else {
 				fprintf(stderr, "NULL\n");
 			}
