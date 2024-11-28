@@ -91,6 +91,7 @@ typedef struct ast_node_var_def
 
 typedef struct ast_node_if_else
 {
+	symbol_t *noNullPayload;
 	ast_node_type type;
 	struct ast_node_exp *conditionExp;
 	struct ast_default_node **ifBlock;
