@@ -85,12 +85,15 @@ int getOperation(int tokenStack, int tokenInput) {
 }
 
 extern Token token;
+extern ast_default_node_t *astRoot;
 
-int expressionParser(bool tokenRead) {
+int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 	int statusCode;
 	t_Stack stack;
 	stackInit(&stack);
-	statusCode = stackPush(&stack, TERMINAL, next);
+	Token new = {next, 0, 0, NULL};
+	statusCode = stackPush(&stack, TERMINAL, allocateToken(new), NULL);
+
 	if (statusCode != 0) {
 		return statusCode;
 	}
@@ -102,7 +105,7 @@ int expressionParser(bool tokenRead) {
 		}
 	}
 	while (1) {
-		//printStack(&stack);
+		printStack(&stack);
 		//temporarily handle inbuild functions
 		if (token.kw == inbuild) {
 			statusCode = read_token();
@@ -125,7 +128,21 @@ int expressionParser(bool tokenRead) {
 				stackClear(&stack);
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
-			statusCode = function_call(false);
+			char *prefix = malloc(strlen("ifj.") + strlen(token.s) + 1);
+			if (prefix == NULL) {
+				fprintf(stderr, "Error: Memory allocation failed\n");
+				return INTERNAL_COMPILER_ERROR;
+			}
+			strcpy(prefix, "ifj.");
+			strcat(prefix, token.s);
+			symbol_t *fnSymbol = getSymbol(prefix);
+			free(prefix);
+			if (fnSymbol == NULL) {
+				fprintf(stderr, "Error: Function %s is not defined\n", token.s);
+				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+			}
+			ast_default_node_t *fnCallNode = ast_createFnCallNode(fnSymbol);
+			statusCode = function_call(false, fnCallNode);
 			if (statusCode != 0) {
 				stackClear(&stack);
 				return statusCode;
@@ -139,17 +156,18 @@ int expressionParser(bool tokenRead) {
 				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 			}
 			if (sym->type == FUNCTION) {
-				statusCode = function_call(false);
+				ast_default_node_t *fnCallNode = ast_createFnCallNode(sym);
+				statusCode = function_call(false, fnCallNode);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;
 				}
-				printf("Function call %d\n", token.kw);
+				fprintf(stderr, "Function call %d\n", token.kw);
 				token.kw = id;
 			}
 		}
 
-		int operation = getOperation(topTerminal(&stack)->keyword, token.kw);
+		int operation = getOperation(topTerminal(&stack)->token->kw, token.kw);
 		switch (operation) {
 			case '<':
 				statusCode
@@ -159,7 +177,7 @@ int expressionParser(bool tokenRead) {
 					stackClear(&stack);
 					return statusCode;
 				}
-				statusCode = stackPush(&stack, TERMINAL, token.kw);
+				statusCode = stackPush(&stack, TERMINAL, allocateToken(token), NULL);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;
@@ -171,7 +189,7 @@ int expressionParser(bool tokenRead) {
 				}
 				break;
 			case '=':
-				statusCode = stackPush(&stack, TERMINAL, token.kw);
+				statusCode = stackPush(&stack, TERMINAL, allocateToken(token), NULL);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;
@@ -191,8 +209,10 @@ int expressionParser(bool tokenRead) {
 				break;
 			case 1:
 				if (stackTop(&stack)->type == NON_TERMINAL) {
-					stackPop(&stack);
-					if (stackTop(&stack)->keyword == next) {
+					ast_node_exp_t *node = stackTop(&stack)->node;
+					if (stackTop(&stack)->prev->token->kw == next) {
+						(void)resultPointer;
+						*resultPointer = node;
 						stackClear(&stack);
 						return 0;
 					}
@@ -233,45 +253,44 @@ int expressionParser(bool tokenRead) {
 */
 int tryToMatchRule(t_Stack *stack) {
 	t_StackItem *temp = stackTop(stack);
-
+	int statusCode;
 	if (temp == NULL) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	//Match rules 3-7
 	if (temp->type == TERMINAL) {
-		if (temp->keyword == id || temp->keyword == num || temp->keyword == decim || temp->keyword == text || temp->keyword == _null) {
-			stackPop(stack);
-			temp = stackTop(stack);
+		if (temp->token->kw == id || temp->token->kw == num || temp->token->kw == decim || temp->token->kw == text || temp->token->kw == _null) {
+			temp = temp->prev;
 			if (temp == NULL) {
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
-
 			if (temp->type == PRECEDENT_LESS) {
-				stackPop(stack);
-				stackPush(stack, NON_TERMINAL, EMPTY);
+				statusCode = createValueExp(stack);
+				if (statusCode != 0) {
+					return statusCode;
+				}
 				return 0;
 			}
-		} else if (temp->keyword == rbracket) {
-			stackPop(stack);
-			temp = stackTop(stack);
+		} else if (temp->token->kw == rbracket) {
+			temp = temp->prev;
 			if (temp == NULL) {
 				return SYNTACTIC_ANALYSIS_ERROR;
 			}
 			if (temp->type == NON_TERMINAL) {
-				stackPop(stack);
-				temp = stackTop(stack);
+				temp = temp->prev;
 				if (temp == NULL) {
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				if (temp->keyword == lbracket) {
-					stackPop(stack);
-					temp = stackTop(stack);
+				if (temp->token->kw == lbracket) {
+					temp = temp->prev;
 					if (temp == NULL) {
 						return SYNTACTIC_ANALYSIS_ERROR;
 					}
 					if (temp->type == PRECEDENT_LESS) {
-						stackPop(stack);
-						stackPush(stack, NON_TERMINAL, EMPTY);
+						statusCode = reduceBracketNonTerminal(stack);
+						if (statusCode != 0) {
+							return statusCode;
+						}
 						return 0;
 					}
 				}
@@ -279,10 +298,9 @@ int tryToMatchRule(t_Stack *stack) {
 		}
 	} // Math rest of rules
 	else if (temp->type == NON_TERMINAL) {
-		stackPop(stack);
-		temp = stackTop(stack);
+		temp = temp->prev;
 
-		switch (temp->keyword) {
+		switch (temp->token->kw) {
 			case plus:
 			case multiply:
 			case division:
@@ -292,43 +310,48 @@ int tryToMatchRule(t_Stack *stack) {
 			case nequal:
 			case lequal:
 			case mequal:
-				stackPop(stack);
-				temp = stackTop(stack);
+
+				temp = temp->prev;
 				if (temp == NULL) {
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
 				if (temp->type == NON_TERMINAL) {
-					stackPop(stack);
-					temp = stackTop(stack);
+
+					temp = temp->prev;
 					if (temp == NULL) {
 						return SYNTACTIC_ANALYSIS_ERROR;
 					}
 					if (temp->type == PRECEDENT_LESS) {
-						stackPop(stack);
-						stackPush(stack, NON_TERMINAL, EMPTY);
+						statusCode = createBinaryExp(stack);
+						if (statusCode != 0) {
+							return statusCode;
+						}
 						return 0;
 					}
 				}
 				break;
 			case minus:
-				stackPop(stack);
-				temp = stackTop(stack);
+				temp = temp->prev;
 				if (temp == NULL) {
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
 				if (temp->type == PRECEDENT_LESS) {
-					stackPop(stack);
-					stackPush(stack, NON_TERMINAL, EMPTY);
+					statusCode = createUnaryExp(stack);
+					if (statusCode != 0) {
+						return statusCode;
+					}
 					return 0;
 				} else if (temp->type == NON_TERMINAL) {
-					stackPop(stack);
-					temp = stackTop(stack);
+
+					temp = temp->prev;
 					if (temp == NULL) {
 						return SYNTACTIC_ANALYSIS_ERROR;
 					}
 					if (temp->type == PRECEDENT_LESS) {
-						stackPop(stack);
-						stackPush(stack, NON_TERMINAL, EMPTY);
+						statusCode = createBinaryExp(stack);
+						if (statusCode != 0) {
+							return statusCode;
+						}
 						return 0;
 					}
 				}
@@ -340,3 +363,65 @@ int tryToMatchRule(t_Stack *stack) {
 	}
 	return SYNTACTIC_ANALYSIS_ERROR;
 }
+
+int reduceBracketNonTerminal(t_Stack *stack) {
+	stackPop(stack);
+	ast_node_exp_t *expNode = stackTop(stack)->node;
+	stackPop(stack);
+	stackPop(stack);
+	stackPop(stack);
+	stackPush(stack, NON_TERMINAL, expNode->token, expNode);
+	return 0;
+};
+int createValueExp(t_Stack *stack) {
+	Token *token = stackTop(stack)->token;
+	stackPop(stack);
+	stackPop(stack);
+
+	varType dataType;
+	if (token->kw == id) {
+		symbol_t *sym = getSymbol(token->s);
+		if (sym == NULL) {
+			fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
+			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+		}
+		dataType = sym->type;
+	} else {
+		dataType = kwToVarType(token->kw);
+	}
+	ast_node_exp_t *expNode = ast_createExpNode(token, dataType);
+	stackPush(stack, NON_TERMINAL, token, expNode);
+	return 0;
+};
+int createBinaryExp(t_Stack *stack) {
+	ast_node_exp_t *expRightNode = stackTop(stack)->node;
+	stackPop(stack);
+	Token *operationToken = stackTop(stack)->token;
+	stackPop(stack);
+	ast_node_exp_t *expLeftNode = stackTop(stack)->node;
+	stackPop(stack);
+	stackPop(stack);
+
+	ast_node_exp_t *newNode = ast_createExpNode(operationToken, expLeftNode->dataType);
+
+	newNode->data_t.binary_op.left = expLeftNode;
+	newNode->data_t.binary_op.right = expRightNode;
+
+	stackPush(stack, NON_TERMINAL, NULL, newNode);
+	printf("Binary exp created\n");
+	return 0;
+};
+int createUnaryExp(t_Stack *stack) {
+
+	ast_node_exp_t *expNode = stackTop(stack)->node;
+	stackPop(stack);
+	Token *operationToken = stackTop(stack)->token;
+	stackPop(stack);
+	stackPop(stack);
+
+	ast_node_exp_t *newNode = ast_createExpNode(operationToken, expNode->dataType);
+	newNode->data_t.unary_op.exp = expNode;
+
+	stackPush(stack, NON_TERMINAL, newNode->token, newNode);
+	return 0;
+};

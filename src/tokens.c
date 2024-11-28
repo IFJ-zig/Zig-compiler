@@ -6,6 +6,29 @@
 
 #include "errors_enum.h"
 
+Token *allocateToken(Token tkn) {
+	Token *T = (Token *)malloc(sizeof(Token));
+	if (T == NULL) {
+		exit(INTERNAL_COMPILER_ERROR);
+	}
+	T->kw = tkn.kw;
+	T->i = tkn.i;
+	T->f = tkn.f;
+
+	// Ensure independent copy of the string
+	if (tkn.s != NULL) {
+		T->s = strdup(tkn.s); // strdup allocates memory and copies the string
+		if (T->s == NULL) {
+			free(T); // Clean up allocated memory if strdup fails
+			exit(INTERNAL_COMPILER_ERROR);
+		}
+	} else {
+		T->s = NULL;
+	}
+
+	return T;
+}
+
 
 KeyWord LGetKeyWAct(Token T) {
 	return T.kw;

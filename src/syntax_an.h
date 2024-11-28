@@ -8,12 +8,12 @@
 
 #include <stdbool.h>
 
+#include "ast.h"
 #include "errors_enum.h"
 #include "expression_parser.h"
 #include "semantic_an.h"
 #include "symtable.h" //For varType
 #include "tokens.h"
-#include "ast.h"
 
 int syntax_analyzer(/*List *L*/);
 int code();
@@ -22,13 +22,13 @@ int seekHeaders();
 int skip_function_body();
 int checkImport();
 int function_analysis();
-int function_call(bool expectReturn);
+int function_call(bool expectReturn, ast_default_node_t *fnCallNode);
 int return_type();
 int data_type();
 int param_list();
 int while_syntax();
 int if_else();
-int inbuild_function();
+int inbuild_function(bool expectNext);
 int return_syntax();
 int call_or_assignment();
 int variable_definition(bool isConst);

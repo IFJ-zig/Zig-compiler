@@ -7,6 +7,7 @@
 
 Token token;
 bool tokenWasGiven = 0;
+ast_default_node_t *astRoot;
 
 int read_token() {
 	token = get_token();
@@ -29,7 +30,7 @@ int rewind_stdin() {
 int syntax_analyzer() {
 	int statusCode;
 	semanticInit();
-	ast_default_node_t *astRoot = (ast_default_node_t *)malloc(sizeof(ast_default_node_t));
+	astRoot = (ast_default_node_t *)malloc(sizeof(ast_default_node_t));
 	if (astRoot == NULL) {
 		fprintf(stderr, "Error: Memory allocation for ast failed\n");
 		return INTERNAL_COMPILER_ERROR;
@@ -197,8 +198,12 @@ int program() {
 			statusCode = function_analysis();
 			if (statusCode != 0)
 				return statusCode;
+			fprintf(stderr, "\n");
 		} else if (token.kw == end) {
-			fprintf(stderr, "\nCompilation successfully finished \n");
+			fprintf(stderr, "------------- BEGIN AST PRINT -------------\n");
+			ast_print(astRoot, 0);
+			fprintf(stderr, "------------- END AST PRINT -------------\n\n");
+			fprintf(stderr, "Compilation successfully finished \n");
 			return 0;
 		} else {
 			fprintf(stderr, "Error: Expected function definition or end of program, but found %d\n", token.kw);
@@ -427,6 +432,8 @@ int function_analysis() {
 																																										   : getSymbol(fnName)->returnType == STRING      ? "STRING"
 																																																						  : "VOID");
 	}
+	ast_default_node_t *functionDefNode = ast_createFnDefNode(getSymbol(fnName));
+	ast_insert(astRoot, functionDefNode);
 
 	statusCode = param_list(); //done semantic
 	if (statusCode != 0)
@@ -449,6 +456,7 @@ int function_analysis() {
 		return statusCode;
 	}
 	while (token.kw != rblock) {
+		astRoot->activeNode = functionDefNode;
 		statusCode = code();
 		if (statusCode != 0) {
 			return statusCode;
@@ -604,7 +612,7 @@ int code() {
 				return statusCode;
 			break;
 		case inbuild:
-			statusCode = inbuild_function();
+			statusCode = inbuild_function(true);
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -630,17 +638,19 @@ int empty_variable() {
 		fprintf(stderr, "Error: Expected = after _\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	statusCode = expressionParser(false);
+	statusCode = expressionParser(false, NULL);
 	if (statusCode != 0)
 		return statusCode;
+
 	return 0;
 }
 
 int if_else() {
 	int statusCode;
 	enterScope();
-
-	statusCode = expressionParser(false);
+	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
+	ast_insert(astRoot->activeNode, ifElseNode);
+	statusCode = expressionParser(false, &ifElseNode->data_t.ifElse->conditionExp);
 
 	if (statusCode != 0) {
 		return statusCode;
@@ -652,13 +662,15 @@ int if_else() {
 			return statusCode;
 		}
 
-
 		if (token.kw != id) {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		defineSymbol(token.s, INT, false, false);
+		statusCode = defineSymbol(token.s, INT, false, false);
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		statusCode = read_token();
 		if (statusCode != 0) {
 			return statusCode;
@@ -683,6 +695,7 @@ int if_else() {
 	}
 
 	while (token.kw != rblock) {
+		astRoot->activeNode = ifElseNode;
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
@@ -713,8 +726,9 @@ int if_else() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-
+	ifElseNode->data_t.ifElse->elseBlockActive = true;
 	while (token.kw != rblock) {
+		astRoot->activeNode = ifElseNode;
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
@@ -736,13 +750,17 @@ int return_syntax() {
 	if (token.kw == next) {
 		return 0;
 	}
-	statusCode = expressionParser(true);
+	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
+	ast_insert(astRoot->activeNode, returnNode);
+	statusCode = expressionParser(true, &returnNode->data_t.fnReturn->expression);
 	if (statusCode != 0)
 		return statusCode;
+
+
 	return 0;
 }
 
-int inbuild_function() {
+int inbuild_function(bool expectNext) {
 	int statusCode;
 	statusCode = read_token();
 	if (statusCode != 0) {
@@ -760,7 +778,22 @@ int inbuild_function() {
 		fprintf(stderr, "Error: Expected library call\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	statusCode = function_call(true);
+	char *prefix = malloc(strlen("ifj.") + strlen(token.s) + 1);
+	if (prefix == NULL) {
+		fprintf(stderr, "Error: Memory allocation failed\n");
+		return INTERNAL_COMPILER_ERROR;
+	}
+	strcpy(prefix, "ifj.");
+	strcat(prefix, token.s);
+	symbol_t *fnSymbol = getSymbol(prefix);
+	free(prefix);
+	if (fnSymbol == NULL) {
+		fprintf(stderr, "Error: Function %s is not defined\n", token.s);
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+	}
+	ast_default_node_t *fnCallNode = ast_createFnCallNode(fnSymbol);
+	ast_insert(astRoot->activeNode, fnCallNode);
+	statusCode = function_call(expectNext, fnCallNode);
 	if (statusCode != 0)
 		return statusCode;
 	return 0;
@@ -778,7 +811,6 @@ int variable_definition(bool isConst) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	Token varID = token;
-	fprintf(stderr, "Variable ID: %s\n", varID.s);
 	statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -789,8 +821,10 @@ int variable_definition(bool isConst) {
 		statusCode = data_type();
 		if (statusCode != 0)
 			return statusCode;
-		fprintf(stderr, "trying to define symbol %s\n", varID.s);
-		defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
+		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		statusCode = read_token();
 		if (statusCode != 0) {
 			return statusCode;
@@ -806,8 +840,11 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0)
 		return statusCode;
 
-	statusCode = expressionParser(false);
+	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(getSymbol(varID.s), NULL);
+	ast_default_node_t *varDefNode = ast_createVarDefNode(getSymbol(varID.s), varAssignNode);
+	ast_insert(astRoot->activeNode, varDefNode);
 
+	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
 
@@ -824,7 +861,9 @@ int call_or_assignment() {
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
 	if (sym->type == FUNCTION) {
-		return function_call(true);
+		ast_default_node_t *fnCallNode = ast_createFnCallNode(sym);
+		ast_insert(astRoot->activeNode, fnCallNode);
+		return function_call(true, fnCallNode);
 	} else {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -834,7 +873,12 @@ int call_or_assignment() {
 			fprintf(stderr, "Error: Expected '=' after variable id\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		int statusCode = expressionParser(false);
+
+		ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(sym, NULL);
+		ast_default_node_t *defaultNode = ast_wrapVarAssignNode(varAssignNode);
+		ast_insert(astRoot->activeNode, defaultNode);
+
+		int statusCode = expressionParser(false, &varAssignNode->expression);
 		if (statusCode != 0)
 			return statusCode;
 	}
@@ -848,7 +892,7 @@ bool isLiteralOrId(Token t) {
 	return false;
 }
 
-int function_call(bool expectNext) {
+int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
 	int statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -858,7 +902,9 @@ int function_call(bool expectNext) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
+
 	bool isPastFirstTerm = false;
+	Token *allocatedTkn = NULL;
 	do {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -877,6 +923,25 @@ int function_call(bool expectNext) {
 			fprintf(stderr, "Error: Expected literal or id in function call\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
+		allocatedTkn = allocateToken(token);
+		if (allocatedTkn == NULL) {
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		varType dataType;
+		if (allocatedTkn->kw == id) {
+			symbol_t *sym = getSymbol(allocatedTkn->s);
+			if (sym == NULL) {
+				fprintf(stderr, "Error: Variable %s has not been defined\n", allocatedTkn->s);
+				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+			}
+			dataType = sym->type;
+		} else {
+			dataType = kwToVarType(allocatedTkn->kw);
+		}
+		ast_node_exp_t *expNode = ast_createExpNode(allocatedTkn, dataType);
+		ast_insertParam(fnCallNode, expNode);
+
 		isPastFirstTerm = true;
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -906,8 +971,9 @@ int function_call(bool expectNext) {
 int while_syntax() {
 	int statusCode;
 	enterScope();
-
-	statusCode = expressionParser(false);
+	ast_default_node_t *whileNode = ast_createWhileNode(NULL);
+	ast_insert(astRoot->activeNode, whileNode);
+	statusCode = expressionParser(false, &whileNode->data_t.While->conditionExp);
 
 	if (statusCode != 0)
 		return statusCode;
@@ -921,7 +987,10 @@ int while_syntax() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		defineSymbol(token.s, INT, false, false);
+		statusCode = defineSymbol(token.s, INT, false, false);
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		statusCode = read_token();
 		if (statusCode != 0) {
 			return statusCode;
@@ -944,7 +1013,9 @@ int while_syntax() {
 		return statusCode;
 	}
 
+
 	while (token.kw != rblock) {
+		astRoot->activeNode = whileNode;
 		statusCode = code();
 		if (statusCode != 0)
 			return statusCode;
