@@ -148,8 +148,10 @@ ast_node_var_assign_t *ast_createVarAssignNode(symbol_t *symbol, ast_node_exp_t 
 ast_default_node_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t *assignment);
 ast_default_node_t *ast_createIfElseNode(ast_node_exp_t *conditionExp);
 ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
+
+char *indentNode(int depth);
 void ast_print(ast_default_node_t *astRoot, int depth);
-void ast_printRoot(ast_default_node_t *astRoot);
+void ast_printExp(ast_node_exp_t *expNode);
 
 void ast_insertParam(ast_default_node_t *astRoot, ast_node_exp_t *expNode);
 

@@ -31,6 +31,31 @@ char *indentNode(int depth) {
 	return indent;
 }
 
+int getDepthOfLeftmost(ast_node_exp_t *expNode) {
+	int depth = 0;
+	while(expNode->data_t.binary_op.left != NULL) {
+		depth++;
+		expNode = expNode->data_t.binary_op.left;
+	}
+	return depth;
+}
+
+void ast_exprintin(ast_node_exp_t *expNode, int spacing){
+	fprintf(stderr, "%s%s", indentNode(spacing), getTokenName(*expNode->token));
+	ast_exprintin(expNode->data_t.binary_op.left, spacing/2);
+	ast_exprintin(expNode->data_t.binary_op.right, spacing/2);
+	fprintf(stderr, "\n");
+}
+
+void ast_printExp(ast_node_exp_t *expNode) {
+	if (expNode == NULL) {
+		fprintf(stderr, "Expression is NULL\n");
+		return;
+	}
+	int depth = getDepthOfLeftmost(expNode);
+	ast_exprintin(expNode, depth);
+}
+
 void ast_print(ast_default_node_t *astRoot, int depth) {
 	//fprintf(stderr, "Printing AST %d %d\n", astRoot->type, astRoot->data_t.body_t.nodeCount);
 	if(astRoot == NULL) {
