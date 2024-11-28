@@ -142,7 +142,7 @@ void variableAssignment(ast_node_var_assign_t *var) {
 	expression(var->expression);
 	printf("POPS LF@%s\n", var->symbol->key);
 }
-
+//TODO: make it realloc
 bst_items_t *bst_init_items() {
 	bst_items_t *items = (bst_items_t *)malloc(sizeof(bst_items_t));
 	items->capacity = 32;
@@ -255,7 +255,7 @@ void whileLoop(ast_node_while_t *loop) {
 	unsigned int internalLabelCounter = labelCounter;
 	labelCounter++;
 
-	printf("LABEL WHILE%d\n", labelCounter);
+	printf("LABEL WHILE%d\n", internalLabelCounter);
 	expression(loop->conditionExp->data_t.binary_op.left);
 	expression(loop->conditionExp->data_t.binary_op.right);
 
