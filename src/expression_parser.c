@@ -419,7 +419,7 @@ int createUnaryExp(t_Stack *stack) {
 	stackPop(stack);
 	stackPop(stack);
 
-	ast_node_exp_t *newNode = ast_createExpNode(operationToken, VOID);
+	ast_node_exp_t *newNode = ast_createExpNode(operationToken, expNode->dataType);
 	newNode->data_t.unary_op.exp = expNode;
 
 	stackPush(stack, NON_TERMINAL, newNode->token, newNode);
