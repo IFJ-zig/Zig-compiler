@@ -140,7 +140,11 @@ void variableDefinition(ast_node_var_def_t *var) {
 
 void variableAssignment(ast_node_var_assign_t *var) {
 	expression(var->expression);
-	printf("POPS LF@%s\n", var->symbol->key);
+	if((strcmp(var->symbol->key, "_" ) == 0)) {
+		printf("POPS GF@_%%\n");
+	} else {
+		printf("POPS LF@%s\n", var->symbol->key);
+	}
 }
 //TODO: make it realloc
 bst_items_t *bst_init_items() {
@@ -152,6 +156,10 @@ bst_items_t *bst_init_items() {
 }
 
 void bst_add_node_to_items(ast_node_exp_t *node, bst_items_t *items) {
+	if(items->size >= items->capacity-1) {
+		items->capacity *= 2;
+		items->nodes = (ast_node_exp_t **)realloc(items->nodes, sizeof(ast_node_exp_t *) * items->capacity);
+	}
 	items->nodes[items->size] = node;
 	items->size++;
 }
@@ -247,6 +255,8 @@ void expression(ast_node_exp_t *exp) {
 				break;
 		}
 	}
+	free(items->nodes);
+	free(items);
 }
 
 void whileLoop(ast_node_while_t *loop) {
@@ -402,6 +412,7 @@ void codebody(ast_default_node_t **nodes, unsigned int nodeCount) {
 void printHeader() {
 	printf(".IFJcode24\n");
 	printf("JUMP main\n");
+	printf("DEFVAR GF@_%%\n");
 	printf("\
         \
         LABEL ifjreadi32\n\
