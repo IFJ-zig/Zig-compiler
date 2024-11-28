@@ -638,7 +638,7 @@ int empty_variable() {
 		fprintf(stderr, "Error: Expected = after _\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	statusCode = expressionParser(false);
+	statusCode = expressionParser(false, NULL);
 	if (statusCode != 0)
 		return statusCode;
 
@@ -648,8 +648,9 @@ int empty_variable() {
 int if_else() {
 	int statusCode;
 	enterScope();
-
-	statusCode = expressionParser(false);
+	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
+	ast_insert(astRoot->activeNode, ifElseNode);
+	statusCode = expressionParser(false, &ifElseNode->data_t.ifElse->conditionExp);
 
 	if (statusCode != 0) {
 		return statusCode;
@@ -692,8 +693,7 @@ int if_else() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
-	ast_insert(astRoot->activeNode, ifElseNode);
+
 	while (token.kw != rblock) {
 		astRoot->activeNode = ifElseNode;
 		statusCode = code();
@@ -750,12 +750,13 @@ int return_syntax() {
 	if (token.kw == next) {
 		return 0;
 	}
-	statusCode = expressionParser(true);
+	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
+	ast_insert(astRoot->activeNode, returnNode);
+	statusCode = expressionParser(true, &returnNode->data_t.fnReturn->expression);
 	if (statusCode != 0)
 		return statusCode;
 
-	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
-	ast_insert(astRoot->activeNode, returnNode);
+
 	return 0;
 }
 
@@ -839,11 +840,11 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0)
 		return statusCode;
 
-	ast_default_node_t *varDefNode = ast_createVarDefNode(getSymbol(varID.s), NULL);
+	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(getSymbol(varID.s), NULL);
+	ast_default_node_t *varDefNode = ast_createVarDefNode(getSymbol(varID.s), varAssignNode);
 	ast_insert(astRoot->activeNode, varDefNode);
 
-	statusCode = expressionParser(false);
-
+	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
 
@@ -877,7 +878,7 @@ int call_or_assignment() {
 		ast_default_node_t *defaultNode = ast_wrapVarAssignNode(varAssignNode);
 		ast_insert(astRoot->activeNode, defaultNode);
 
-		int statusCode = expressionParser(false);
+		int statusCode = expressionParser(false, &varAssignNode->expression);
 		if (statusCode != 0)
 			return statusCode;
 	}
@@ -970,8 +971,9 @@ int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
 int while_syntax() {
 	int statusCode;
 	enterScope();
-	statusCode
-			= expressionParser(false);
+	ast_default_node_t *whileNode = ast_createWhileNode(NULL);
+	ast_insert(astRoot->activeNode, whileNode);
+	statusCode = expressionParser(false, &whileNode->data_t.While->conditionExp);
 
 	if (statusCode != 0)
 		return statusCode;
@@ -1010,8 +1012,7 @@ int while_syntax() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	ast_default_node_t *whileNode = ast_createWhileNode(NULL);
-	ast_insert(astRoot->activeNode, whileNode);
+
 
 	while (token.kw != rblock) {
 		astRoot->activeNode = whileNode;

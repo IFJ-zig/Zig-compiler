@@ -10,15 +10,17 @@ void stackInit(t_Stack *stack) {
 	stack->size = 0;
 }
 
-int stackPush(t_Stack *stack, stackElementType type, KeyWord keyword) {
+int stackPush(t_Stack *stack, stackElementType type, Token *tkn, ast_node_exp_t *node) {
 	t_StackItem *newItem = (t_StackItem *)malloc(sizeof(t_StackItem));
 	if (newItem == NULL) {
 		return INTERNAL_COMPILER_ERROR;
 	}
+
 	newItem->type = type;
-	newItem->keyword = keyword;
+	newItem->token = tkn;
 	newItem->prev = stack->top;
 	newItem->next = NULL;
+	newItem->node = node;
 	if (stack->top != NULL) {
 		stack->top->next = newItem;
 	}
@@ -94,7 +96,7 @@ void printStack(t_Stack *stack) {
 
 	while (temp != NULL) {
 		if (temp->type == TERMINAL) {
-			printf("%c", mapTokenToChar(temp->keyword));
+			printf("%c", mapTokenToChar(temp->token->kw));
 		} else if (temp->type == NON_TERMINAL) {
 			printf("E");
 		} else {

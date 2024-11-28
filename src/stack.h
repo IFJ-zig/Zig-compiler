@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "ast.h"
 #include "errors_enum.h"
 #include "tokens.h"
 
@@ -28,16 +29,17 @@ typedef struct Stack
 typedef struct StackItem
 {
 	stackElementType type;
-	KeyWord keyword;
+	Token *token;
 	struct StackItem *next;
 	struct StackItem *prev;
+	ast_node_exp_t *node;
 } t_StackItem;
 
 // Function to initialize the stack
 void stackInit(t_Stack *stack);
 
 // Function to push an item onto the stack
-int stackPush(t_Stack *stack, stackElementType type, KeyWord keyword);
+int stackPush(t_Stack *stack, stackElementType type, Token *tkn, ast_node_exp_t *node);
 
 // Function to pop an item from the stack
 void stackPop(t_Stack *stack);
