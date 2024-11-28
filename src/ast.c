@@ -22,34 +22,27 @@ void printIndent(int depth) {
         fputc(' ', stderr);
     }
 }
+void ast_printTree(ast_node_exp_t *expNode, int depth) {
+    if (expNode == NULL) {
+        printIndent(depth);
+        fprintf(stderr, "NULL\n");
+        return;
+    }
 
-int getDepthOfLeftmost(ast_node_exp_t *expNode) {
-	int depth = 0;
-	while(expNode->data_t.binary_op.left != NULL) {
-		depth++;
-		expNode = expNode->data_t.binary_op.left;
-	}
-	return depth;
-}
+    printIndent(depth);
+    fprintf(stderr, "%s\n", getTokenName(*expNode->token)); // Print current node
 
-void ast_exprintin(ast_node_exp_t *expNode, int spacing){
-	if (expNode == NULL) {
-		return;
-	}
-	printIndent(spacing);
-	fprintf(stderr, "%s", getTokenName(*expNode->token));
-	ast_exprintin(expNode->data_t.binary_op.left, spacing/2);
-	ast_exprintin(expNode->data_t.binary_op.right, spacing/2);
-	fprintf(stderr, "\n");
+    // Recursively print left and right subtrees
+    ast_printTree(expNode->data_t.binary_op.left, depth + 1);
+    ast_printTree(expNode->data_t.binary_op.right, depth + 1);
 }
 
 void ast_printExp(ast_node_exp_t *expNode) {
-	if (expNode == NULL) {
-		fprintf(stderr, "Expression is NULL\n");
-		return;
-	}
-	int depth = getDepthOfLeftmost(expNode);
-	ast_exprintin(expNode, depth);
+    if (expNode == NULL) {
+        fprintf(stderr, "Expression is NULL\n");
+        return;
+    }
+    ast_printTree(expNode, 0); // Start printing from depth 0
 }
 
 void ast_print(ast_default_node_t *astRoot, int depth) {
