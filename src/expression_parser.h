@@ -18,7 +18,11 @@
 
 int precedentTableTranslator(int token);
 int getOperation(int tokenStack, int tokenInput);
-int expressionParser(bool tokenRead);
+int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer);
 int tryToMatchRule(t_Stack *stack);
+int reduceBracketNonTerminal(t_Stack *stack);
+int createValueExp(t_Stack *stack);
+int createBinaryExp(t_Stack *stack);
+int createUnaryExp(t_Stack *stack);
 
 #endif // HEXP_H__
