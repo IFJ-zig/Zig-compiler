@@ -123,7 +123,7 @@ int seekHeaders() {
 					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				data_type();
+				data_type(NULL);
 
 				assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 				statusCode = read_token();
@@ -510,7 +510,7 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = data_type();
+		statusCode = data_type(NULL);
 		if (statusCode != 0)
 			return statusCode;
 		processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
@@ -531,13 +531,17 @@ int param_list() {
 	return 0;
 }
 
-int data_type() {
+int data_type(bool *isNullable) {
 	int statusCode = read_token();
 	if (statusCode != 0) {
 		free(token.s);
 		return statusCode;
 	}
+	if(isNullable != NULL)
+		*isNullable = true;
 	if (token.kw == question_mark) {
+		if(isNullable != NULL)
+			*isNullable = true;
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -800,7 +804,8 @@ int inbuild_function(bool expectNext) {
 }
 
 int variable_definition(bool isConst) {
-	bool isNullable = false; //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+	bool *isNullable = malloc(sizeof(bool));
+	*isNullable = false;
 	int statusCode = 0;
 	statusCode = read_token();
 	if (statusCode != 0) {
@@ -818,7 +823,7 @@ int variable_definition(bool isConst) {
 	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
 		isDefined = true;
-		statusCode = data_type();
+		statusCode = data_type(isNullable);
 		if (statusCode != 0)
 			return statusCode;
 		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
@@ -836,9 +841,12 @@ int variable_definition(bool isConst) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	if (!isDefined)
-		statusCode = defineSymbol(varID.s, INT, isConst, isNullable);
-	if (statusCode != 0)
+		statusCode = defineSymbol(varID.s, INT, isConst, *isNullable);
+	if (statusCode != 0){
+		free(isNullable);
 		return statusCode;
+	}
+	free(isNullable);
 
 	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(getSymbol(varID.s), NULL);
 	ast_default_node_t *varDefNode = ast_createVarDefNode(getSymbol(varID.s), varAssignNode);

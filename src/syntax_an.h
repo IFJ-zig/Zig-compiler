@@ -24,7 +24,7 @@ int checkImport();
 int function_analysis();
 int function_call(bool expectReturn, ast_default_node_t *fnCallNode);
 int return_type();
-int data_type();
+int data_type(bool *isNullable); //if isNullable is NULL, this function will just ignore it, otherwise it sets it according to if '?' was found in definition
 int param_list();
 int while_syntax();
 int if_else();
