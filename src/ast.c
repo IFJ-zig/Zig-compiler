@@ -98,7 +98,7 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		fprintf(stderr, "Expression\n");
 	} else if (astRoot->type == AST_NODE_VAR_DEF) {
 		printIndent(depth);
-		fprintf(stderr, "Variable definition - %s\n", astRoot->data_t.varDef->symbol->key);
+		//fprintf(stderr, "Variable definition - %s\n", astRoot->data_t.varDef->symbol->key);
 		if(astRoot->data_t.varDef->assignment != NULL) {
 			printIndent(depth+1);
 			fprintf(stderr, " Variable assignment\n");

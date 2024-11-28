@@ -380,7 +380,7 @@ int createValueExp(t_Stack *stack) {
 
 	varType dataType;
 	if (token->kw == id) {
-		symbol_t *sym = getSymbol(token->s);
+		symbol_t *sym = getSymbol(token->s);	//This sends null sometime?
 		if (sym == NULL) {
 			fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
