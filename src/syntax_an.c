@@ -537,10 +537,10 @@ int data_type(bool *isNullable) {
 		free(token.s);
 		return statusCode;
 	}
-	if(isNullable != NULL)
+	if (isNullable != NULL)
 		*isNullable = true;
 	if (token.kw == question_mark) {
-		if(isNullable != NULL)
+		if (isNullable != NULL)
 			*isNullable = true;
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -842,7 +842,7 @@ int variable_definition(bool isConst) {
 	}
 	if (!isDefined)
 		statusCode = defineSymbol(varID.s, INT, isConst, *isNullable);
-	if (statusCode != 0){
+	if (statusCode != 0) {
 		free(isNullable);
 		return statusCode;
 	}
@@ -901,6 +901,25 @@ bool isLiteralOrId(Token t) {
 }
 
 int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
+	int statusCode = parse_params(fnCallNode);
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (expectNext) {
+		int statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
+		if (token.kw != next) {
+			fprintf(stderr, "Error: Expected ';' after function call\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+	}
+
+	return 0;
+}
+
+int parse_params(ast_default_node_t *fnCallNode) {
 	int statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -961,18 +980,6 @@ int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
 		fprintf(stderr, "Error: Expected ')' after function call\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-
-	if (expectNext) {
-		statusCode = read_token();
-		if (statusCode != 0) {
-			return statusCode;
-		}
-		if (token.kw != next) {
-			fprintf(stderr, "Error: Expected ';' after function call\n");
-			return SYNTACTIC_ANALYSIS_ERROR;
-		}
-	}
-
 	return 0;
 }
 
