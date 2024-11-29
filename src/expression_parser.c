@@ -211,8 +211,8 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 				if (stackTop(&stack)->type == NON_TERMINAL) {
 					ast_node_exp_t *node = stackTop(&stack)->node;
 					if (stackTop(&stack)->prev->token->kw == next) {
-						(void)resultPointer;
-						*resultPointer = node;
+						if (resultPointer != NULL)
+							*resultPointer = node;
 						stackClear(&stack);
 						return 0;
 					}
@@ -380,7 +380,7 @@ int createValueExp(t_Stack *stack) {
 
 	varType dataType;
 	if (token->kw == id) {
-		symbol_t *sym = getSymbol(token->s);	//This sends null sometime?
+		symbol_t *sym = getSymbol(token->s); //This sends null sometime?
 		if (sym == NULL) {
 			fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;

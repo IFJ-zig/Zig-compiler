@@ -751,15 +751,15 @@ int return_syntax() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
+	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
+	ast_insert(astRoot->activeNode, returnNode);
 	if (token.kw == next) {
 		return 0;
 	}
-	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
-	ast_insert(astRoot->activeNode, returnNode);
+
 	statusCode = expressionParser(true, &returnNode->data_t.fnReturn->expression);
 	if (statusCode != 0)
 		return statusCode;
-
 
 	return 0;
 }
