@@ -46,7 +46,12 @@ void ast_printTree(ast_node_exp_t *node, int depth, int indentPrefix) {
     } else {
         // Leaf node
         printIndent(depth + 1 + indentPrefix);
-        fprintf(stderr, "Leaf (no children)\n");
+		if(node->data_t.fnCall != NULL){
+			fprintf(stderr, "Function call - %s, argCount(Node)=%d\n", node->data_t.fnCall->fnSymbol->key, node->data_t.fnCall->argCount);
+		}
+		else{
+        	fprintf(stderr, "Leaf (no children)\n");
+		}
     }
 }
 

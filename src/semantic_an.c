@@ -57,7 +57,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 
 symbol_t *getSymbol(char *name) {
 	if(name == NULL){
-		fprintf(stderr, "Error: Symbol name is NULL\n");
+		fprintf(stderr, "Error getSymbol: Symbol name is NULL\n");
 		return NULL;
 	}
 	symbol_t *symbol = NULL;
