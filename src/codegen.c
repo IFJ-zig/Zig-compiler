@@ -86,7 +86,8 @@ void removeChar(char *str, char garbage) {
 
 void functionCall(ast_node_fn_call_t *fn) {
 	for (unsigned int i = 0; i < fn->argCount; i++) {
-		if (fn->args[i]->token->kw == id) {
+		expression(fn->args[i]);
+		/*if (fn->args[i]->token->kw == id) {
 			printf("PUSHS LF@%s\n", fn->args[i]->token->s);
 		} else if (fn->args[i]->token->kw == num) {
 			printf("PUSHS int@%d\n", fn->args[i]->token->i);
@@ -102,7 +103,7 @@ void functionCall(ast_node_fn_call_t *fn) {
 				}
 			}
 			printf("\n");
-		}
+		}*/
 	}
 	if (strncmp(fn->fnSymbol->key, "ifj.", 4) == 0) {
 		if (strcmp(fn->fnSymbol->key, "ifj.write") == 0) {
@@ -238,7 +239,13 @@ void expression(ast_node_exp_t *exp) {
 				printf("ADDS\n");
 				break;
 			case minus:
-				printf("SUBS\n");
+				if(items->nodes[i]->data_t.unary_op.exp != NULL) {
+					printf("PUSHS int@0\n");
+					expression(items->nodes[i]->data_t.unary_op.exp);
+					printf("SUBS\n");
+				} else {
+					printf("SUBS\n");
+				}
 				break;
 			case multiply:
 				printf("MULS\n");
