@@ -390,6 +390,7 @@ ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
 	newNode->conditionExp = conditionExp;
 	newNode->block = malloc(sizeof(ast_default_node_t *));
 	newNode->blockCount = 0;
+	newNode->noNullPayload = NULL;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.While = newNode;
 	defaultNode->type = AST_NODE_WHILE;

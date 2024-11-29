@@ -670,8 +670,21 @@ int if_else() {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
+		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		ifElseNode->data_t.ifElse->noNullPayload = malloc(sizeof(symbol_t));
+		if (ifElseNode->data_t.ifElse->noNullPayload == NULL) {
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		symbol_t *noNullPayload = getSymbol(token.s);
+		*ifElseNode->data_t.ifElse->noNullPayload = *noNullPayload;
+		ifElseNode->data_t.ifElse->noNullPayload->key = malloc(strlen(noNullPayload->key) + 1);
+		if (ifElseNode->data_t.ifElse->noNullPayload->key == NULL) {
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		strcpy((char *)ifElseNode->data_t.ifElse->noNullPayload->key, noNullPayload->key);
 
-		statusCode = defineSymbol(token.s, INT, false, false);
 		if (statusCode != 0) {
 			return statusCode;
 		}
@@ -995,7 +1008,20 @@ int while_syntax() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = defineSymbol(token.s, INT, false, false);
+		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		whileNode->data_t.While->noNullPayload = malloc(sizeof(symbol_t));
+		if (whileNode->data_t.While->noNullPayload == NULL) {
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		symbol_t *noNullPayload = getSymbol(token.s);
+		*whileNode->data_t.While->noNullPayload = *noNullPayload;
+		whileNode->data_t.While->noNullPayload->key = malloc(strlen(noNullPayload->key) + 1);
+		if(whileNode->data_t.While->noNullPayload->key == NULL){
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		strcpy((char *)whileNode->data_t.While->noNullPayload->key, noNullPayload->key);
 		if (statusCode != 0) {
 			return statusCode;
 		}

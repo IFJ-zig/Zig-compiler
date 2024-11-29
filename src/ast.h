@@ -106,6 +106,7 @@ typedef struct ast_node_while
 {
 	ast_node_type type;
 	struct ast_node_exp *conditionExp;
+	symbol_t *noNullPayload;
 	struct ast_default_node **block;
 	unsigned int blockCount;
 } ast_node_while_t;
