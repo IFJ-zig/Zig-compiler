@@ -123,7 +123,7 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		printIndent(depth+1);
 		fprintf(stderr, "->expression = \n");
 		if(astRoot->data_t.varAssign->expression != NULL) {
-			ast_printExp(astRoot->data_t.varDef->assignment->expression, depth + 3);
+			ast_printExp(astRoot->data_t.varAssign->expression, depth + 3);
 		} else {
 			fprintf(stderr, "NULL\n");
 		}
