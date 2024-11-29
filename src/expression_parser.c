@@ -86,6 +86,7 @@ int getOperation(int tokenStack, int tokenInput) {
 
 extern Token token;
 extern ast_default_node_t *astRoot;
+ast_default_node_t *fnCallNode;
 
 int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 	int statusCode;
@@ -136,19 +137,20 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 			strcpy(prefix, "ifj.");
 			strcat(prefix, token.s);
 			symbol_t *fnSymbol = getSymbol(prefix);
-			free(prefix);
 			if (fnSymbol == NULL) {
 				fprintf(stderr, "Error: Function %s is not defined\n", token.s);
 				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 			}
-			ast_default_node_t *fnCallNode = ast_createFnCallNode(fnSymbol);
+			fnCallNode = ast_createFnCallNode(fnSymbol);
 			statusCode = function_call(false, fnCallNode);
 			if (statusCode != 0) {
 				stackClear(&stack);
 				return statusCode;
 			}
-			token.kw = id;
+			Token new = {id, 0, 0, prefix};
+			token = new;
 		} else if (token.kw == id) {
+			char *name = token.s;
 			symbol_t *sym = getSymbol(token.s);
 			if (sym == NULL) {
 				fprintf(stderr, "Error: Undefined symbol %s\n", token.s);
@@ -156,14 +158,15 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 				return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 			}
 			if (sym->type == FUNCTION) {
-				ast_default_node_t *fnCallNode = ast_createFnCallNode(sym);
+				fnCallNode = ast_createFnCallNode(sym);
 				statusCode = function_call(false, fnCallNode);
 				if (statusCode != 0) {
 					stackClear(&stack);
 					return statusCode;
 				}
 				fprintf(stderr, "Function call %d\n", token.kw);
-				token.kw = id;
+				Token new = {id, 0, 0, name};
+				token = new;
 			}
 		}
 
@@ -177,6 +180,7 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 					stackClear(&stack);
 					return statusCode;
 				}
+
 				statusCode = stackPush(&stack, TERMINAL, allocateToken(token), NULL);
 				if (statusCode != 0) {
 					stackClear(&stack);
@@ -211,8 +215,8 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 				if (stackTop(&stack)->type == NON_TERMINAL) {
 					ast_node_exp_t *node = stackTop(&stack)->node;
 					if (stackTop(&stack)->prev->token->kw == next) {
-						(void)resultPointer;
-						*resultPointer = node;
+						if (resultPointer != NULL)
+							*resultPointer = node;
 						stackClear(&stack);
 						return 0;
 					}
@@ -380,7 +384,7 @@ int createValueExp(t_Stack *stack) {
 
 	varType dataType;
 	if (token->kw == id) {
-		symbol_t *sym = getSymbol(token->s);
+		symbol_t *sym = getSymbol(token->s); //This sends null sometime?
 		if (sym == NULL) {
 			fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
@@ -390,6 +394,10 @@ int createValueExp(t_Stack *stack) {
 		dataType = kwToVarType(token->kw);
 	}
 	ast_node_exp_t *expNode = ast_createExpNode(token, dataType);
+	if (fnCallNode != NULL) {
+		expNode->data_t.fnCall = fnCallNode->data_t.fnCall;
+		fnCallNode = NULL;
+	}
 	stackPush(stack, NON_TERMINAL, token, expNode);
 	return 0;
 };

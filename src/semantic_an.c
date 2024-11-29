@@ -30,7 +30,8 @@ void enterScope() {
 }
 
 void exitScope() {
-	//htab_removeLast(list);
+	htab_removeLast(list);
+	//ALLOCATE SYMBOLS IN AST TREE AND KEEP THIS AS IT WAS! IT WILL BE FINE, TRUST
 }
 
 int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
@@ -55,6 +56,10 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 }
 
 symbol_t *getSymbol(char *name) {
+	if(name == NULL){
+		fprintf(stderr, "Error getSymbol: Symbol name is NULL\n");
+		return NULL;
+	}
 	symbol_t *symbol = NULL;
 	htab_t *t = list->last;
 	while (symbol == NULL && t != NULL) {

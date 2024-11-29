@@ -125,7 +125,7 @@ int seekHeaders() {
 					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				data_type();
+				data_type(NULL);
 
 				assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 				statusCode = read_token();
@@ -512,7 +512,7 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = data_type();
+		statusCode = data_type(NULL);
 		if (statusCode != 0)
 			return statusCode;
 		processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
@@ -533,13 +533,17 @@ int param_list() {
 	return 0;
 }
 
-int data_type() {
+int data_type(bool *isNullable) {
 	int statusCode = read_token();
 	if (statusCode != 0) {
 		free(token.s);
 		return statusCode;
 	}
+	if (isNullable != NULL)
+		*isNullable = true;
 	if (token.kw == question_mark) {
+		if (isNullable != NULL)
+			*isNullable = true;
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -668,8 +672,21 @@ int if_else() {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
+		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		ifElseNode->data_t.ifElse->noNullPayload = malloc(sizeof(symbol_t));
+		if (ifElseNode->data_t.ifElse->noNullPayload == NULL) {
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		symbol_t *noNullPayload = getSymbol(token.s);
+		*ifElseNode->data_t.ifElse->noNullPayload = *noNullPayload;
+		ifElseNode->data_t.ifElse->noNullPayload->key = malloc(strlen(noNullPayload->key) + 1);
+		if (ifElseNode->data_t.ifElse->noNullPayload->key == NULL) {
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		strcpy((char *)ifElseNode->data_t.ifElse->noNullPayload->key, noNullPayload->key);
 
-		statusCode = defineSymbol(token.s, INT, false, false);
 		if (statusCode != 0) {
 			return statusCode;
 		}
@@ -749,15 +766,15 @@ int return_syntax() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
+	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
+	ast_insert(astRoot->activeNode, returnNode);
 	if (token.kw == next) {
 		return 0;
 	}
-	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
-	ast_insert(astRoot->activeNode, returnNode);
+
 	statusCode = expressionParser(true, &returnNode->data_t.fnReturn->expression);
 	if (statusCode != 0)
 		return statusCode;
-
 
 	return 0;
 }
@@ -802,7 +819,8 @@ int inbuild_function(bool expectNext) {
 }
 
 int variable_definition(bool isConst) {
-	bool isNullable = false; //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+	bool *isNullable = malloc(sizeof(bool));
+	*isNullable = false;
 	int statusCode = 0;
 	statusCode = read_token();
 	if (statusCode != 0) {
@@ -820,7 +838,7 @@ int variable_definition(bool isConst) {
 	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
 		isDefined = true;
-		statusCode = data_type();
+		statusCode = data_type(isNullable);
 		if (statusCode != 0)
 			return statusCode;
 		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
@@ -838,9 +856,12 @@ int variable_definition(bool isConst) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	if (!isDefined)
-		statusCode = defineSymbol(varID.s, INT, isConst, isNullable);
-	if (statusCode != 0)
+		statusCode = defineSymbol(varID.s, INT, isConst, *isNullable);
+	if (statusCode != 0) {
+		free(isNullable);
 		return statusCode;
+	}
+	free(isNullable);
 
 	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(getSymbol(varID.s), NULL);
 	ast_default_node_t *varDefNode = ast_createVarDefNode(getSymbol(varID.s), varAssignNode);
@@ -895,6 +916,25 @@ bool isLiteralOrId(Token t) {
 }
 
 int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
+	int statusCode = parse_params(fnCallNode);
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (expectNext) {
+		int statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
+		if (token.kw != next) {
+			fprintf(stderr, "Error: Expected ';' after function call\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+	}
+
+	return 0;
+}
+
+int parse_params(ast_default_node_t *fnCallNode) {
 	int statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -955,18 +995,6 @@ int function_call(bool expectNext, ast_default_node_t *fnCallNode) {
 		fprintf(stderr, "Error: Expected ')' after function call\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-
-	if (expectNext) {
-		statusCode = read_token();
-		if (statusCode != 0) {
-			return statusCode;
-		}
-		if (token.kw != next) {
-			fprintf(stderr, "Error: Expected ';' after function call\n");
-			return SYNTACTIC_ANALYSIS_ERROR;
-		}
-	}
-
 	return 0;
 }
 
@@ -989,7 +1017,20 @@ int while_syntax() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = defineSymbol(token.s, INT, false, false);
+		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		whileNode->data_t.While->noNullPayload = malloc(sizeof(symbol_t));
+		if (whileNode->data_t.While->noNullPayload == NULL) {
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		symbol_t *noNullPayload = getSymbol(token.s);
+		*whileNode->data_t.While->noNullPayload = *noNullPayload;
+		whileNode->data_t.While->noNullPayload->key = malloc(strlen(noNullPayload->key) + 1);
+		if(whileNode->data_t.While->noNullPayload->key == NULL){
+			fprintf(stderr, "Error: Memory allocation failed\n");
+			return INTERNAL_COMPILER_ERROR;
+		}
+		strcpy((char *)whileNode->data_t.While->noNullPayload->key, noNullPayload->key);
 		if (statusCode != 0) {
 			return statusCode;
 		}

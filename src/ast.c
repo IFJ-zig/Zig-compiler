@@ -23,7 +23,7 @@ void printIndent(int depth) {
     }
 }
 // Recursive function to print the AST
-void ast_printTree(ast_node_exp_t *node, int depth) {
+void ast_printTree(ast_node_exp_t *node, int depth, int indentPrefix) {
     if (node == NULL) {
         printIndent(depth);
         fprintf(stderr, "NULL\n");
@@ -32,34 +32,39 @@ void ast_printTree(ast_node_exp_t *node, int depth) {
 
     // Print the current node's token name
     printIndent(depth);
+	printIndent(indentPrefix);
     fprintf(stderr, "%s\n", getTokenName(*node->token));
 
     // Determine if the node is unary or binary
     if (node->data_t.binary_op.left != NULL || node->data_t.binary_op.right != NULL) {
         // Binary node: Print left and right subtrees
-        ast_printTree(node->data_t.binary_op.left, depth + 1);
-        ast_printTree(node->data_t.binary_op.right, depth + 1);
+        ast_printTree(node->data_t.binary_op.left, depth + 1, indentPrefix);
+        ast_printTree(node->data_t.binary_op.right, depth + 1, indentPrefix);
     } else if (node->data_t.unary_op.exp != NULL) {
         // Unary node: Print the single operand
-        ast_printTree(node->data_t.unary_op.exp, depth + 1);
+        ast_printTree(node->data_t.unary_op.exp, depth + 1, indentPrefix);
     } else {
         // Leaf node
-        printIndent(depth + 1);
-        fprintf(stderr, "Leaf (no children)\n");
+        printIndent(depth + 1 + indentPrefix);
+		if(node->data_t.fnCall != NULL){
+			fprintf(stderr, "Function call - %s, argCount(Node)=%d\n", node->data_t.fnCall->fnSymbol->key, node->data_t.fnCall->argCount);
+		}
+		else{
+        	fprintf(stderr, "Leaf (no children)\n");
+		}
     }
 }
 
 // Top-level function to print the AST
-void ast_printExp(ast_node_exp_t *expNode) {
+void ast_printExp(ast_node_exp_t *expNode, int indent) {
     if (expNode == NULL) {
         fprintf(stderr, "Expression is NULL\n");
         return;
     }
-    ast_printTree(expNode, 0); // Start printing from depth 0
+    ast_printTree(expNode, 0, indent); // Start printing from depth 0
 }
 
 void ast_print(ast_default_node_t *astRoot, int depth) {
-	//fprintf(stderr, "Printing AST %d %d\n", astRoot->type, astRoot->data_t.body_t.nodeCount);
 	if(astRoot == NULL) {
 		fprintf(stderr, "AST IS NULL!\n");
 	}
@@ -86,10 +91,9 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		printIndent(depth);
 		fprintf(stderr, "Function return\n");
 		printIndent(depth+1);
-		fprintf(stderr, "->expression = ");
+		fprintf(stderr, "->expression = \n");
 		if(astRoot->data_t.fnReturn->expression != NULL) {
-			fprintf(stderr, "%d\n", astRoot->data_t.fnReturn->expression->token->kw);
-			ast_printExp(astRoot->data_t.varDef->assignment->expression);
+			ast_printExp(astRoot->data_t.fnReturn->expression, depth + 2);
 		} else {
 			fprintf(stderr, "NULL\n");
 		}
@@ -98,14 +102,14 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		fprintf(stderr, "Expression\n");
 	} else if (astRoot->type == AST_NODE_VAR_DEF) {
 		printIndent(depth);
-		fprintf(stderr, "Variable definition\n");
+		fprintf(stderr, "Variable definition - %s\n", astRoot->data_t.varDef->symbol->key);
 		if(astRoot->data_t.varDef->assignment != NULL) {
 			printIndent(depth+1);
-			fprintf(stderr, " Variable assignment\n");
+			fprintf(stderr, " Variable assignment - %s\n", astRoot->data_t.varAssign->symbol->key);
 			printIndent(depth+2);
-			fprintf(stderr, "->expression = ");
+			fprintf(stderr, "->expression = \n");
 			if(astRoot->data_t.varDef->assignment->expression != NULL) {
-				ast_printExp(astRoot->data_t.varDef->assignment->expression);
+				ast_printExp(astRoot->data_t.varDef->assignment->expression, depth + 3);
 			} else {
 				fprintf(stderr, "NULL\n");
 			}
@@ -117,9 +121,9 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		printIndent(depth);
 		fprintf(stderr, "Variable assignment\n");
 		printIndent(depth+1);
-		fprintf(stderr, "->expression = ");
+		fprintf(stderr, "->expression = \n");
 		if(astRoot->data_t.varAssign->expression != NULL) {
-			fprintf(stderr, "%d\n", astRoot->data_t.varAssign->expression->token->kw);
+			ast_printExp(astRoot->data_t.varAssign->expression, depth + 3);
 		} else {
 			fprintf(stderr, "NULL\n");
 		}
@@ -246,7 +250,10 @@ ast_default_node_t *ast_createFnDefNode(symbol_t *fnSymbol) {
 		exit(INTERNAL_COMPILER_ERROR);
 	}
 	newNode->type = AST_NODE_FN_DEF;
-	newNode->fnSymbol = fnSymbol;
+	newNode->fnSymbol = malloc(sizeof(symbol_t));
+	*newNode->fnSymbol = *fnSymbol;
+	newNode->fnSymbol->key = malloc(strlen(fnSymbol->key) + 1);
+	strcpy((char *)newNode->fnSymbol->key, fnSymbol->key);
 	newNode->body = malloc(sizeof(ast_default_node_t *));
 	newNode->bodyCount = 0;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
@@ -262,7 +269,10 @@ ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol) {
 		exit(INTERNAL_COMPILER_ERROR);
 	}
 	newNode->type = AST_NODE_FN_CALL;
-	newNode->fnSymbol = fnSymbol;
+	newNode->fnSymbol = malloc(sizeof(symbol_t));
+	*newNode->fnSymbol = *fnSymbol;
+	newNode->fnSymbol->key = malloc(strlen(fnSymbol->key) + 1);
+	strcpy((char *)newNode->fnSymbol->key, fnSymbol->key);
 	newNode->args = malloc(sizeof(ast_node_exp_t *));
 	newNode->argCount = 0;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
@@ -317,7 +327,10 @@ ast_node_var_assign_t *ast_createVarAssignNode(symbol_t *symbol, ast_node_exp_t 
 		exit(INTERNAL_COMPILER_ERROR);
 	}
 	newNode->type = AST_NODE_VAR_ASSIGN;
-	newNode->symbol = symbol;
+	newNode->symbol = malloc(sizeof(symbol_t));
+	*newNode->symbol = *symbol;
+	newNode->symbol->key = malloc(strlen(symbol->key) + 1);
+	strcpy((char *)newNode->symbol->key, symbol->key);
 	newNode->expression = expression;
 	return newNode;
 }
@@ -336,7 +349,10 @@ ast_default_node_t *ast_createVarDefNode(symbol_t *symbol, ast_node_var_assign_t
 		exit(INTERNAL_COMPILER_ERROR);
 	}
 	newNode->type = AST_NODE_VAR_DEF;
-	newNode->symbol = symbol;
+	newNode->symbol = malloc(sizeof(symbol_t));
+	*newNode->symbol = *symbol;
+	newNode->symbol->key = malloc(strlen(symbol->key) + 1);
+	strcpy((char *)newNode->symbol->key, symbol->key);
 	newNode->assignment = assignment;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.varDef = newNode;
@@ -374,6 +390,7 @@ ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp) {
 	newNode->conditionExp = conditionExp;
 	newNode->block = malloc(sizeof(ast_default_node_t *));
 	newNode->blockCount = 0;
+	newNode->noNullPayload = NULL;
 	ast_default_node_t *defaultNode = ast_create_node(AST_NODE_DEFAULT);
 	defaultNode->data_t.While = newNode;
 	defaultNode->type = AST_NODE_WHILE;
