@@ -298,7 +298,11 @@ int checkImport() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	if (token.kw != text && strcmp(token.s, "ifj24.zig")) {
+	if (token.kw != text) {
+		fprintf(stderr, "Error: Expected name of the package\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	if (strcmp(token.s, "ifj24.zig")) {
 		fprintf(stderr, "Error: Expected 'ifj24.zig' as name of the package\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
