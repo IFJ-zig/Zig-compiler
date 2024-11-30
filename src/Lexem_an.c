@@ -266,7 +266,7 @@ Token get_token() {
 					return new;
 				}
 				new.kw = text;
-				strcpy(p, lexem);puts(lexem);
+				strcpy(p, lexem);
 				new.s = p;
 				//printf("text_%s ", LGetStrAct(&new));
 				ungetc(letter, stdin);
