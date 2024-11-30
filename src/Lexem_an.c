@@ -234,8 +234,8 @@ Token get_token() {
 						}
 						if (letter > 31) {
 							strncat(lexem, &letter, 1);
+							letter = getchar();
 						}
-						letter = getchar();
 					}
 					//check if size sufficient
 					if (strlen(lexem) >= (lex_size - 1)) {
@@ -362,8 +362,8 @@ Token get_token() {
 							}
 						} else if (letter > 31) {
 							strncat(lexem, &letter, 1);
+							letter = getchar();
 						}
-						letter = getchar();
 					}
 					if (letter == EOF || letter == '\n') {
 						//chyba lexemu
