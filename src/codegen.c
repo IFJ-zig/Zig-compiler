@@ -9,6 +9,57 @@
 
 unsigned int labelCounter = 0;
 //unsigned int ifCounter = 0;
+bst_vars_t *vars = NULL;
+
+void defAllVars(ast_default_node_t **nodes, unsigned int nodeCount) {
+	for (unsigned int i = 0; i < nodeCount; i++) {
+		if (nodes[i]->type == AST_NODE_VAR_DEF) {
+			ast_node_var_def_t *var = nodes[i]->data_t.varDef;
+			bool foundVar = false;
+			for (int x = 0; x < vars->size; x++) {
+				if (strcmp(vars->nodes[x], var->symbol->key) == 0) {
+					foundVar = true;
+				}
+			}
+			if (!foundVar) {
+				bst_add_var_to_items((char *)var->symbol->key, vars);
+				printf("DEFVAR LF@%s\n", var->symbol->key);
+			}
+			//variableDefinition(nodes[i]->data_t.varDef);
+		} else if (nodes[i]->type == AST_NODE_IF_ELSE) {
+			if(nodes[i]->data_t.ifElse->noNullPayload != NULL) {
+				bool foundVar = false;
+				for (int x = 0; x < vars->size; x++) {
+					if (strcmp(vars->nodes[x], nodes[i]->data_t.ifElse->noNullPayload->key) == 0) {
+						foundVar = true;
+					}
+					//printf("YOLO\n");
+				}
+				if (!foundVar) {
+					bst_add_var_to_items((char *)nodes[i]->data_t.ifElse->noNullPayload->key, vars);
+					printf("DEFVAR LF@%s\n", nodes[i]->data_t.ifElse->noNullPayload->key);
+				}
+			}
+			defAllVars(nodes[i]->data_t.ifElse->ifBlock, nodes[i]->data_t.ifElse->ifCount);
+			defAllVars(nodes[i]->data_t.ifElse->elseBlock, nodes[i]->data_t.ifElse->elseCount);
+		} else if (nodes[i]->type == AST_NODE_WHILE) {
+			if(nodes[i]->data_t.While->noNullPayload != NULL) {
+				bool foundVar = false;
+				for (int x = 0; x < vars->size; x++) {
+					if (strcmp(vars->nodes[x], nodes[i]->data_t.While->noNullPayload->key) == 0) {
+						foundVar = true;
+					}
+					//printf("YOLO\n");
+				}
+				if (!foundVar) {
+					bst_add_var_to_items((char *)nodes[i]->data_t.While->noNullPayload->key, vars);
+					printf("DEFVAR LF@%s\n", nodes[i]->data_t.While->noNullPayload->key);
+				}
+			}
+			defAllVars(nodes[i]->data_t.While->block, nodes[i]->data_t.While->blockCount);
+		}
+	}
+}
 
 void stringToSlice(char *s) {
 	printf("PUSHS string@");
@@ -54,16 +105,20 @@ void write(Token *token) {
 		default:
 			break;
 	}
+	//printf("POPS GF@_%%\n");
 }
 
 void functionDef(ast_node_fn_def_t *fn) {
+	vars = bst_init_vars();
 	printf("LABEL %s\n", fn->fnSymbol->key);
 	printf("CREATEFRAME\n");
 	printf("PUSHFRAME\n");
-	for (int i = 0; i < fn->fnSymbol->paramCount; i++) {
+	for (int i = fn->fnSymbol->paramCount-1; i >= 0; i--) {
 		printf("DEFVAR LF@%s\n", fn->fnSymbol->params[i]->key);
+		bst_add_var_to_items((char *)fn->fnSymbol->params[i]->key, vars);
 		printf("POPS LF@%s\n", fn->fnSymbol->params[i]->key);
 	}
+	defAllVars(fn->body, fn->bodyCount);
 	codebody(fn->body, fn->bodyCount);
 	printf("POPFRAME\n");
 	if (strcmp(fn->fnSymbol->key, "main") == 0) {
@@ -71,6 +126,7 @@ void functionDef(ast_node_fn_def_t *fn) {
 	} else {
 		printf("RETURN\n");
 	}
+	free(vars->nodes);
 }
 
 void removeChar(char *str, char garbage) {
@@ -85,25 +141,27 @@ void removeChar(char *str, char garbage) {
 }
 
 void functionCall(ast_node_fn_call_t *fn) {
-	for (unsigned int i = 0; i < fn->argCount; i++) {
-		expression(fn->args[i]);
-		/*if (fn->args[i]->token->kw == id) {
-			printf("PUSHS LF@%s\n", fn->args[i]->token->s);
-		} else if (fn->args[i]->token->kw == num) {
-			printf("PUSHS int@%d\n", fn->args[i]->token->i);
-		} else if (fn->args[i]->token->kw == decim) {
-			printf("PUSHS float@%a\n", fn->args[i]->token->f);
-		} else if (fn->args[i]->token->kw == text) {
-			printf("PUSHS string@");
-			for (size_t j = 0; j < strlen(fn->args[i]->token->s); j++) {
-				if ((fn->args[i]->token->s[j] >= 0 && fn->args[i]->token->s[j] <= 32) || fn->args[i]->token->s[j] == 35 || fn->args[i]->token->s[j] == 92) {
-					printf("\\%03d", fn->args[i]->token->s[j]);
-				} else {
-					printf("%c", fn->args[i]->token->s[j]);
+	if (strcmp(fn->fnSymbol->key, "ifj.write") != 0){
+		for (unsigned int i = 0; i < fn->argCount; i++) {
+			expression(fn->args[i]);
+			/*if (fn->args[i]->token->kw == id) {
+				printf("PUSHS LF@%s\n", fn->args[i]->token->s);
+			} else if (fn->args[i]->token->kw == num) {
+				printf("PUSHS int@%d\n", fn->args[i]->token->i);
+			} else if (fn->args[i]->token->kw == decim) {
+				printf("PUSHS float@%a\n", fn->args[i]->token->f);
+			} else if (fn->args[i]->token->kw == text) {
+				printf("PUSHS string@");
+				for (size_t j = 0; j < strlen(fn->args[i]->token->s); j++) {
+					if ((fn->args[i]->token->s[j] >= 0 && fn->args[i]->token->s[j] <= 32) || fn->args[i]->token->s[j] == 35 || fn->args[i]->token->s[j] == 92) {
+						printf("\\%03d", fn->args[i]->token->s[j]);
+					} else {
+						printf("%c", fn->args[i]->token->s[j]);
+					}
 				}
-			}
-			printf("\n");
-		}*/
+				printf("\n");
+			}*/
+		}
 	}
 	if (strncmp(fn->fnSymbol->key, "ifj.", 4) == 0) {
 		if (strcmp(fn->fnSymbol->key, "ifj.write") == 0) {
@@ -121,19 +179,41 @@ void functionCall(ast_node_fn_call_t *fn) {
 }
 
 void functionReturn(ast_node_fn_return_t *fn) {
-	if (fn->expression->token->kw == id) {
-		printf("MOVE LF@retval%% LF@%s\n", fn->expression->token->s);
-	} else if (fn->expression->token->kw == dtint) {
-		printf("MOVE LF@retval%% int@%d\n", fn->expression->token->i);
-	} else if (fn->expression->token->kw == dtflt) {
-		printf("MOVE LF@retval%% float@%a\n", fn->expression->token->f);
-	} else if (fn->expression->token->kw == dtstr) {
-		printf("MOVE LF@retval%% string@%s\n", fn->expression->token->s);
+	printf("DEFVAR LF@retval%%\n");
+	expression(fn->expression);
+	printf("POPS LF@retval%%\n");
+	printf("POPFRAME\n");
+	printf("RETURN\n");
+}
+
+bst_vars_t *bst_init_vars(){
+	bst_vars_t *items = (bst_vars_t *)malloc(sizeof(bst_vars_t));
+	items->capacity = 32;
+	items->nodes = (char **)malloc(sizeof(char *) * items->capacity);
+	items->size = 0;
+	return items;
+};
+
+void bst_add_var_to_items(char *var, bst_vars_t *items) {
+	if(items->size >= items->capacity-1) {
+		items->capacity *= 2;
+		items->nodes = (char **)realloc(items->nodes, sizeof(char *) * items->capacity);
 	}
+	items->nodes[items->size] = var;
+	items->size++;
 }
 
 void variableDefinition(ast_node_var_def_t *var) {
-	printf("DEFVAR LF@%s\n", var->symbol->key);
+	bool foundVar = false;
+	for (int i = 0; i < vars->size; i++) {
+		if (strcmp(vars->nodes[i], var->symbol->key) == 0) {
+			foundVar = true;
+		}
+	}
+	if (!foundVar) {
+		bst_add_var_to_items((char *)var->symbol->key, vars);
+		printf("DEFVAR LF@%s\n", var->symbol->key);
+	}
 	if (var->assignment != NULL) {
 		variableAssignment(var->assignment);
 	}
@@ -180,6 +260,7 @@ void bst_postorder(ast_node_exp_t *tree, bst_items_t *items) {
 }
 
 
+
 void expression(ast_node_exp_t *exp) {
 	bst_items_t *items = bst_init_items();
 	bst_postorder(exp, items);
@@ -223,7 +304,9 @@ void expression(ast_node_exp_t *exp) {
 			case id:
 				if (items->nodes[i]->dataType == FUNCTION) {
 					functionCall(items->nodes[i]->data_t.fnCall);
-					printf("PUSHS TF@retval%%\n");
+					if(strcmp(items->nodes[i]->data_t.fnCall->fnSymbol->key, "ifj.string") != 0) {
+						printf("PUSHS TF@retval%%\n");
+					}
 				} else {
 
 					printf("PUSHS LF@%s\n", items->nodes[i]->token->s);
@@ -257,6 +340,30 @@ void expression(ast_node_exp_t *exp) {
 					printf("DIVS\n");
 				}
 				break;
+			case compare_equal:
+				printf("EQS\n");
+				printf("PUSHS bool@true\n");
+				break;
+			case nequal:
+				printf("EQS\n");
+				printf("PUSHS bool@true\n");
+				break;
+			case less:
+				printf("LTS\n");
+				printf("PUSHS bool@true\n");
+				break;
+			case more:
+				printf("GTS\n");
+				printf("PUSHS bool@true\n");
+				break;
+			case lequal:
+				printf("GTS\n");
+				printf("PUSHS bool@true\n");
+				break;
+			case mequal:
+				printf("LTS\n");
+				printf("PUSHS bool@true\n");
+				break;
 
 			default:
 				break;
@@ -267,52 +374,58 @@ void expression(ast_node_exp_t *exp) {
 }
 
 void whileLoop(ast_node_while_t *loop) {
+	/*for(unsigned int i = 0; i < loop->blockCount; i++) {
+		if(loop->block[i]->type == AST_NODE_VAR_DEF) {
+			variableDefinition(loop->block[i]->data_t.varDef);
+		}
+	}*/
+	if(loop->noNullPayload == NULL){
+		unsigned int internalLabelCounter = labelCounter;
+		labelCounter++;
 
+		printf("LABEL WHILE%d\n", internalLabelCounter);
+		expression(loop->conditionExp);
 
-	unsigned int internalLabelCounter = labelCounter;
-	labelCounter++;
-
-	printf("LABEL WHILE%d\n", internalLabelCounter);
-	expression(loop->conditionExp->data_t.binary_op.left);
-	expression(loop->conditionExp->data_t.binary_op.right);
-
-	switch (loop->conditionExp->token->kw) {
-		case compare_equal:
-			printf("EQS\n");
-			printf("PUSHS bool@true\n");
-			printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
-			break;
-		case nequal:
-			printf("EQS\n");
-			printf("PUSHS bool@true\n");
-			printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
-			break;
-		case less:
-			printf("LTS\n");
-			printf("PUSHS bool@true\n");
-			printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
-			break;
-		case more:
-			printf("GTS\n");
-			printf("PUSHS bool@true\n");
-			printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
-			break;
-		case lequal:
-			printf("GTS\n");
-			printf("PUSHS bool@true\n");
-			printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
-			break;
-		case mequal:
-			printf("LTS\n");
-			printf("PUSHS bool@true\n");
-			printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
-			break;
-		default:
-			break;
+		switch (loop->conditionExp->token->kw) {
+			case compare_equal:
+				printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
+				break;
+			case nequal:
+				printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
+				break;
+			case less:
+				printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
+				break;
+			case more:
+				printf("JUMPIFNEQS WHILEEND%d\n", internalLabelCounter);
+				break;
+			case lequal:
+				printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
+				break;
+			case mequal:
+				printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
+				break;
+			default:
+				break;
+		}
+		codebody(loop->block, loop->blockCount);
+		printf("JUMP WHILE%d\n", internalLabelCounter);
+		printf("LABEL WHILEEND%d\n", internalLabelCounter);
+	} else {
+		unsigned int internalLabelCounter = labelCounter;
+		labelCounter++;
+		printf("LABEL WHILE%d\n", internalLabelCounter);
+		expression(loop->conditionExp);
+		printf("PUSHS nil@nil\n");
+		printf("EQS\n");
+		printf("PUSHS bool@true\n");
+		printf("JUMPIFEQS WHILEEND%d\n", internalLabelCounter);
+		//printf("DEFVAR LF@%s\n", loop->noNullPayload->key);
+		printf("MOVE LF@%s LF@%s\n", loop->noNullPayload->key, loop->conditionExp->token->s);
+		codebody(loop->block, loop->blockCount);
+		printf("JUMP WHILE%d\n", internalLabelCounter);
+		printf("LABEL WHILEEND%d\n", internalLabelCounter);
 	}
-	codebody(loop->block, loop->blockCount);
-	printf("JUMP WHILE%d\n", internalLabelCounter);
-	printf("LABEL WHILEEND%d\n", internalLabelCounter);
 }
 
 void ifElse(ast_node_if_else_t *ifelse) {
@@ -320,37 +433,24 @@ void ifElse(ast_node_if_else_t *ifelse) {
 		unsigned int internalLabelCounter = labelCounter;
 		labelCounter++;
 		printf("LABEL IF%d\n", internalLabelCounter);
-		expression(ifelse->conditionExp->data_t.binary_op.left);
-		expression(ifelse->conditionExp->data_t.binary_op.right);
+		expression(ifelse->conditionExp);
 		switch (ifelse->conditionExp->token->kw) {
 			case compare_equal:
-				printf("EQS\n");
-				printf("PUSHS bool@true\n");
 				printf("JUMPIFNEQS ELSE%d\n", internalLabelCounter);
 				break;
 			case nequal:
-				printf("EQS\n");
-				printf("PUSHS bool@true\n");
 				printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
 				break;
 			case less:
-				printf("LTS\n");
-				printf("PUSHS bool@true\n");
 				printf("JUMPIFNEQS ELSE%d\n", internalLabelCounter);
 				break;
 			case more:
-				printf("GTS\n");
-				printf("PUSHS bool@true\n");
 				printf("JUMPIFNEQS ELSE%d\n", internalLabelCounter);
 				break;
 			case lequal:
-				printf("GTS\n");
-				printf("PUSHS bool@true\n");
 				printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
 				break;
 			case mequal:
-				printf("LTS\n");
-				printf("PUSHS bool@true\n");
 				printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
 				break;
 			default:
@@ -368,8 +468,10 @@ void ifElse(ast_node_if_else_t *ifelse) {
 		expression(ifelse->conditionExp);
 		printf("PUSHS nil@nil\n");
 		printf("EQS\n");
+		printf("PUSHS bool@true\n");
 		printf("JUMPIFEQS ELSE%d\n", internalLabelCounter);
-		printf("DEFVAR LF@%s\n", ifelse->noNullPayload->key);
+		//printf("BREAK\n");
+		//printf("DEFVAR LF@%s\n", ifelse->noNullPayload->key);
 		printf("MOVE LF@%s LF@%s\n", ifelse->noNullPayload->key, ifelse->conditionExp->token->s);
 		codebody(ifelse->ifBlock, ifelse->ifCount);
 		printf("JUMP IFEND%d\n", internalLabelCounter);
@@ -417,6 +519,7 @@ void codebody(ast_default_node_t **nodes, unsigned int nodeCount) {
 }
 
 void printHeader() {
+	//vars = bst_init_vars();
 	printf(".IFJcode24\n");
 	printf("JUMP main\n");
 	printf("DEFVAR GF@_%%\n");
@@ -425,51 +528,51 @@ void printHeader() {
         LABEL ifjreadi32\n\
             CREATEFRAME\n\
             PUSHFRAME\n\
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@readValue%%\n\
             DEFVAR LF@readValueType%%\n\
             READ LF@readValue%% int\n\
             TYPE LF@readValueType%% LF@readValue%%\n\
             JUMPIFNEQ correct_input_int LF@readValueType%% nil@nil\n\
-            MOVE LF@retVal%% nil@nil\n\
+            MOVE LF@retval%% nil@nil\n\
             POPFRAME\n\
             RETURN\n\
             LABEL correct_input_int\n\
-            MOVE LF@retVal%% LF@readValue%%\n\
+            MOVE LF@retval%% LF@readValue%%\n\
             POPFRAME\n\
         RETURN\n\
         \
         LABEL ifjreadf64\n\
             CREATEFRAME\n\
             PUSHFRAME\n\
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@readValue%%\n\
             DEFVAR LF@readValueType%%\n\
             READ LF@readValue%% float\n\
             TYPE LF@readValueType%% LF@readValue%%\n\
             JUMPIFNEQ correct_input_float LF@readValueType%% nil@nil\n\
-            MOVE LF@retVal%% nil@nil\n\
+            MOVE LF@retval%% nil@nil\n\
             POPFRAME\n\
             RETURN\n\
             LABEL correct_input_float\n\
-            MOVE LF@retVal%% LF@readValue%%\n\
+            MOVE LF@retval%% LF@readValue%%\n\
             POPFRAME\n\
         RETURN\n\
         \
         LABEL ifjreadstr\n\
             CREATEFRAME\n\
             PUSHFRAME\n\
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@readValue%%\n\
             DEFVAR LF@readValueType%%\n\
             READ LF@readValue%% string\n\
             TYPE LF@readValueType%% LF@readValue%%\n\
             JUMPIFNEQ correct_input_string LF@readValueType%% nil@nil\n\
-            MOVE LF@retVal%% nil@nil\n\
+            MOVE LF@retval%% nil@nil\n\
             POPFRAME\n\
             RETURN\n\
             LABEL correct_input_string\n\
-            MOVE LF@retVal%% LF@readValue%%\n\
+            MOVE LF@retval%% LF@readValue%%\n\
             POPFRAME\n\
         RETURN\n\
         \
@@ -477,10 +580,10 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@param%%\n\
             POPS LF@param%%\n\
-            INT2FLOAT LF@retVal%% LF@param%%\n\
+            INT2FLOAT LF@retval%% LF@param%%\n\
             \
             POPFRAME\n\
         RETURN\n\
@@ -489,10 +592,10 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@param%%\n\
             POPS LF@param%%\n\
-            FLOAT2INT LF@retVal%% LF@param%%\n\
+            FLOAT2INT LF@retval%% LF@param%%\n\
             \
             POPFRAME\n\
         RETURN\n\
@@ -501,10 +604,10 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@param%%\n\
             POPS LF@param%%\n\
-            STRLEN LF@retVal%% LF@param%%\n\
+            STRLEN LF@retval%% LF@param%%\n\
             \
             POPFRAME\n\
         RETURN\n\
@@ -513,12 +616,12 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@param1%%\n\
             DEFVAR LF@param2%%\n\
             POPS LF@param2%%\n\
             POPS LF@param1%%\n\
-            CONCAT LF@retVal%% LF@param1%% LF@param2%%\n\
+            CONCAT LF@retval%% LF@param1%% LF@param2%%\n\
             \
             POPFRAME\n\
         RETURN\n\
@@ -527,8 +630,8 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
-            MOVE LF@retVal%% string@\n\
+            DEFVAR LF@retval%%\n\
+            MOVE LF@retval%% string@\n\
             DEFVAR LF@string%%\n\
             DEFVAR LF@startIndex%%\n\
             DEFVAR LF@endIndex%%\n\
@@ -554,12 +657,12 @@ void printHeader() {
             LABEL substrWhileCycle\n\
             JUMPIFEQ substrCheckPassed LF@substrCounter%% int@0\n\
             GETCHAR LF@substrChar%% LF@string%% LF@startIndex%%\n\
-            CONCAT LF@retVal%% LF@retVal%% LF@substrChar%%\n\
+            CONCAT LF@retval%% LF@retval%% LF@substrChar%%\n\
             ADD LF@startIndex%% LF@startIndex%% int@1\n\
             SUB LF@substrCounter%% LF@substrCounter%% int@1\n\
             JUMP substrWhileCycle\n\
             LABEL substrCheckFailed\n\
-            MOVE LF@retVal%% nil@nil\n\
+            MOVE LF@retval%% nil@nil\n\
             LABEL substrCheckPassed\n\
             POPFRAME\n\
         RETURN\n\
@@ -568,13 +671,17 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@str1Length%%\n\
             DEFVAR LF@str2Length%%\n\
             DEFVAR LF@usedLength%%\n\
             DEFVAR LF@string1%%\n\
             DEFVAR LF@string2%%\n\
             DEFVAR LF@strcmpInfo%% ## 0 - equal, 1 - str1 > str2, 2 - str1 < str2\n\
+			DEFVAR LF@strcmpChar1%%\n\
+            DEFVAR LF@strcmpChar2%%\n\
+            DEFVAR LF@strcmpIndex%%\n\
+            MOVE LF@strcmpIndex%% int@0\n\
             \
             POPS LF@string2%%\n\
             POPS LF@string1%%\n\
@@ -599,15 +706,11 @@ void printHeader() {
             MOVE LF@strcmpInfo%% int@0\n\
             \
             LABEL strcmpCycle\n\
-            DEFVAR LF@strcmpChar1%%\n\
-            DEFVAR LF@strcmpChar2%%\n\
-            DEFVAR LF@strcmpIndex%%\n\
-            MOVE LF@strcmpIndex%% int@0\n\
+			\
             \
             JUMPIFEQ strcmpEnd LF@usedLength%% int@0\n\
             STRI2INT LF@strcmpChar1%% LF@string1%% LF@strcmpIndex%%\n\
             STRI2INT LF@strcmpChar2%% LF@string2%% LF@strcmpIndex%%\n\
-            DPRINT LF@strcmpIndex%%\n\
             EQ LF@strcmpBool%% LF@strcmpChar1%% LF@strcmpChar2%%\n\
             JUMPIFEQ strcmpCycleDiff LF@strcmpBool%% bool@false\n\
             ADD LF@strcmpIndex%% LF@strcmpIndex%% int@1\n\
@@ -617,17 +720,17 @@ void printHeader() {
             LABEL strcmpCycleDiff\n\
             LT LF@strcmpBool%% LF@strcmpChar1%% LF@strcmpChar2%%\n\
             JUMPIFEQ strcmpString1Less LF@strcmpBool%% bool@true\n\
-            MOVE LF@retVal%% int@1\n\
+            MOVE LF@retval%% int@1\n\
             POPFRAME\n\
             RETURN\n\
             \
             LABEL strcmpString1Less\n\
-            MOVE LF@retVal%% int@-1\n\
+            MOVE LF@retval%% int@-1\n\
             POPFRAME\n\
             RETURN\n\
             \
             LABEL strcmpEnd\n\
-            MOVE LF@retVal%% LF@strcmpInfo%%\n\
+            MOVE LF@retval%% LF@strcmpInfo%%\n\
             POPFRAME\n\
         RETURN\n\
         \
@@ -635,7 +738,7 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@string%%\n\
             DEFVAR LF@index%%\n\
             DEFVAR LF@strLen%%\n\
@@ -652,12 +755,12 @@ void printHeader() {
             LT LF@indexCheck%% LF@index%% int@0\n\
             JUMPIFEQ ordCheckFailed LF@indexCheck%% bool@true\n\
             \
-            STRI2INT LF@retVal%% LF@string%% LF@index%%\n\
+            STRI2INT LF@retval%% LF@string%% LF@index%%\n\
             POPFRAME\n\
             RETURN\n\
             \
             LABEL ordCheckFailed\n\
-            MOVE LF@retVal%% int@0\n\
+            MOVE LF@retval%% int@0\n\
             POPFRAME\n\
         RETURN\n\
         \
@@ -665,10 +768,10 @@ void printHeader() {
             CREATEFRAME\n\
             PUSHFRAME\n\
             \
-            DEFVAR LF@retVal%%\n\
+            DEFVAR LF@retval%%\n\
             DEFVAR LF@char%%\n\
             POPS LF@char%%\n\
-            INT2CHAR LF@retVal%% LF@char%%\n\
+            INT2CHAR LF@retval%% LF@char%%\n\
             \
             POPFRAME\n\
         RETURN\n\
