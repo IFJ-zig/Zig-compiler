@@ -34,7 +34,7 @@ In root run
 ```bash
 cd ./tests
 git clone https://github.com/jansko03/IFJ24-tests.git
-chmod +x ./IFJ-tests/test.sh
+chmod +x ./IFJ24-tests/test.sh
 cd ..
 ```
 
