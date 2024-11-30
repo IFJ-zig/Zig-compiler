@@ -474,7 +474,6 @@ int function_analysis() {
 		}
 	}
 
-
 	// TODO: SEMANTHIC CHECKS FOR RETURN STATEMENT
 	exitScope();
 	return 0;
@@ -658,7 +657,6 @@ int empty_variable() {
 
 int if_else() {
 	int statusCode;
-	enterScope();
 	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
 	ast_insert(astRoot->activeNode, ifElseNode);
 	statusCode = expressionParser(false, &ifElseNode->data_t.ifElse->conditionExp);
@@ -728,7 +726,8 @@ int if_else() {
 			return statusCode;
 		}
 	}
-	exitScope(); //Exit the scope of the if statement has to be here since we can't have the unwrapped value reach the else block
+	if(ifElseNode->data_t.ifElse->noNullPayload != NULL)
+		undefineSymbol((char *)ifElseNode->data_t.ifElse->noNullPayload->key);
 	statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -737,7 +736,6 @@ int if_else() {
 		fprintf(stderr, "Error: Expected 'else' after if block\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	enterScope();
 	statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -761,7 +759,6 @@ int if_else() {
 			return statusCode;
 		}
 	}
-	exitScope();
 
 	return 0;
 }
@@ -1005,7 +1002,6 @@ int parse_params(ast_default_node_t *fnCallNode) {
 
 int while_syntax() {
 	int statusCode;
-	enterScope();
 	ast_default_node_t *whileNode = ast_createWhileNode(NULL);
 	ast_insert(astRoot->activeNode, whileNode);
 	statusCode = expressionParser(false, &whileNode->data_t.While->conditionExp);
@@ -1072,6 +1068,5 @@ int while_syntax() {
 			return statusCode;
 		}
 	}
-	exitScope();
 	return 0;
 }

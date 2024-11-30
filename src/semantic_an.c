@@ -55,6 +55,11 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 	return 0;
 }
 
+void undefineSymbol(char *name) {
+	htab_undefine(list->last, name);
+}
+
+
 symbol_t *getSymbol(char *name) {
 	if(name == NULL){
 		fprintf(stderr, "Error getSymbol: Symbol name is NULL\n");

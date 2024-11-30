@@ -85,6 +85,7 @@ htab_t *htab_init(int depth); // konstruktor tabulky
 
 symbol_t *htab_find(const htab_t *t, htab_key_t key); // hledání
 symbol_t *htab_define(htab_t *t, htab_key_t key);
+void htab_undefine(htab_t *t, htab_key_t key); // ruší záznam
 
 void htab_clear(htab_t *t); // ruší všechny záznamy
 void htab_free(htab_t *t);  // destruktor tabulky
