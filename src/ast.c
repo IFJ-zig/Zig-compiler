@@ -196,18 +196,13 @@ void ast_destroyExp(ast_node_exp_t *expNode) {
 }
 
 void ast_destroy(ast_default_node_t *astRoot){
-	if(astRoot == NULL) {
-		fprintf(stderr, "AST IS NULL!\n");
-	}
 	if (astRoot->type == AST_NODE_DEFAULT) {
-		fprintf(stderr, "Destroying default node\n");
 		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
 			ast_destroy(astRoot->data_t.body_t.nodes[i]);
 		}
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_FN_DEF) {
-		fprintf(stderr, "Destroying function definition node\n");
 		for (unsigned int i = 0; i < astRoot->data_t.fnDef->bodyCount; i++) {
 			ast_destroy(astRoot->data_t.fnDef->body[i]);
 		}
@@ -218,7 +213,6 @@ void ast_destroy(ast_default_node_t *astRoot){
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_FN_CALL) {
-		fprintf(stderr, "Destroying function call node\n");
 		for(unsigned int i = 0; i < astRoot->data_t.fnCall->argCount; i++){
 			ast_destroyExp(astRoot->data_t.fnCall->args[i]);
 		}
@@ -229,7 +223,6 @@ void ast_destroy(ast_default_node_t *astRoot){
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_FN_RETURN) {
-		fprintf(stderr, "Destroying function return node\n");
 		if(astRoot->data_t.fnReturn->expression != NULL) {
 			ast_destroyExp(astRoot->data_t.fnReturn->expression);
 		}
@@ -237,12 +230,10 @@ void ast_destroy(ast_default_node_t *astRoot){
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_EXP) {
-		fprintf(stderr, "Destroying expression node\n");
 		ast_destroyExp(astRoot->data_t.exp);
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_VAR_DEF) {
-		fprintf(stderr, "Destroying variable definition node\n");
 		free((char *)astRoot->data_t.varDef->symbol->key);
 		free(astRoot->data_t.varDef->symbol);
 		if(astRoot->data_t.varDef->assignment != NULL) {
@@ -257,7 +248,6 @@ void ast_destroy(ast_default_node_t *astRoot){
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_VAR_ASSIGN) {
-		fprintf(stderr, "Destroying variable assignment node\n");
 		if(astRoot->data_t.varAssign->expression != NULL) {
 			ast_destroyExp(astRoot->data_t.varAssign->expression);
 		}
@@ -267,7 +257,6 @@ void ast_destroy(ast_default_node_t *astRoot){
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_IF_ELSE) {
-		fprintf(stderr, "Destroying if-else node\n");
 		if(astRoot->data_t.ifElse->ifCount != 0){
 			for (unsigned int i = 0; i < astRoot->data_t.ifElse->ifCount; i++) {
 				ast_destroy(astRoot->data_t.ifElse->ifBlock[i]);
@@ -289,7 +278,6 @@ void ast_destroy(ast_default_node_t *astRoot){
 		free(astRoot);
 	} 
 	else if (astRoot->type == AST_NODE_WHILE) {
-		fprintf(stderr, "Destroying while node\n");
 		for (unsigned int i = 0; i < astRoot->data_t.While->blockCount; i++) {
 			ast_destroy(astRoot->data_t.While->block[i]);
 		}

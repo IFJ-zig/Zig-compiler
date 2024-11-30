@@ -48,7 +48,6 @@ int syntax_analyzer() {
 	if (statusCode != 0)
 		return statusCode;
 	ast_destroy(astRoot);
-	free(astRoot);
 	return 0;
 };
 
