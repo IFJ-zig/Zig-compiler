@@ -10,7 +10,7 @@
 int main() {
 	//TODO další kontroly a generace kodu
 
-	int err = syntax_analyzer();
+	int err = syntax_analyzer();printf("\n\n%d\n\n",err);
 
 	if (err) {
 		return err;
