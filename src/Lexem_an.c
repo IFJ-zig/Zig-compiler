@@ -272,26 +272,14 @@ Token get_token() {
 									break;
 								case 'x':
 									//hexadecimální
-									if (getchar() == '{') {
+									let[0] = getchar();
+									let[1] = getchar();
+									let[2] = '\0';
+									if (((let[0] >= '0' && let[0] <= '9') || (let[0] >= 'a' && let[0] <= 'f') || (let[0] >= 'A' && let[0] <= 'F')) && ((let[1] >= '0' && let[1] <= '9') || (let[1] >= 'a' && let[1] <= 'f') || (let[1] >= 'A' && let[1] <= 'F'))) {
+										sscanf(let, "%X", &y);
+										letter = y;
+										strncat(lexem, &letter, 1);
 										letter = getchar();
-										for (int i = 0; i < 8 && letter != '}'; i++) {
-											let[0] = let[1];
-											let[1] = letter;
-											letter = getchar();
-										}
-										let[2] = '\0';
-										if (((let[0] >= '0' && let[0] <= '9') || (let[0] >= 'a' && let[0] <= 'f') || (let[0] >= 'A' && let[0] <= 'F')) && ((let[1] >= '0' && let[1] <= '9') || (let[1] >= 'a' && let[1] <= 'f') || (let[1] >= 'A' && let[1] <= 'F'))) {
-											sscanf(let, "%X", &y);
-											letter = y;
-											strncat(lexem, &letter, 1);
-											letter = getchar();
-										} else {
-											//chyba lexemu
-											new.kw = LEXEM;
-											new.i = LEXEM_ERROR;
-											free(lexem);
-											return new;
-										}
 									} else {
 										//chyba lexemu
 										new.kw = LEXEM;
@@ -312,10 +300,23 @@ Token get_token() {
 							letter = getchar();
 						}
 					}
+					//check if size sufficient
+					if (strlen(lexem) >= (lex_size - 1)) {
+						lex_size *= 2;
+						p = realloc(lexem, sizeof(char) * lex_size);
+						if (p == NULL) {
+							free(lexem);
+							new.kw = INTERNAL;
+							new.i = INTERNAL_COMPILER_ERROR;
+							return new;
+						} else {
+							lexem = p;
+						}
+					}
 					strncat(lexem, "\n\n", 1);
 					letter = getchar();
 					//přeskočí bílé znaky na novém řádku
-					while (letter == ' ' || letter == '\t') {
+					while (letter == ' ' || letter == '\t' || letter == '\n' || letter == '\r') {
 						letter = getchar();
 					}
 				} while (letter == '\\');
