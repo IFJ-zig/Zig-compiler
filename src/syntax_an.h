@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #include "ast.h"
+#include "codegen.h"
 #include "errors_enum.h"
 #include "expression_parser.h"
 #include "semantic_an.h"

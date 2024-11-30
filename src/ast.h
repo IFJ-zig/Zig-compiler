@@ -136,7 +136,6 @@ typedef struct ast_default_node
 } ast_default_node_t;
 
 
-
 void ast_init(ast_default_node_t *astRoot);
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node);
 

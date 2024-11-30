@@ -47,7 +47,9 @@ int syntax_analyzer() {
 	statusCode = program();
 	if (statusCode != 0)
 		return statusCode;
-	ast_destroy(astRoot);
+	printHeader();
+	codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
+  ast_destroy(astRoot);
 	return 0;
 };
 
@@ -297,7 +299,11 @@ int checkImport() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	if (token.kw != text && strcmp(token.s, "ifj24.zig")) {
+	if (token.kw != text) {
+		fprintf(stderr, "Error: Expected name of the package\n");
+		return SYNTACTIC_ANALYSIS_ERROR;
+	}
+	if (strcmp(token.s, "ifj24.zig")) {
 		fprintf(stderr, "Error: Expected 'ifj24.zig' as name of the package\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
@@ -671,7 +677,7 @@ int if_else() {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false); //Unwrapped value (payload)
 		ifElseNode->data_t.ifElse->noNullPayload = malloc(sizeof(symbol_t));
 		if (ifElseNode->data_t.ifElse->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
@@ -1016,7 +1022,7 @@ int while_syntax() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false); //Unwrapped value (payload)
 		whileNode->data_t.While->noNullPayload = malloc(sizeof(symbol_t));
 		if (whileNode->data_t.While->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
@@ -1025,7 +1031,7 @@ int while_syntax() {
 		symbol_t *noNullPayload = getSymbol(token.s);
 		*whileNode->data_t.While->noNullPayload = *noNullPayload;
 		whileNode->data_t.While->noNullPayload->key = malloc(strlen(noNullPayload->key) + 1);
-		if(whileNode->data_t.While->noNullPayload->key == NULL){
+		if (whileNode->data_t.While->noNullPayload->key == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
 			return INTERNAL_COMPILER_ERROR;
 		}
