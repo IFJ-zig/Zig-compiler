@@ -1,4 +1,8 @@
 #include "ast.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef CODEGEN
 #define CODEGEN 1
@@ -17,6 +21,7 @@ typedef struct bst_vars
 	int size;               // aktuální velikost pole v počtu položek
 } bst_vars_t;
 
+void defAllVars(ast_default_node_t **nodes, unsigned int nodeCount); //
 void printHeader();
 void write(Token *token);
 void variableDefinition(ast_node_var_def_t *var);

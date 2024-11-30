@@ -1,17 +1,29 @@
+/*
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains functions used to generate IFJcode24
+ *  @file codegen.c
+ *  @author Daniel Bohata, xbohatd00
+ *  @brief Code generation for IFJcode24
+ * 
+*/
+
 #include "codegen.h"
 
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "ast.h"
-
+// Global variable used to differentiate between different while cycles and ifElses
 unsigned int labelCounter = 0;
-//unsigned int ifCounter = 0;
+
+// Global variable used for pointing to the current function's list of already defined variables
 bst_vars_t *vars = NULL;
 
+/*
+ * 	Defines all variables inside a body of code, going into depth
+ *	@brief Defines all variables in a body of code
+ *	@param nodes Body of code to analyse
+ *	@param nodeCount Number of nodes to analyse
+*/
 void defAllVars(ast_default_node_t **nodes, unsigned int nodeCount) {
+
 	for (unsigned int i = 0; i < nodeCount; i++) {
 		if (nodes[i]->type == AST_NODE_VAR_DEF) {
 			ast_node_var_def_t *var = nodes[i]->data_t.varDef;
@@ -518,8 +530,11 @@ void codebody(ast_default_node_t **nodes, unsigned int nodeCount) {
 	}
 }
 
+/*
+*
+*
+*/
 void printHeader() {
-	//vars = bst_init_vars();
 	printf(".IFJcode24\n");
 	printf("JUMP main\n");
 	printf("DEFVAR GF@_%%\n");
