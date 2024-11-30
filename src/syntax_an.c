@@ -49,6 +49,7 @@ int syntax_analyzer() {
 		return statusCode;
 	printHeader();
 	codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
+  ast_destroy(astRoot);
 	return 0;
 };
 
