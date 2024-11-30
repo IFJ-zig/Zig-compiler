@@ -672,7 +672,7 @@ int if_else() {
 			fprintf(stderr, "Error: Expected ID after unwrapped value\n");
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false); //Unwrapped value (payload)
 		ifElseNode->data_t.ifElse->noNullPayload = malloc(sizeof(symbol_t));
 		if (ifElseNode->data_t.ifElse->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
@@ -1017,7 +1017,7 @@ int while_syntax() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false);	//Unwrapped value (payload)
+		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false); //Unwrapped value (payload)
 		whileNode->data_t.While->noNullPayload = malloc(sizeof(symbol_t));
 		if (whileNode->data_t.While->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
@@ -1026,7 +1026,7 @@ int while_syntax() {
 		symbol_t *noNullPayload = getSymbol(token.s);
 		*whileNode->data_t.While->noNullPayload = *noNullPayload;
 		whileNode->data_t.While->noNullPayload->key = malloc(strlen(noNullPayload->key) + 1);
-		if(whileNode->data_t.While->noNullPayload->key == NULL){
+		if (whileNode->data_t.While->noNullPayload->key == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
 			return INTERNAL_COMPILER_ERROR;
 		}

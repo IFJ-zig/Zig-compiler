@@ -9,12 +9,12 @@
 #include <stdbool.h>
 
 #include "ast.h"
+#include "codegen.h"
 #include "errors_enum.h"
 #include "expression_parser.h"
 #include "semantic_an.h"
 #include "symtable.h" //For varType
 #include "tokens.h"
-#include "codegen.h"
 
 int syntax_analyzer(/*List *L*/);
 int code();
