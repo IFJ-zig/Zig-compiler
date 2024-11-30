@@ -257,6 +257,7 @@ Token get_token() {
 						letter = getchar();
 					}
 				} while (letter == '\\');
+				lexem[strlen(lexem)-1]='\0';
 				p = malloc(sizeof(char) * (strlen(lexem) + 1));
 				if (p == NULL) {
 					free(lexem);
@@ -265,7 +266,7 @@ Token get_token() {
 					return new;
 				}
 				new.kw = text;
-				strcpy(p, lexem);
+				strcpy(p, lexem);puts(lexem);
 				new.s = p;
 				//printf("text_%s ", LGetStrAct(&new));
 				ungetc(letter, stdin);
