@@ -140,7 +140,6 @@ typedef struct ast_default_node
 void ast_init(ast_default_node_t *astRoot);
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node);
 
-ast_default_node_t *ast_createDefaultNode(ast_node_type type);
 ast_default_node_t *ast_createFnDefNode(symbol_t *fnSymbol);
 ast_default_node_t *ast_createFnCallNode(symbol_t *fnSymbol);
 ast_default_node_t *ast_createFnReturnNode(Token *token, varType returnType, ast_node_exp_t *expression);
@@ -153,6 +152,7 @@ ast_default_node_t *ast_createWhileNode(ast_node_exp_t *conditionExp);
 void printIndent(int depth);
 void ast_print(ast_default_node_t *astRoot, int depth);
 void ast_printExp(ast_node_exp_t *expNode, int indent);
+void ast_destroy(ast_default_node_t *astRoot);
 
 void ast_insertParam(ast_default_node_t *astRoot, ast_node_exp_t *expNode);
 
