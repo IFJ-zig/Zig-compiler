@@ -24,50 +24,65 @@ bst_vars_t *vars = NULL;
 */
 void defAllVars(ast_default_node_t **nodes, unsigned int nodeCount) {
 
+	// Checks for all nodes that could have a variable definition in them and defines those variables, adds them to the list
 	for (unsigned int i = 0; i < nodeCount; i++) {
+
 		if (nodes[i]->type == AST_NODE_VAR_DEF) {
+
 			ast_node_var_def_t *var = nodes[i]->data_t.varDef;
 			bool foundVar = false;
 			for (int x = 0; x < vars->size; x++) {
+
 				if (strcmp(vars->nodes[x], var->symbol->key) == 0) {
 					foundVar = true;
 				}
 			}
+
 			if (!foundVar) {
+
 				bst_add_var_to_items((char *)var->symbol->key, vars);
 				printf("DEFVAR LF@%s\n", var->symbol->key);
 			}
-			//variableDefinition(nodes[i]->data_t.varDef);
 		} else if (nodes[i]->type == AST_NODE_IF_ELSE) {
+
 			if(nodes[i]->data_t.ifElse->noNullPayload != NULL) {
+
 				bool foundVar = false;
 				for (int x = 0; x < vars->size; x++) {
+
 					if (strcmp(vars->nodes[x], nodes[i]->data_t.ifElse->noNullPayload->key) == 0) {
 						foundVar = true;
 					}
-					//printf("YOLO\n");
 				}
+
 				if (!foundVar) {
+
 					bst_add_var_to_items((char *)nodes[i]->data_t.ifElse->noNullPayload->key, vars);
 					printf("DEFVAR LF@%s\n", nodes[i]->data_t.ifElse->noNullPayload->key);
 				}
 			}
+
 			defAllVars(nodes[i]->data_t.ifElse->ifBlock, nodes[i]->data_t.ifElse->ifCount);
 			defAllVars(nodes[i]->data_t.ifElse->elseBlock, nodes[i]->data_t.ifElse->elseCount);
 		} else if (nodes[i]->type == AST_NODE_WHILE) {
+
 			if(nodes[i]->data_t.While->noNullPayload != NULL) {
+
 				bool foundVar = false;
 				for (int x = 0; x < vars->size; x++) {
+
 					if (strcmp(vars->nodes[x], nodes[i]->data_t.While->noNullPayload->key) == 0) {
 						foundVar = true;
 					}
-					//printf("YOLO\n");
 				}
+
 				if (!foundVar) {
+
 					bst_add_var_to_items((char *)nodes[i]->data_t.While->noNullPayload->key, vars);
 					printf("DEFVAR LF@%s\n", nodes[i]->data_t.While->noNullPayload->key);
 				}
 			}
+			
 			defAllVars(nodes[i]->data_t.While->block, nodes[i]->data_t.While->blockCount);
 		}
 	}
