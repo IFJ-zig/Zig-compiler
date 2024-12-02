@@ -354,44 +354,53 @@ void loadIFJ24() {
 	fnSymbol = getSymbol("ifj.write");
 	assignFunctionParameter(fnSymbol, (Token){.s = "value", .kw = id}, (Token){.kw = dtflt}, false);
 	fnSymbol->params[0]->type = ANYTYPE; //Anytype is allowed, we don't have a keyword for that however, so a little hack because, because this is happens only once in the entire program
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.readstr", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readstr");
 	fnSymbol->returnType = STRING;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.readi32", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readi32");
 	fnSymbol->returnType = INT;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.readf64", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readf64");
 	fnSymbol->returnType = FLOAT;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.string", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.string");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.concat", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.concat");
 	assignFunctionParameter(fnSymbol, (Token){.s = "str1", .kw = id}, (Token){.kw = dtstr}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "str2", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.length", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.length");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = INT;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.i2f", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.i2f");
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = FLOAT;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.f2i", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.f2i");
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtflt}, false);
 	fnSymbol->returnType = INT;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.substring", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.substring");
@@ -399,23 +408,27 @@ void loadIFJ24() {
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "j", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = STRING;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.ord", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.ord");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = INT;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.chr", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.chr");
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = STRING;
+	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.strcmp", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.strcmp");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s1", .kw = id}, (Token){.kw = dtstr}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "s2", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = INT;
+	fprintf(stderr, "\n");
 	fprintf(stderr, "Done loading IFJ24 functions\n\n");
 }
 
@@ -722,10 +735,12 @@ int if_else() {
 	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
 	ast_insert(astRoot->activeNode, ifElseNode);
 	statusCode = expressionParser(false, &ifElseNode->data_t.ifElse->conditionExp);
-	if (statusCode != 0) {
+	if (statusCode != 0)
 		return statusCode;
-	}
-	ast_printExp(ifElseNode->data_t.ifElse->conditionExp, 0);
+	
+	fprintf(stderr, "    ---------- START PRINT IF CONDITION ----------\n");
+	ast_printExp(ifElseNode->data_t.ifElse->conditionExp, 1);
+	fprintf(stderr, "    ----------- END PRINT IF CONDITION -----------\n\n");
 	statusCode = isValidIfExpression(ifElseNode->data_t.ifElse->conditionExp);
 	if (statusCode != 0) {
 		fprintf(stderr, "Error: Invalid if condition\n");
@@ -920,10 +935,10 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	bool typeDefined = false;
+	bool explicitTypeDefinition = false;
 	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
-		typeDefined = true;
+		explicitTypeDefinition = true;
 		isDefined = true;
 		statusCode = data_type(isNullable);
 		if (statusCode != 0)
@@ -967,7 +982,7 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Incompatible types in expression\n");
 		return statusCode;
 	}
-	if(nullKWInExpr(varAssignNode->expression) && !typeDefined){
+	if(nullKWInExpr(varAssignNode->expression) && !explicitTypeDefinition){
 		fprintf(stderr, "Error: Cannot define symbol %s with null\n", varID.s);
 		return TYPE_INFERENCE_ERROR;
 	}
@@ -1159,6 +1174,15 @@ int while_syntax() {
 
 	if (statusCode != 0)
 		return statusCode;
+
+	fprintf(stderr, "    -------- START PRINT WHILE CONDITION ---------\n");
+	ast_printExp(whileNode->data_t.While->conditionExp, 1);
+	fprintf(stderr, "    --------- END PRINT WHILE CONDITION ----------\n\n");
+	statusCode = isValidIfExpression(whileNode->data_t.While->conditionExp);
+	if (statusCode != 0) {
+		fprintf(stderr, "Error: Invalid if condition\n");
+		return statusCode;
+	}
 	if (token.kw == vertical_bar) {
 		statusCode = read_token();
 		if (statusCode != 0) {
