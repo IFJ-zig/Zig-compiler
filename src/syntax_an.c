@@ -36,7 +36,7 @@ int syntax_analyzer() {
 		return INTERNAL_COMPILER_ERROR;
 	}
 	ast_init(astRoot);
-	statusCode = seekHeaders();
+	statusCode = headers();
 
 	if (statusCode != 0)
 		return statusCode;
@@ -53,7 +53,7 @@ int syntax_analyzer() {
 };
 
 
-int seekHeaders() {
+int headers() {
 	int statusCode = checkImport();
 	if (statusCode != 0)
 		return statusCode;
@@ -125,7 +125,7 @@ int seekHeaders() {
 					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				data_type(NULL);
+				data_type(NULL, false);
 
 				assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 				statusCode = read_token();
@@ -153,11 +153,7 @@ int seekHeaders() {
 			fprintf(stderr, "Error: Expected ')' after param list in function header, got %s\n", getTokenName(token));
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		statusCode = read_token();
-		if (statusCode != 0) {
-			return statusCode;
-		}
-		if (isValidReturnType(token.kw)) {
+		if (!data_type(NULL, true)) {
 			fnSymbol->returnType = kwToVarType(token.kw); //Save the return type of the function
 		} else {
 			fprintf(stderr, "Error: Invalid return type of function %s\n", fnSymbol->key);
@@ -429,9 +425,9 @@ int function_analysis() {
 
 	fprintf(stderr, "Analysis ID: %s\n", fnName);
 
-	//The function name should already be in the symtable at depth 0 since it was done in seekHeaders, lets just check if it's still there
+	//The function name should already be in the symtable at depth 0 since it was done in headers, lets just check if it's still there
 	if (getSymbol(fnName) == NULL) {
-		fprintf(stderr, "Error: Function %s is not defined, this function should've been defined in seekHeaders!\n", fnName);
+		fprintf(stderr, "Error: Function %s is not defined, this function should've been defined in headers!\n", fnName);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	} else {
 		fprintf(stderr, "Function %s successfully found in symtable, depth=%d, return type=%s\n", fnName, getSymbol(fnName)->depth, getSymbol(fnName)->returnType == INT ? "INT" : getSymbol(fnName)->returnType == FLOAT ? "FLOAT"
@@ -445,7 +441,7 @@ int function_analysis() {
 	if (statusCode != 0)
 		return statusCode;
 
-	statusCode = return_type(); //semantic done in seekHeaders
+	statusCode = return_type(); //semantic done in headers
 	if (statusCode != 0)
 		return statusCode;
 
@@ -516,7 +512,7 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = data_type(NULL);
+		statusCode = data_type(NULL, false);
 		if (statusCode != 0)
 			return statusCode;
 		processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
@@ -537,12 +533,17 @@ int param_list() {
 	return 0;
 }
 
-int data_type(bool *isNullable) {
+int data_type(bool *isNullable, bool canBeVoid) {
 	int statusCode = read_token();
 	if (statusCode != 0) {
 		free(token.s);
 		return statusCode;
 	}
+	printf("Data type: %d\n", token.kw);
+	if (canBeVoid && token.kw == dtvoid) {
+		return 0;
+	}
+	printf("Data type: %d\n", token.kw);
 	if (isNullable != NULL)
 		*isNullable = true;
 	if (token.kw == question_mark) {
@@ -574,19 +575,9 @@ int data_type(bool *isNullable) {
 	return 0;
 }
 
-bool isValidReturnType(KeyWord kw) {
-	if (!data_type(NULL) && kw != dtvoid)
-		return false;
-	return true;
-}
 
 int return_type() {
-	int statusCode = read_token();
-	if (statusCode != 0) {
-		free(token.s);
-		return statusCode;
-	}
-	if (!isValidReturnType(token.kw)) {
+	if (data_type(NULL, true)) {
 		fprintf(stderr, "Error: Expected return type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
@@ -627,7 +618,7 @@ int code() {
 				return statusCode;
 			break;
 		case inbuild:
-			statusCode = inbuild_function(true);
+			statusCode = library_function(true);
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -788,7 +779,7 @@ int return_syntax() {
 	return 0;
 }
 
-int inbuild_function(bool expectNext) {
+int library_function(bool expectNext) {
 	int statusCode;
 	statusCode = read_token();
 	if (statusCode != 0) {
@@ -847,7 +838,7 @@ int variable_definition(bool isConst) {
 	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
 		isDefined = true;
-		statusCode = data_type(isNullable);
+		statusCode = data_type(isNullable, false);
 		if (statusCode != 0)
 			return statusCode;
 		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
