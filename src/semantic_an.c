@@ -37,6 +37,10 @@ int exitScope() {
 				fprintf(stderr, "Error: Variable %s at depth %d is unused\n", itm->symbol.key, itm->symbol.depth);
 				return UNUSED_VARIABLE_ERROR;
 			}
+			if(itm->symbol.isChanged == false && itm->symbol.isConst == false){
+				fprintf(stderr, "Error: Variable %s at depth %d is unchanged\n", itm->symbol.key, itm->symbol.depth);
+				return UNUSED_VARIABLE_ERROR;
+			}
 			itm = itm->next;
 		}
 	}
@@ -57,6 +61,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 	symbol->isConst = isConst;
 	symbol->isNullable = isNullable;
 	symbol->isUsed = false;
+	symbol->isChanged = false;
 	symbol->paramCount = 0;
 	symbol->params = NULL;
 	symbol->depth = getCurrentDepth(list);
@@ -162,6 +167,27 @@ bool nullableInExpr(ast_node_exp_t *expression){
 		if(nullableInExpr(expression->data_t.binary_op.left))
 			return true;
 		if(nullableInExpr(expression->data_t.binary_op.right))
+			return true;
+	}
+	return false;
+}
+
+bool containsNonConst(ast_node_exp_t *expression){
+	if(expression->token->kw == id){
+		symbol_t *sym = getSymbol(expression->token->s);
+		if(sym == NULL){
+			fprintf(stderr, "Error: Variable %s has not been defined\n", expression->token->s);
+			return false;
+		}
+		if(!sym->isConst){
+			fprintf(stderr, "Variable %s is not const\n", sym->key);
+			return true;
+		}
+	}
+	if(expression->data_t.binary_op.left != NULL || expression->data_t.binary_op.right != NULL){
+		if(containsNonConst(expression->data_t.binary_op.left))
+			return true;
+		if(containsNonConst(expression->data_t.binary_op.right))
 			return true;
 	}
 	return false;

@@ -26,6 +26,7 @@ bool isValidParamType(KeyWord kw);
 int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);
 int checkExprTypesCompatibility(ast_node_exp_t *expression, varType *expType);
 bool nullableInExpr(ast_node_exp_t *expression);
+bool containsNonConst(ast_node_exp_t *expression);
 int isValidIfExpression(ast_node_exp_t *expression);
 
 int processParam(Token paramName, Token paramType, bool isNullable);

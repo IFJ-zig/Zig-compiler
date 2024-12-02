@@ -541,6 +541,8 @@ int param_list() {
 		statusCode = processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
 		if (statusCode != 0) 
 			return statusCode;
+		getSymbol(paramID.s)->isChanged = true;
+		getSymbol(paramID.s)->isUsed = false;
 		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
 																																		   : "STRING",
 				getSymbol(paramID.s)->depth);
@@ -732,6 +734,8 @@ int if_else() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false); //Unwrapped value (payload)
+		getSymbol(token.s)->isChanged = true;
+		getSymbol(token.s)->isUsed = false;
 		if (statusCode != 0) {
 			return statusCode;
 		}
@@ -962,12 +966,15 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Variable %s is not nullable\n", sym->key);
 		return TYPE_COMPATIBILITY_ERROR;
 	}
+	int a = 5;
+	fprintf(stderr, "a = %d\n", a);
 	fprintf(stderr, "Variable definition done\n\n");
 	return 0;
 };
 int call_or_assignment() {
 	int statusCode;
 	symbol_t *sym = getSymbol(token.s);
+	sym->isChanged = true;
 	fprintf(stderr, "ID: %s\n", token.s);
 	if (sym == NULL) {
 		fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
@@ -1121,6 +1128,8 @@ int while_syntax() {
 		}
 
 		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false); //Unwrapped value (payload)
+		getSymbol(token.s)->isChanged = true;
+		getSymbol(token.s)->isUsed = false;
 		if (statusCode != 0) {
 			return statusCode;
 		}

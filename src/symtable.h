@@ -44,6 +44,7 @@ typedef struct symbol
 	bool isNullable;
 	bool isConst;
 	bool isUsed;
+	bool isChanged;
 } symbol_t; // typedef podle zadání
 
 // Prvek tabulky:
