@@ -29,9 +29,30 @@ void enterScope() {
 	htab_insertLast(list, t);
 }
 
-void exitScope() {
+int exitScope() {
+	/*
+	size_t hash = htab_hash_function(key);
+	int index = hash % t->arr_size;
+	htab_itm_t *itm = t->arr_ptr[index];
+	while (itm != NULL) {
+		if (strcmp(key, itm->symbol.key) == 0)
+			return &itm->symbol;
+		itm = itm->next;
+	}
+	return NULL;*/
+	for(int i = 0; i < HASH_TABLE_SIZE; i++){
+		htab_itm_t *itm = list->last->arr_ptr[i];
+		while(itm != NULL){
+			if(itm->symbol.isDefined == false){
+				fprintf(stderr, "Error: Variable %s is unused\n", itm->symbol.key);
+				//return UNUSED_VARIABLE_ERROR;
+			}
+			itm = itm->next;
+		}
+	}
+
 	htab_removeLast(list);
-	//ALLOCATE SYMBOLS IN AST TREE AND KEEP THIS AS IT WAS! IT WILL BE FINE, TRUST
+	return 0;
 }
 
 int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
@@ -45,6 +66,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 	symbol->isDefined = false;
 	symbol->isConst = isConst;
 	symbol->isNullable = isNullable;
+	symbol->isUsed = false;
 	symbol->paramCount = 0;
 	symbol->params = NULL;
 	symbol->depth = getCurrentDepth(list);
@@ -72,6 +94,8 @@ symbol_t *getSymbol(char *name) {
 		symbol = htab_find(t, name);
 		t = t->previous;
 	}
+	if(symbol != NULL)
+		symbol->isUsed = true;
 	return symbol;
 }
 
@@ -102,8 +126,7 @@ int processParam(Token paramName, Token paramType, bool isNullable) {
 		type = FLOAT;
 	if (paramType.kw == dtstr)
 		type = STRING;
-	defineSymbol(paramName.s, type, false, isNullable); //Function can also return a nullable thing, figure this out later
-	return 0;
+	return defineSymbol(paramName.s, type, false, isNullable); //Function can also return a nullable thing, figure this out later
 }
 
 bool isValidParamType(KeyWord kw) {

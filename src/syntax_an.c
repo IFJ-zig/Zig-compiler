@@ -49,12 +49,14 @@ int syntax_analyzer() {
 		return statusCode;
 	printHeader();
 	codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
-  ast_destroy(astRoot);
+  	ast_destroy(astRoot);
+	semanticDestroy();
 	return 0;
 };
 
 
 int seekHeaders() {
+	fprintf(stderr, "--------------- START SEEK HEADERS ---------------\n");
 	int statusCode = checkImport();
 	if (statusCode != 0)
 		return statusCode;
@@ -193,6 +195,7 @@ int seekHeaders() {
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR; //TODO: Is this the correct error code?
 	}
 	fprintf(stderr, "Headers OK\n");
+	fprintf(stderr, "---------------- END SEEK HEADERS ----------------\n\n\n");
 	return 0;
 };
 
@@ -214,9 +217,9 @@ int program() {
 				return statusCode;
 			fprintf(stderr, "\n");
 		} else if (token.kw == end) {
-			fprintf(stderr, "------------- BEGIN AST PRINT -------------\n");
+			fprintf(stderr, "---------------- BEGIN AST PRINT -----------------\n");
 			ast_print(astRoot, 0);
-			fprintf(stderr, "------------- END AST PRINT -------------\n\n");
+			fprintf(stderr, "----------------- END AST PRINT ------------------\n\n");
 			fprintf(stderr, "Compilation successfully finished \n");
 			return 0;
 		} else {
@@ -413,6 +416,7 @@ void loadIFJ24() {
 }
 
 int function_analysis() {
+	fprintf(stderr, "------------- START FUNCTION ANALYSIS ------------\n");
 	enterScope();
 	int statusCode = 0;
 
@@ -439,7 +443,7 @@ int function_analysis() {
 		fnName = token.s;
 	}
 
-	fprintf(stderr, "Analysis ID: %s\n", fnName);
+	fprintf(stderr, "Analysing function: %s\n", fnName);
 
 	//The function name should already be in the symtable at depth 0 since it was done in seekHeaders, lets just check if it's still there
 	if (getSymbol(fnName) == NULL) {
@@ -486,7 +490,11 @@ int function_analysis() {
 	}
 
 	// TODO: SEMANTHIC CHECKS FOR RETURN STATEMENT
-	exitScope();
+	statusCode = exitScope();
+	if(statusCode != 0){
+		return statusCode;
+	}
+	fprintf(stderr, "-------------- END FUNCTION ANALYSIS -------------\n\n");
 	return 0;
 }
 
@@ -530,7 +538,9 @@ int param_list() {
 		statusCode = data_type(NULL);
 		if (statusCode != 0)
 			return statusCode;
-		processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+		statusCode = processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+		if (statusCode != 0) 
+			return statusCode;
 		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
 																																		   : "STRING",
 				getSymbol(paramID.s)->depth);
@@ -687,6 +697,9 @@ int if_else() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false); //Unwrapped value (payload)
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		ifElseNode->data_t.ifElse->noNullPayload = malloc(sizeof(symbol_t));
 		if (ifElseNode->data_t.ifElse->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
@@ -890,7 +903,8 @@ int variable_definition(bool isConst) {
 		return statusCode;
 	}
 
-	symbol_t *sym = getSymbol(varID.s);		
+	symbol_t *sym = getSymbol(varID.s);	
+	sym->isUsed = false;	//Definition is not usage	
 	varType dataType;
 	if(varAssignNode->expression->dataType == FUNCTION){
 		dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;
@@ -1067,6 +1081,9 @@ int while_syntax() {
 		}
 
 		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false); //Unwrapped value (payload)
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		whileNode->data_t.While->noNullPayload = malloc(sizeof(symbol_t));
 		if (whileNode->data_t.While->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");

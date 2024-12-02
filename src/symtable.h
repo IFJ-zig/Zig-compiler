@@ -14,6 +14,8 @@
 #include <stdbool.h> // bool
 #include <string.h>  // size_t
 
+#define HASH_TABLE_SIZE 251 //Should be 1.3x the amount of expected entries and it should be a prime, 251 is just a guess
+
 // Typy:
 typedef const char *htab_key_t; // typ klíče
 
@@ -41,6 +43,7 @@ typedef struct symbol
 	bool isDefined;
 	bool isNullable;
 	bool isConst;
+	bool isUsed;
 } symbol_t; // typedef podle zadání
 
 // Prvek tabulky:
