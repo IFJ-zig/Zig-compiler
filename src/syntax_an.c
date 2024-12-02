@@ -565,7 +565,7 @@ int data_type(bool *isNullable) {
 		return statusCode;
 	}
 	if (isNullable != NULL)
-		*isNullable = true;
+		*isNullable = false;
 	if (token.kw == question_mark) {
 		if (isNullable != NULL)
 			*isNullable = true;
@@ -692,6 +692,10 @@ int empty_variable() {
 	if (statusCode != 0){
 		fprintf(stderr, "Error: Incompatible types in expression\n");
 		return statusCode;
+	}
+	if (nullableInExpr(varAssignNode->expression)){
+		fprintf(stderr, "Error: Expression contains nullable\n");
+		return TYPE_COMPATIBILITY_ERROR;
 	}
 	free((char *)varAssignNode->symbol->key);
 	free(varAssignNode->symbol);
@@ -898,7 +902,7 @@ int variable_definition(bool isConst) {
 		statusCode = data_type(isNullable);
 		if (statusCode != 0)
 			return statusCode;
-		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
+		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, *isNullable);
 		if (statusCode != 0) {
 			return statusCode;
 		}
@@ -954,6 +958,10 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Variable %d incompatible!\n", dataType);
 		return statusCode;
 	}
+	if (nullableInExpr(varAssignNode->expression) && !sym->isNullable){
+		fprintf(stderr, "Error: Variable %s is not nullable\n", sym->key);
+		return TYPE_COMPATIBILITY_ERROR;
+	}
 	fprintf(stderr, "Variable definition done\n\n");
 	return 0;
 };
@@ -986,7 +994,8 @@ int call_or_assignment() {
 		int statusCode = expressionParser(false, &varAssignNode->expression);
 		if (statusCode != 0)
 			return statusCode;
-				
+		if (nullableInExpr(varAssignNode->expression) && !sym->isNullable)
+			return TYPE_COMPATIBILITY_ERROR;
 		varType dataType;
 		if(varAssignNode->expression->dataType == FUNCTION)
 			dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;

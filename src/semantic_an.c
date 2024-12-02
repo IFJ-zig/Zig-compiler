@@ -153,8 +153,10 @@ bool nullableInExpr(ast_node_exp_t *expression){
 			fprintf(stderr, "Error: Variable %s has not been defined\n", expression->token->s);
 			return false;
 		}
-		if(sym->isNullable)
+		if(sym->isNullable){
+			fprintf(stderr, "Variable %s is nullable\n", sym->key);
 			return true;
+		}
 	}
 	if(expression->data_t.binary_op.left != NULL || expression->data_t.binary_op.right != NULL){
 		if(nullableInExpr(expression->data_t.binary_op.left))
@@ -163,7 +165,6 @@ bool nullableInExpr(ast_node_exp_t *expression){
 			return true;
 	}
 	return false;
-
 }
 
 int exprTypeCompatibility(ast_node_exp_t *expression, varType *type){
