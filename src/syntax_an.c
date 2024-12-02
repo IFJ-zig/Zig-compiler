@@ -848,7 +848,7 @@ int return_syntax() {
 	statusCode = expressionParser(true, &returnNode->data_t.fnReturn->expression);
 	if (statusCode != 0)
 		return statusCode;
-	ast_printExp(returnNode->data_t.fnReturn->expression, 0);
+
 	if(currentFunction->returnType == VOID && returnNode->data_t.fnReturn->expression != NULL){
 		fprintf(stderr, "Error: Function %s is void, it cannot return any value\n", currentFunction->key);
 		return RETURN_EXPRESSION_ERROR;
@@ -916,8 +916,10 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0) {
 		return statusCode;
 	}
+	bool typeDefined = false;
 	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
+		typeDefined = true;
 		isDefined = true;
 		statusCode = data_type(isNullable);
 		if (statusCode != 0)
@@ -956,6 +958,10 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0){
 		fprintf(stderr, "Error: Incompatible types in expression\n");
 		return statusCode;
+	}
+	if(nullKWInExpr(varAssignNode->expression) && !typeDefined){
+		fprintf(stderr, "Error: Cannot define symbol %s with null\n", varID.s);
+		return TYPE_INFERENCE_ERROR;
 	}
 
 	symbol_t *sym = getSymbol(varID.s);	

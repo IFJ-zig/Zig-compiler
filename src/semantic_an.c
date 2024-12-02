@@ -152,6 +152,19 @@ int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType
 	return 0;
 }
 
+bool nullKWInExpr(ast_node_exp_t *expression){
+	if(expression->token->kw == _null){
+		return true;
+	}
+	if(expression->data_t.binary_op.left != NULL || expression->data_t.binary_op.right != NULL){
+		if(nullKWInExpr(expression->data_t.binary_op.left))
+			return true;
+		if(nullKWInExpr(expression->data_t.binary_op.right))
+			return true;
+	}
+	return false;
+}
+
 bool nullableInExpr(ast_node_exp_t *expression){
 	if(expression->token->kw == id){
 		symbol_t *sym = getSymbol(expression->token->s);
