@@ -353,6 +353,7 @@ int tryToMatchRule(t_Stack *stack) {
 					}
 					if (temp->type == PRECEDENT_LESS) {
 						statusCode = createBinaryExp(stack);
+						//fprintf(stderr, "%d\n", stackTop(stack)->node->token->kw);
 						if (statusCode != 0) {
 							return statusCode;
 						}
@@ -384,7 +385,7 @@ int createValueExp(t_Stack *stack) {
 
 	varType dataType;
 	if (token->kw == id) {
-		symbol_t *sym = getSymbol(token->s); //This sends null sometime?
+		symbol_t *sym = getSymbol(token->s);
 		if (sym == NULL) {
 			fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;

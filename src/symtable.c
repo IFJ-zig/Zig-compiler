@@ -22,8 +22,6 @@
 
 #include "errors_enum.h"
 
-#define HASH_TABLE_SIZE 251 //Should be 1.3x the amount of expected entries and it should be a prime, 251 is just a guess
-
 
 size_t htab_hash_function(const char *str) {
 	uint32_t h = 0; // musí mít 32 bitů
@@ -138,6 +136,28 @@ symbol_t *htab_define(htab_t *t, htab_key_t key) {
 		newitm->symbol.key = keyString;
 		t->size++;
 		return &newitm->symbol;
+	}
+}
+
+void htab_undefine(htab_t *t, htab_key_t key) {
+	size_t hash = htab_hash_function(key);
+	int index = hash % t->arr_size;
+	htab_itm_t *itm = t->arr_ptr[index];
+	htab_itm_t *previtm = NULL;
+	while (itm != NULL) {
+		if (strcmp(key, itm->symbol.key) == 0) {
+			if (previtm == NULL) {
+				t->arr_ptr[index] = itm->next;
+			} else {
+				previtm->next = itm->next;
+			}
+			free((char *)itm->symbol.key);
+			free(itm);
+			t->size--;
+			return;
+		}
+		previtm = itm;
+		itm = itm->next;
 	}
 }
 

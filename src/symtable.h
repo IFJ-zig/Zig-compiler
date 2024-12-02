@@ -14,6 +14,8 @@
 #include <stdbool.h> // bool
 #include <string.h>  // size_t
 
+#define HASH_TABLE_SIZE 251 //Should be 1.3x the amount of expected entries and it should be a prime, 251 is just a guess
+
 // Typy:
 typedef const char *htab_key_t; // typ klíče
 
@@ -25,7 +27,8 @@ typedef enum
 	BOOL,
 	FUNCTION,
 	ANYTYPE,
-	VOID
+	VOID,
+	UNDEFINED
 } varType;
 
 // Data v tabulce:
@@ -40,6 +43,10 @@ typedef struct symbol
 	bool isDefined;
 	bool isNullable;
 	bool isConst;
+	bool isUsed;
+	bool isChanged;
+	bool hasReturn;
+	bool isMutable;
 } symbol_t; // typedef podle zadání
 
 // Prvek tabulky:
@@ -85,6 +92,7 @@ htab_t *htab_init(int depth); // konstruktor tabulky
 
 symbol_t *htab_find(const htab_t *t, htab_key_t key); // hledání
 symbol_t *htab_define(htab_t *t, htab_key_t key);
+void htab_undefine(htab_t *t, htab_key_t key); // ruší záznam
 
 void htab_clear(htab_t *t); // ruší všechny záznamy
 void htab_free(htab_t *t);  // destruktor tabulky
