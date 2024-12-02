@@ -904,7 +904,8 @@ int variable_definition(bool isConst) {
 	}
 
 	symbol_t *sym = getSymbol(varID.s);	
-	sym->isUsed = false;	//Definition is not usage	
+	sym->isUsed = false;
+
 	varType dataType;
 	if(varAssignNode->expression->dataType == FUNCTION){
 		dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;

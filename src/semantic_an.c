@@ -43,9 +43,9 @@ int exitScope() {
 	for(int i = 0; i < HASH_TABLE_SIZE; i++){
 		htab_itm_t *itm = list->last->arr_ptr[i];
 		while(itm != NULL){
-			if(itm->symbol.isDefined == false){
-				fprintf(stderr, "Error: Variable %s is unused\n", itm->symbol.key);
-				//return UNUSED_VARIABLE_ERROR;
+			if(itm->symbol.isUsed == false){
+				fprintf(stderr, "Error: Variable %s at depth %d is unused\n", itm->symbol.key, itm->symbol.depth);
+				return UNUSED_VARIABLE_ERROR;
 			}
 			itm = itm->next;
 		}
