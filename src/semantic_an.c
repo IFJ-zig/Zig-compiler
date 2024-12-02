@@ -30,16 +30,6 @@ void enterScope() {
 }
 
 int exitScope() {
-	/*
-	size_t hash = htab_hash_function(key);
-	int index = hash % t->arr_size;
-	htab_itm_t *itm = t->arr_ptr[index];
-	while (itm != NULL) {
-		if (strcmp(key, itm->symbol.key) == 0)
-			return &itm->symbol;
-		itm = itm->next;
-	}
-	return NULL;*/
 	for(int i = 0; i < HASH_TABLE_SIZE; i++){
 		htab_itm_t *itm = list->last->arr_ptr[i];
 		while(itm != NULL){
@@ -156,6 +146,26 @@ int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType
 	return 0;
 }
 
+bool nullableInExpr(ast_node_exp_t *expression){
+	if(expression->token->kw == id){
+		symbol_t *sym = getSymbol(expression->token->s);
+		if(sym == NULL){
+			fprintf(stderr, "Error: Variable %s has not been defined\n", expression->token->s);
+			return false;
+		}
+		if(sym->isNullable)
+			return true;
+	}
+	if(expression->data_t.binary_op.left != NULL || expression->data_t.binary_op.right != NULL){
+		if(nullableInExpr(expression->data_t.binary_op.left))
+			return true;
+		if(nullableInExpr(expression->data_t.binary_op.right))
+			return true;
+	}
+	return false;
+
+}
+
 int exprTypeCompatibility(ast_node_exp_t *expression, varType *type){
 	if(expression->token->kw == id){
 		symbol_t *sym = getSymbol(expression->token->s);
@@ -181,7 +191,7 @@ int exprTypeCompatibility(ast_node_exp_t *expression, varType *type){
 	return 0;
 }
 
-int checkExpression(ast_node_exp_t *expression, varType *expType){
+int checkExprTypesCompatibility(ast_node_exp_t *expression, varType *expType){
 	//Ignoring nums because those can be converted to floats
 	*expType = UNDEFINED;
 	if(expression->token->kw == id){

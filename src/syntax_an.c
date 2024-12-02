@@ -669,9 +669,35 @@ int empty_variable() {
 		fprintf(stderr, "Error: Expected = after _\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	statusCode = expressionParser(false, NULL);
+	symbol_t *virtualSymbol = malloc(sizeof(symbol_t));
+	if (virtualSymbol == NULL) {
+		fprintf(stderr, "Error: Memory allocation failed\n");
+		return INTERNAL_COMPILER_ERROR;
+	}
+	virtualSymbol->key = "_";
+	virtualSymbol->type = UNDEFINED;
+	virtualSymbol->depth = -1;
+	virtualSymbol->isConst = false;
+	virtualSymbol->isNullable = false;
+	virtualSymbol->isDefined = false;
+	virtualSymbol->paramCount = 0;
+	virtualSymbol->params = NULL;
+	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(virtualSymbol, NULL);
+	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
+
+	varType expDataType = UNDEFINED;
+	statusCode = checkExprTypesCompatibility(varAssignNode->expression, &expDataType);
+	if (statusCode != 0){
+		fprintf(stderr, "Error: Incompatible types in expression\n");
+		return statusCode;
+	}
+	free((char *)varAssignNode->symbol->key);
+	free(varAssignNode->symbol);
+	free(varAssignNode);
+	free(virtualSymbol);
+
 
 	return 0;
 }
@@ -895,16 +921,16 @@ int variable_definition(bool isConst) {
 	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
-	ast_printExp(varAssignNode->expression, 0);
+
 	varType expDataType = UNDEFINED;
-	statusCode = checkExpression(varAssignNode->expression, &expDataType);
+	statusCode = checkExprTypesCompatibility(varAssignNode->expression, &expDataType);
 	if (statusCode != 0){
 		fprintf(stderr, "Error: Incompatible types in expression\n");
 		return statusCode;
 	}
 
 	symbol_t *sym = getSymbol(varID.s);	
-	sym->isUsed = false;
+	sym->isUsed = false;	//Definition is not usage
 
 	varType dataType;
 	if(varAssignNode->expression->dataType == FUNCTION){
@@ -923,12 +949,11 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Variable %d incompatible!\n", dataType);
 		return statusCode;
 	}
+	fprintf(stderr, "Variable definition done\n\n");
 	return 0;
 };
 int call_or_assignment() {
 	int statusCode;
-	// TODO: SEMANTHIC ANALYSIS
-	// I need semanthic analysis to define if id is a function or variable
 	symbol_t *sym = getSymbol(token.s);
 	fprintf(stderr, "ID: %s\n", token.s);
 	if (sym == NULL) {
@@ -956,7 +981,7 @@ int call_or_assignment() {
 		int statusCode = expressionParser(false, &varAssignNode->expression);
 		if (statusCode != 0)
 			return statusCode;
-			
+				
 		varType dataType;
 		if(varAssignNode->expression->dataType == FUNCTION)
 			dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;

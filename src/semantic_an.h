@@ -24,7 +24,8 @@ int assignSymbol(symbol_t *symbol, varType type);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
 int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);
-int checkExpression(ast_node_exp_t *expression, varType *expType);
+int checkExprTypesCompatibility(ast_node_exp_t *expression, varType *expType);
+bool nullableInExpr(ast_node_exp_t *expression);
 
 int processParam(Token paramName, Token paramType, bool isNullable);
 varType kwToVarType(KeyWord kw);
