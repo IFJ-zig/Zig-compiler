@@ -22,7 +22,7 @@ void undefineSymbol(char *name);
 int assignSymbol(symbol_t *symbol, varType type);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
-void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);
+int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);
 
 int processParam(Token paramName, Token paramType, bool isNullable);
 varType kwToVarType(KeyWord kw);

@@ -91,9 +91,13 @@ int seekHeaders() {
 			fnName = token.s;
 		}
 		//Save the name of functions into the symtable at depth 0
-		if (defineSymbol(fnName, FUNCTION, false, false) == REDEFINITION_ERROR) {
+		int statusCode = defineSymbol(fnName, FUNCTION, false, false);
+		if (statusCode == REDEFINITION_ERROR) {
 			fprintf(stderr, "Error: Function %s is already defined\n", token.s);
 			return REDEFINITION_ERROR;
+		}
+		else if(statusCode != 0){
+			return statusCode;
 		}
 		symbol_t *fnSymbol = getSymbol(fnName);
 		if (token.kw == _main) {
@@ -128,7 +132,10 @@ int seekHeaders() {
 				}
 				data_type(NULL);
 
-				assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+				statusCode = assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+				if (statusCode != 0) {
+					return statusCode;
+				}
 				statusCode = read_token();
 				if (statusCode != 0) {
 					return statusCode;
@@ -160,6 +167,10 @@ int seekHeaders() {
 		}
 		if (isValidReturnType(token.kw)) {
 			fnSymbol->returnType = kwToVarType(token.kw); //Save the return type of the function
+			if(strcmp(fnSymbol->key, "main") == 0 && fnSymbol->returnType != VOID){
+				fprintf(stderr, "Error: Main function must return void\n");
+				return PARAM_ERROR;
+			}
 		} else {
 			fprintf(stderr, "Error: Invalid return type of function %s\n", fnSymbol->key);
 			return SYNTACTIC_ANALYSIS_ERROR;

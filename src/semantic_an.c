@@ -52,7 +52,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 																																																   : type == STRING      ? "STRING"
 																																																   : type == FUNCTION    ? "FUNCTION"
 																																																	: type == UNDEFINED		? "UNDEFINED"
-																																																						 : "VOID");
+																																																						 : "VOID");																																												 
 	return 0;
 }
 
@@ -114,7 +114,7 @@ bool isValidParamType(KeyWord kw) {
 
 
 //This function creates a memore leak, because the symbols created for params are never freed, fix before final version TODO
-void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable) {
+int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable) {
 	fprintf(stderr, "  ┕Function %s has a parameter %s of type %s isNullable=%s\n", function->key, paramName.s, getTokenName(paramType), isNullable ? "true" : "false");
 	function->paramCount++;
 	function->params = realloc(function->params, function->paramCount * sizeof(symbol_t *));
@@ -126,6 +126,11 @@ void assignFunctionParameter(symbol_t *function, Token paramName, Token paramTyp
 	param->isDefined = false;
 	param->depth = -1;
 	function->params[function->paramCount - 1] = param;
+	if(!strcmp(function->key, "main")){
+		fprintf(stderr, "Error: main must not take any parameters!\n");
+		return PARAM_ERROR;
+	}				
+	return 0;
 }
 
 varType kwToVarType(KeyWord kw) {
