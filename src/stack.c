@@ -1,15 +1,21 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Adam Vožda, xvozdaa00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of stack used in precedence analysis 
+ *  @file stack.c
+ *  @author Adam Vožda, xvozdaa00
+ *  @brief Stack used in precedence analysis 
+*/
 
 #include "stack.h"
 
+// Initialize the stack
 void stackInit(t_Stack *stack) {
 	stack->top = NULL;
 	stack->size = 0;
 }
 
+// Push an item onto the stack
 int stackPush(t_Stack *stack, stackElementType type, Token *tkn, ast_node_exp_t *node) {
 	t_StackItem *newItem = (t_StackItem *)malloc(sizeof(t_StackItem));
 	if (newItem == NULL) {
@@ -30,6 +36,7 @@ int stackPush(t_Stack *stack, stackElementType type, Token *tkn, ast_node_exp_t 
 	return 0;
 }
 
+// Pop an item from the stack
 void stackPop(t_Stack *stack) {
 	if (stack->top == NULL) {
 		return;
@@ -43,16 +50,19 @@ void stackPop(t_Stack *stack) {
 	stack->size--;
 }
 
+// Get the top item of the stack
 t_StackItem *stackTop(t_Stack *stack) {
 	return stack->top;
 }
 
+// Clear the stack
 void stackClear(t_Stack *stack) {
 	while (stack->top != NULL) {
 		stackPop(stack);
 	}
 }
 
+// Push a PRECEDENT_LESS item after the top terminal item in the stack
 int stackPushPrecedentLess(t_Stack *stack) {
 	t_StackItem *temp = topTerminal(stack);
 	if (temp == NULL) {
@@ -79,6 +89,7 @@ int stackPushPrecedentLess(t_Stack *stack) {
 	return 0;
 }
 
+// Get the top terminal item in the stack
 t_StackItem *topTerminal(t_Stack *stack) {
 	t_StackItem *temp = stack->top;
 	while (temp != NULL && temp->type != TERMINAL) {
@@ -87,7 +98,7 @@ t_StackItem *topTerminal(t_Stack *stack) {
 	return temp;
 }
 
-
+// Print the stack
 void printStack(t_Stack *stack) {
 	t_StackItem *temp = stack->top;
 	while (temp != NULL && temp->prev != NULL) {
@@ -107,7 +118,7 @@ void printStack(t_Stack *stack) {
 	fprintf(stderr, "\n");
 }
 
-
+// Map a token keyword to a character
 char mapTokenToChar(KeyWord kw) {
 	if (kw == num || kw == decim || kw == text || kw == id || kw == _null) {
 		return 'x';
