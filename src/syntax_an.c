@@ -974,6 +974,10 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Cannot define symbol %s with null\n", varID.s);
 		return TYPE_INFERENCE_ERROR;
 	}
+	if(nullableInExpr(varAssignNode->expression) && !getSymbol(varID.s)->isNullable){
+		fprintf(stderr, "Info: Changing variable %s to nullable\n", varID.s);
+		getSymbol(varID.s)->isNullable = true;
+	}
 
 	symbol_t *sym = getSymbol(varID.s);	
 	sym->isUsed = false;	//Definition is not usage
