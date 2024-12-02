@@ -133,6 +133,59 @@ int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType
 	return 0;
 }
 
+int exprTypeCompatibility(ast_node_exp_t *expression, varType *type){
+	if(expression->token->kw == id){
+		symbol_t *sym = getSymbol(expression->token->s);
+		if(sym == NULL){
+			fprintf(stderr, "Error: Variable %s has not been defined\n", expression->token->s);
+			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+		}
+		varType newType;
+		if(sym->type == FUNCTION)
+			newType = sym->returnType;
+		else
+			newType = sym->type;
+		if(*type == UNDEFINED){
+			*type = newType;
+			if(expression->data_t.binary_op.left != NULL || expression->data_t.binary_op.right != NULL){
+				exprTypeCompatibility(expression->data_t.binary_op.left, type);
+				exprTypeCompatibility(expression->data_t.binary_op.right, type);
+			}
+		}
+		else if(*type != newType)
+			return TYPE_COMPATIBILITY_ERROR;
+	}
+	return 0;
+}
+
+int checkExpression(ast_node_exp_t *expression, varType *expType){
+	//Ignoring nums because those can be converted to floats
+	*expType = UNDEFINED;
+	if(expression->token->kw == id){
+		symbol_t *sym = getSymbol(expression->token->s);
+		if(sym == NULL){
+			fprintf(stderr, "Error: Variable %s has not been defined\n", expression->token->s);
+			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
+		}
+		if(sym->type == FUNCTION)
+			*expType = sym->returnType;
+		else
+			*expType = sym->type;
+		fprintf(stderr, "checkEXPR Variable %s is of type %s\n", sym->key, *expType == INT ? "INT" : *expType == FLOAT ? "FLOAT" : *expType == STRING ? "STRING" : *expType == ANYTYPE ? "ANYTYPE" : "VOID");
+	}
+	int statusCode;
+	if(expression->data_t.binary_op.left != NULL || expression->data_t.binary_op.right != NULL){
+		statusCode = exprTypeCompatibility(expression->data_t.binary_op.left, expType);
+		if(statusCode != 0)
+			return statusCode;
+		statusCode = exprTypeCompatibility(expression->data_t.binary_op.right, expType);
+		if(statusCode != 0)
+			return statusCode;
+	}
+	fprintf(stderr, "expr type compatibility ok\n");
+	return 0;
+}
+
 varType kwToVarType(KeyWord kw) {
 	if (kw == dtint || kw == num)
 		return INT;

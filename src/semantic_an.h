@@ -11,6 +11,7 @@
 #include "errors_enum.h"
 #include "symtable.h"
 #include "tokens.h"
+#include "ast.h"
 
 void semanticInit();
 void semanticDestroy();
@@ -23,6 +24,7 @@ int assignSymbol(symbol_t *symbol, varType type);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
 int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);
+int checkExpression(ast_node_exp_t *expression, varType *expType);
 
 int processParam(Token paramName, Token paramType, bool isNullable);
 varType kwToVarType(KeyWord kw);

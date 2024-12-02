@@ -875,7 +875,6 @@ int variable_definition(bool isConst) {
 		return statusCode;
 	}
 	free(isNullable);
-
 	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(getSymbol(varID.s), NULL);
 	ast_default_node_t *varDefNode = ast_createVarDefNode(getSymbol(varID.s), varAssignNode);
 	ast_insert(astRoot->activeNode, varDefNode);
@@ -883,8 +882,15 @@ int variable_definition(bool isConst) {
 	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
-		
-	symbol_t *sym = getSymbol(varID.s);
+	ast_printExp(varAssignNode->expression, 0);
+	varType expDataType = UNDEFINED;
+	statusCode = checkExpression(varAssignNode->expression, &expDataType);
+	if (statusCode != 0){
+		fprintf(stderr, "Error: Incompatible types in expression\n");
+		return statusCode;
+	}
+
+	symbol_t *sym = getSymbol(varID.s);		
 	varType dataType;
 	if(varAssignNode->expression->dataType == FUNCTION){
 		dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;
@@ -897,7 +903,6 @@ int variable_definition(bool isConst) {
 		dataType = varAssignNode->expression->dataType;
 		statusCode = assignSymbol(sym, varAssignNode->expression->dataType);
 	}
-
 	if (statusCode != 0){
 		fprintf(stderr, "Error: Variable %s type=%d incompatible!\n", sym->key, sym->type);
 		fprintf(stderr, "Error: Variable %d incompatible!\n", dataType);
