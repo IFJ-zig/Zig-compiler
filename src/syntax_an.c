@@ -707,8 +707,13 @@ int if_else() {
 	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
 	ast_insert(astRoot->activeNode, ifElseNode);
 	statusCode = expressionParser(false, &ifElseNode->data_t.ifElse->conditionExp);
-
 	if (statusCode != 0) {
+		return statusCode;
+	}
+	ast_printExp(ifElseNode->data_t.ifElse->conditionExp, 0);
+	statusCode = isValidIfExpression(ifElseNode->data_t.ifElse->conditionExp);
+	if (statusCode != 0) {
+		fprintf(stderr, "Error: Invalid if condition\n");
 		return statusCode;
 	}
 

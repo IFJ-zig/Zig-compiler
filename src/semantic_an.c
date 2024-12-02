@@ -228,3 +228,10 @@ varType kwToVarType(KeyWord kw) {
 		return STRING;
 	return VOID;
 }
+
+int isValidIfExpression(ast_node_exp_t *expression){
+	KeyWord kw = expression->token->kw;	//Expression in if must be of a boolean type, so it must contain more, less, compare_equal, nequal or be an id
+	if(kw == compare_equal || kw == nequal || kw == more || kw == less || kw == lequal || kw == mequal || kw == id)
+		return 0;
+	return TYPE_COMPATIBILITY_ERROR;
+}
