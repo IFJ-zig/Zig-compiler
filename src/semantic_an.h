@@ -19,7 +19,7 @@ void semanticDestroy();
 int defineSymbol(char *name, varType type, bool isConst, bool isNullable);
 void undefineSymbol(char *name);
 
-bool assignSymbol(char *name, KeyWord kw);
+int assignSymbol(symbol_t *symbol, varType type);
 symbol_t *getSymbol(char *name);
 bool isValidParamType(KeyWord kw);
 void assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable);

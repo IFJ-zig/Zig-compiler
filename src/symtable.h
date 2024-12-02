@@ -25,7 +25,8 @@ typedef enum
 	BOOL,
 	FUNCTION,
 	ANYTYPE,
-	VOID
+	VOID,
+	UNDEFINED
 } varType;
 
 // Data v tabulce:

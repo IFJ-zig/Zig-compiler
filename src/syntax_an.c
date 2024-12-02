@@ -858,7 +858,7 @@ int variable_definition(bool isConst) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	if (!isDefined)
-		statusCode = defineSymbol(varID.s, INT, isConst, *isNullable);
+		statusCode = defineSymbol(varID.s, UNDEFINED, isConst, *isNullable);
 	if (statusCode != 0) {
 		free(isNullable);
 		return statusCode;
@@ -872,15 +872,34 @@ int variable_definition(bool isConst) {
 	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
+		
+	symbol_t *sym = getSymbol(varID.s);
+	varType dataType;
+	if(varAssignNode->expression->dataType == FUNCTION){
+		dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;
+		sym->isNullable = varAssignNode->expression->data_t.fnCall->fnSymbol->isNullable;
+		statusCode = assignSymbol(sym, varAssignNode->expression->data_t.fnCall->fnSymbol->returnType);
+		if(sym->isNullable)
+			fprintf(stderr, "Variable %s is nullable\n", sym->key);
+	}
+	else{
+		dataType = varAssignNode->expression->dataType;
+		statusCode = assignSymbol(sym, varAssignNode->expression->dataType);
+	}
 
+	if (statusCode != 0){
+		fprintf(stderr, "Error: Variable %s type=%d incompatible!\n", sym->key, sym->type);
+		fprintf(stderr, "Error: Variable %d incompatible!\n", dataType);
+		return statusCode;
+	}
 	return 0;
 };
 int call_or_assignment() {
 	int statusCode;
 	// TODO: SEMANTHIC ANALYSIS
 	// I need semanthic analysis to define if id is a function or variable
-
 	symbol_t *sym = getSymbol(token.s);
+	fprintf(stderr, "ID: %s\n", token.s);
 	if (sym == NULL) {
 		fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
@@ -906,6 +925,19 @@ int call_or_assignment() {
 		int statusCode = expressionParser(false, &varAssignNode->expression);
 		if (statusCode != 0)
 			return statusCode;
+			
+		varType dataType;
+		if(varAssignNode->expression->dataType == FUNCTION)
+			dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;
+		else
+			dataType = varAssignNode->expression->dataType;
+
+		statusCode = assignSymbol(sym, dataType);
+		if (statusCode != 0){
+			fprintf(stderr, "Error: Variable %s type=%d incompatible!\n", sym->key, sym->type);
+			fprintf(stderr, "Error: Variable %d incompatible!\n", dataType);
+			return statusCode;
+		}
 	}
 
 	return 0;

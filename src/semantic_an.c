@@ -51,6 +51,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 	fprintf(stderr, "Symbol '%s' defined at depth %d, isConst=%s, isNullable=%s, type=%s\n", name, getCurrentDepth(list), isConst ? "true" : "false", isNullable ? "true" : "false", type == INT ? "INT" : type == FLOAT ? "FLOAT"
 																																																   : type == STRING      ? "STRING"
 																																																   : type == FUNCTION    ? "FUNCTION"
+																																																	: type == UNDEFINED		? "UNDEFINED"
 																																																						 : "VOID");
 	return 0;
 }
@@ -74,28 +75,18 @@ symbol_t *getSymbol(char *name) {
 	return symbol;
 }
 
-bool assignSymbol(char *name, KeyWord kw) {
-	symbol_t *symbol = getSymbol(name);
-	if (symbol == NULL)
-		return false; //Symbol does not exist
-	symbol->isDefined = true;
-	if (symbol->isNullable == true) {
-		if (kw == _null)
-			return true;
+int assignSymbol(symbol_t *symbol, varType type) {
+	if(symbol->type == UNDEFINED){
+		fprintf(stderr, "Variable %s is of undefined type, assigning type %d\n", symbol->key, type);
+		symbol->type = type;
 	}
-	if (symbol->type == INT) {
-		if (kw == dtint) {
-			return true;
-		}
-	} else if (symbol->type == FLOAT) {
-		if (kw == dtflt || kw == dtint) {
-			return true;
-		}
-	} else if (symbol->type == STRING)
-		if (kw == dtstr) {
-			return true;
-		}
-	return false;
+	if(type == VOID && symbol->isNullable == true)
+		return 0;
+	if(type == INT && symbol->type == FLOAT)
+		return 0;
+	else if (symbol->type != type)
+		return TYPE_COMPATIBILITY_ERROR;
+	return 0;
 }
 
 //Entering function, get 3 tokens from which extract paramName and paramType, this functions expects to already be shifted into the function scope
