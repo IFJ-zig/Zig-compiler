@@ -560,9 +560,14 @@ int data_type(bool *isNullable) {
 			free(token.s);
 			return statusCode;
 		}
+		if (token.kw != dtstr) {
+			fprintf(stderr, "Error: Expected data type\n");
+			return SYNTACTIC_ANALYSIS_ERROR;
+		}
+		return 0;
 	}
 
-	if (token.kw != dtint && token.kw != dtstr && token.kw != dtflt) {
+	if (token.kw != dtint && token.kw != dtflt) {
 		fprintf(stderr, "Error: Expected data type\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
@@ -570,7 +575,7 @@ int data_type(bool *isNullable) {
 }
 
 bool isValidReturnType(KeyWord kw) {
-	if (kw != dtint && kw != dtstr && kw != dtflt && kw != dtvoid)
+	if (!data_type(NULL) && kw != dtvoid)
 		return false;
 	return true;
 }

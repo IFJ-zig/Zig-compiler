@@ -13,10 +13,10 @@
 #include "errors_enum.h"
 #include "expression_parser.h"
 #include "semantic_an.h"
-#include "symtable.h" //For varType
+#include "symtable.h"
 #include "tokens.h"
 
-int syntax_analyzer(/*List *L*/);
+int syntax_analyzer();
 int code();
 int program();
 int seekHeaders();
@@ -26,7 +26,7 @@ int function_analysis();
 int function_call(bool expectReturn, ast_default_node_t *fnCallNode);
 int parse_params(ast_default_node_t *fnCallNode);
 int return_type();
-int data_type(bool *isNullable); //if isNullable is NULL, this function will just ignore it, otherwise it sets it according to if '?' was found in definition
+int data_type(bool *isNullable);
 int param_list();
 int while_syntax();
 int if_else();
@@ -39,7 +39,6 @@ int read_token();
 void loadIFJ24();
 
 
-//Helper functions
 bool isValidReturnType(KeyWord kw);
 symbol_t *skip_expression_get_symbol();
 #endif // SYNTAX_H

@@ -1,3 +1,11 @@
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains error codes used in the compiler
+ *  @file errors_enum.h
+ *  @author Tadeáš Horák, xhorakt00
+ *  @brief Error codes used in the compiler
+*/
 #ifndef ERROR_CODES_H
 #define ERROR_CODES_H
 
