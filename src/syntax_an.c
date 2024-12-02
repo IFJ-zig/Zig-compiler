@@ -8,6 +8,7 @@
 Token token;
 bool tokenWasGiven = 0;
 ast_default_node_t *astRoot;
+symbol_t *currentFunction;
 
 int read_token() {
 	token = get_token();
@@ -444,7 +445,7 @@ int function_analysis() {
 	}
 
 	fprintf(stderr, "Analysing function: %s\n", fnName);
-
+	currentFunction = getSymbol(fnName);
 	//The function name should already be in the symtable at depth 0 since it was done in seekHeaders, lets just check if it's still there
 	if (getSymbol(fnName) == NULL) {
 		fprintf(stderr, "Error: Function %s is not defined, this function should've been defined in seekHeaders!\n", fnName);
@@ -493,6 +494,10 @@ int function_analysis() {
 	statusCode = exitScope();
 	if(statusCode != 0){
 		return statusCode;
+	}
+	if(currentFunction->hasReturn == false && currentFunction->returnType != VOID){
+		fprintf(stderr, "Error: Function %s does not have a return statement\n", currentFunction->key);
+		return RETURN_EXPRESSION_ERROR;
 	}
 	fprintf(stderr, "-------------- END FUNCTION ANALYSIS -------------\n\n");
 	return 0;
@@ -834,12 +839,23 @@ int return_syntax() {
 	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
 	ast_insert(astRoot->activeNode, returnNode);
 	if (token.kw == next) {
+		if(currentFunction->returnType != VOID){
+			fprintf(stderr, "Error: Function %s is not void, it must return a value\n", currentFunction->key);
+			return RETURN_EXPRESSION_ERROR;
+		}
 		return 0;
 	}
-
 	statusCode = expressionParser(true, &returnNode->data_t.fnReturn->expression);
 	if (statusCode != 0)
 		return statusCode;
+	ast_printExp(returnNode->data_t.fnReturn->expression, 0);
+	if(currentFunction->returnType == VOID && returnNode->data_t.fnReturn->expression != NULL){
+		fprintf(stderr, "Error: Function %s is void, it cannot return any value\n", currentFunction->key);
+		return RETURN_EXPRESSION_ERROR;
+	}
+	if(returnNode->data_t.fnReturn->expression->dataType != currentFunction->returnType)
+		return PARAM_ERROR;
+	currentFunction->hasReturn = true;
 
 	return 0;
 }
@@ -971,6 +987,7 @@ int variable_definition(bool isConst) {
 	fprintf(stderr, "Variable definition done\n\n");
 	return 0;
 };
+
 int call_or_assignment() {
 	int statusCode;
 	symbol_t *sym = getSymbol(token.s);
