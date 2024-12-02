@@ -1,7 +1,11 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Adam Vožda, xvozdaa00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of functions used for expression parsing
+ *  @file  expression_parser.c
+ *  @author Adam Vožda, xvozdaa00
+ *  @brief Implementation file for expression parsing
+ */
 
 #include "expression_parser.h"
 
@@ -69,7 +73,7 @@ int precedentTableTranslator(int token) // Returns position of element in preced
 			return -1;
 	}
 }
-
+// Returns operation from precedent table
 int getOperation(int tokenStack, int tokenInput) {
 	int i = precedentTableTranslator(tokenStack);
 	if (i == -1) {
@@ -86,6 +90,7 @@ int getOperation(int tokenStack, int tokenInput) {
 
 extern Token token;
 extern ast_default_node_t *astRoot;
+// if there is fnCallNode, it means that when is matched to nonterminal, it is function call
 ast_default_node_t *fnCallNode;
 
 int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
@@ -93,11 +98,13 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 	t_Stack stack;
 	stackInit(&stack);
 	Token new = {next, 0, 0, NULL};
+	// push $ to stack
 	statusCode = stackPush(&stack, TERMINAL, allocateToken(new), NULL);
 
 	if (statusCode != 0) {
 		return statusCode;
 	}
+	// First token of expression has aleready been read
 	if (!tokenRead) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -106,8 +113,8 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 		}
 	}
 	while (1) {
-		printStack(&stack);
-		//temporarily handle inbuild functions
+		//printStack(&stack);
+		// handle inbuild functions
 		if (token.kw == inbuild) {
 			statusCode = read_token();
 			if (statusCode != 0) {
@@ -149,7 +156,7 @@ int expressionParser(bool tokenRead, ast_node_exp_t **resultPointer) {
 			}
 			Token new = {id, 0, 0, prefix};
 			token = new;
-		} else if (token.kw == id) {
+		} else if (token.kw == id) { // handle id is function call
 			char *name = token.s;
 			symbol_t *sym = getSymbol(token.s);
 			if (sym == NULL) {
@@ -368,6 +375,7 @@ int tryToMatchRule(t_Stack *stack) {
 	return SYNTACTIC_ANALYSIS_ERROR;
 }
 
+// (E) -> E
 int reduceBracketNonTerminal(t_Stack *stack) {
 	stackPop(stack);
 	ast_node_exp_t *expNode = stackTop(stack)->node;
@@ -377,6 +385,7 @@ int reduceBracketNonTerminal(t_Stack *stack) {
 	stackPush(stack, NON_TERMINAL, expNode->token, expNode);
 	return 0;
 };
+// id, num, text, decim -> E
 int createValueExp(t_Stack *stack) {
 	Token *token = stackTop(stack)->token;
 	stackPop(stack);
@@ -384,7 +393,7 @@ int createValueExp(t_Stack *stack) {
 
 	varType dataType;
 	if (token->kw == id) {
-		symbol_t *sym = getSymbol(token->s); //This sends null sometime?
+		symbol_t *sym = getSymbol(token->s);
 		if (sym == NULL) {
 			fprintf(stderr, "Error: Variable %s has not been defined\n", token->s);
 			return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
@@ -394,6 +403,7 @@ int createValueExp(t_Stack *stack) {
 		dataType = kwToVarType(token->kw);
 	}
 	ast_node_exp_t *expNode = ast_createExpNode(token, dataType);
+	//if this is is fucntion call assign it
 	if (fnCallNode != NULL) {
 		expNode->data_t.fnCall = fnCallNode->data_t.fnCall;
 		fnCallNode = NULL;
@@ -401,6 +411,7 @@ int createValueExp(t_Stack *stack) {
 	stackPush(stack, NON_TERMINAL, token, expNode);
 	return 0;
 };
+// E op E -> E
 int createBinaryExp(t_Stack *stack) {
 	ast_node_exp_t *expRightNode = stackTop(stack)->node;
 	stackPop(stack);
@@ -419,6 +430,7 @@ int createBinaryExp(t_Stack *stack) {
 	fprintf(stderr, "Binary exp created\n");
 	return 0;
 };
+// -E -> E
 int createUnaryExp(t_Stack *stack) {
 
 	ast_node_exp_t *expNode = stackTop(stack)->node;

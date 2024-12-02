@@ -1,7 +1,12 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Adam Vožda, xvozdaa00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of functions used for recursive descendance syntax analysis
+ *  @file  syntax_an.c
+ *  @author Adam Vožda, xvozdaa00
+ *  @brief Implementation file for recursive descendance syntax analysis
+ */
+
 #include "syntax_an.h"
 
 
@@ -52,9 +57,8 @@ int syntax_analyzer() {
 	return 0;
 };
 
-
 int headers() {
-	int statusCode = checkImport();
+	int statusCode = import();
 	if (statusCode != 0)
 		return statusCode;
 	statusCode = read_token();
@@ -89,7 +93,7 @@ int headers() {
 		} else {
 			fnName = token.s;
 		}
-		//Save the name of functions into the symtable at depth 0
+		// Save the name of functions into the symtable at depth 0
 		if (defineSymbol(fnName, FUNCTION, false, false) == REDEFINITION_ERROR) {
 			fprintf(stderr, "Error: Function %s is already defined\n", token.s);
 			return REDEFINITION_ERROR;
@@ -113,7 +117,7 @@ int headers() {
 		if (statusCode != 0) {
 			return statusCode;
 		}
-		while (token.kw != rbracket) { //Process the parameters
+		while (token.kw != rbracket) {
 			if (token.kw == id) {
 				fprintf(stderr, "Param ID: %s\n", token.s);
 				Token paramID = token;
@@ -127,7 +131,7 @@ int headers() {
 				}
 				data_type(NULL, false);
 
-				assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+				assignFunctionParameter(fnSymbol, paramID, token, false);
 				statusCode = read_token();
 				if (statusCode != 0) {
 					return statusCode;
@@ -154,7 +158,7 @@ int headers() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		if (!data_type(NULL, true)) {
-			fnSymbol->returnType = kwToVarType(token.kw); //Save the return type of the function
+			fnSymbol->returnType = kwToVarType(token.kw); // Save the return type of the function
 		} else {
 			fprintf(stderr, "Error: Invalid return type of function %s\n", fnSymbol->key);
 			return SYNTACTIC_ANALYSIS_ERROR;
@@ -174,7 +178,7 @@ int headers() {
 	}
 	if (getSymbol("main") == NULL) {
 		fprintf(stderr, "Error: Main function is not defined\n");
-		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR; //TODO: Is this the correct error code?
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
 	fprintf(stderr, "Headers OK\n");
 	return 0;
@@ -182,11 +186,10 @@ int headers() {
 
 int program() {
 	int statusCode;
-	statusCode = checkImport();
+	statusCode = import();
 	if (statusCode != 0)
 		return statusCode;
 
-	// TODO: SOME CODE GENERATION STUFF
 	while (1) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -239,7 +242,7 @@ int skip_function_body() {
 }
 
 
-int checkImport() {
+int import() {
 	static bool imported = false;
 	int statusCode = read_token();
 	if (statusCode != 0) {
@@ -468,9 +471,6 @@ int function_analysis() {
 			return statusCode;
 		}
 	}
-
-
-	// TODO: SEMANTHIC CHECKS FOR RETURN STATEMENT
 	exitScope();
 	return 0;
 }
@@ -515,7 +515,7 @@ int param_list() {
 		statusCode = data_type(NULL, false);
 		if (statusCode != 0)
 			return statusCode;
-		processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+		processParam(paramID, token, false);
 		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
 																																		   : "STRING",
 				getSymbol(paramID.s)->depth);
@@ -539,13 +539,14 @@ int data_type(bool *isNullable, bool canBeVoid) {
 		free(token.s);
 		return statusCode;
 	}
-	printf("Data type: %d\n", token.kw);
+	// if it is return type it can also be void
 	if (canBeVoid && token.kw == dtvoid) {
 		return 0;
 	}
-	printf("Data type: %d\n", token.kw);
+
 	if (isNullable != NULL)
 		*isNullable = true;
+	//check if its optional
 	if (token.kw == question_mark) {
 		if (isNullable != NULL)
 			*isNullable = true;
@@ -555,6 +556,7 @@ int data_type(bool *isNullable, bool canBeVoid) {
 			return statusCode;
 		}
 	}
+	//check if its []u8
 	if (token.kw == square_brackets) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -587,46 +589,55 @@ int return_type() {
 int code() {
 	int statusCode;
 	switch (token.kw) {
+		//line starts with const
 		case constant:
-			statusCode = variable_definition(true); //semantic done, exp done
+			statusCode = variable_definition(true);
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with var
 		case variable:
-			statusCode = variable_definition(false); //semantic done, exp done
+			statusCode = variable_definition(false);
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with id
 		case id:
-			statusCode = call_or_assignment(); //TODO: assignment done, call is missing
+			statusCode = call_or_assignment();
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with if
 		case _if:
-			statusCode = if_else(); //semantic done,
+			statusCode = if_else();
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with while
 		case _while:
-			statusCode = while_syntax(); //semantic done
+			statusCode = while_syntax();
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with return
 		case _return:
-			statusCode = return_syntax(); //No can do without precedent_an
+			statusCode = return_syntax();
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with ifj
 		case inbuild:
 			statusCode = library_function(true);
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with _
 		case underscore:
 			statusCode = empty_variable();
 			if (statusCode != 0)
 				return statusCode;
 			break;
+		//line starts with unallowed keyword
 		default:
 			fprintf(stderr, "Error: Expected command but found: %d\n", token.kw);
 			return SYNTACTIC_ANALYSIS_ERROR;
@@ -661,7 +672,7 @@ int if_else() {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-
+	// Check if there is an attempt to unwrap the value
 	if (token.kw == vertical_bar) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -802,6 +813,7 @@ int library_function(bool expectNext) {
 		fprintf(stderr, "Error: Memory allocation failed\n");
 		return INTERNAL_COMPILER_ERROR;
 	}
+	// add ifj. prefix to the function name so we can find it in the symtable as library function
 	strcpy(prefix, "ifj.");
 	strcat(prefix, token.s);
 	symbol_t *fnSymbol = getSymbol(prefix);
@@ -836,7 +848,8 @@ int variable_definition(bool isConst) {
 		return statusCode;
 	}
 	bool isDefined = false;
-	if (token.kw == colon) { //Nice definition with variable type
+	//Definition with variable type
+	if (token.kw == colon) {
 		isDefined = true;
 		statusCode = data_type(isNullable, false);
 		if (statusCode != 0)
@@ -875,14 +888,13 @@ int variable_definition(bool isConst) {
 };
 int call_or_assignment() {
 	int statusCode;
-	// TODO: SEMANTHIC ANALYSIS
-	// I need semanthic analysis to define if id is a function or variable
-
 	symbol_t *sym = getSymbol(token.s);
+	//Check if id is defined
 	if (sym == NULL) {
 		fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
+	//Check if id is a function
 	if (sym->type == FUNCTION) {
 		ast_default_node_t *fnCallNode = ast_createFnCallNode(sym);
 		ast_insert(astRoot->activeNode, fnCallNode);
@@ -944,7 +956,7 @@ int parse_params(ast_default_node_t *fnCallNode) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 
-
+	// this bool is there to check if we are pass first term, because then there is trailing , allowed
 	bool isPastFirstTerm = false;
 	Token *allocatedTkn = NULL;
 	do {
@@ -1007,6 +1019,7 @@ int while_syntax() {
 
 	if (statusCode != 0)
 		return statusCode;
+	//Check if there is an attempt to unwrap the value
 	if (token.kw == vertical_bar) {
 		statusCode = read_token();
 		if (statusCode != 0) {
