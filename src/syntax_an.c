@@ -956,6 +956,10 @@ int variable_definition(bool isConst) {
 	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
+	if(varAssignNode->expression->dataType == STRING){
+			fprintf(stderr, "Error: Cannot define string without ifj.string!\n");
+			return TYPE_INFERENCE_ERROR;
+		}
 
 	varType expDataType = UNDEFINED;
 	statusCode = checkExprTypesCompatibility(varAssignNode->expression, &expDataType);
@@ -1006,7 +1010,7 @@ int call_or_assignment() {
 		return REDEFINITION_ERROR;
 	}
 	sym->isChanged = true;
-	fprintf(stderr, "ID: %s\n", token.s);
+	fprintf(stderr, "Assignment/call ID: %s\n", token.s);
 	if (sym == NULL) {
 		fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
@@ -1029,11 +1033,18 @@ int call_or_assignment() {
 		ast_default_node_t *defaultNode = ast_wrapVarAssignNode(varAssignNode);
 		ast_insert(astRoot->activeNode, defaultNode);
 
+
 		int statusCode = expressionParser(false, &varAssignNode->expression);
 		if (statusCode != 0)
 			return statusCode;
+		if(varAssignNode->expression->dataType == STRING){
+			fprintf(stderr, "Error: Cannot assign string without ifj.string!\n");
+			return TYPE_COMPATIBILITY_ERROR;
+		}
+
 		if (nullableInExpr(varAssignNode->expression) && !sym->isNullable)
 			return TYPE_COMPATIBILITY_ERROR;
+
 		varType dataType;
 		if(varAssignNode->expression->dataType == FUNCTION)
 			dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;
