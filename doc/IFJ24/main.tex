@@ -105,10 +105,28 @@
 \rhead{\bfseries Implementace překladače (Lexikální analýza)}
 \section{Implementace překladače}
 \subsection{Lexikální analýza}
-%\subsubsection{Základní struktura lexikálního analyzátoru}
-Lexikální analýza se provádí funkcí \textit{get\_token()} 
-funkce \textit{\textbf{get\_next\_token()}} Rozhraní (\textit{scanner}) načítající \newline
-\textit{\textbf{delete\_token()}} která
+Lexikální analýza se provádí funkcí \textit{get\_token()}, která je definována v souboru \textit{Lexem\_an.c}. Její pomocné struktury a funkce jsou definovány v souborech \textit{tokens.h, .c}.\newline
+Syntaktická analýza zavolá \textit{get\_token()}, který vrací strukturu \textit{Token}. Druh tokenu se určuje podle atributu \textit{KeyWord kw}. V atributech \textit{int i, double f, char *s} se předávají hodnoty tokenů pro identifikátory, čísla a stringy.\newline
+Lexikální analyzátor jsem vytvořil z lexikálních analyzátorů, které jsem udělal pro projekty posledních dvou let.
+
+\subsubsection{Inicializace}
+Na začátku se zavedou proměnné a alokuje paměť.\newline
+Proměnné \textit{int n} a \textit{double d} slouží k předání celých a desetinných čísel do tokenů. \textit{Token new} drží strukturu \textit{Token}, kterou funkce po úpravách lexikální analýzou vrací. \textit{char letter} si pamatuje poslední znak ze vstupu. Pokud funkce končí a poslední znak se nevyužil, vrací ho zpět na vstup. \textit{size\_t lex\_size} udržuje aktuální maximální alokovanou délku \textit{char *lexem}. Při spuštění funkce začíná na 8. \textit{char *lexem} je dynamicky alokovaný string pro uchovávání dlouhých lexémů. Před přidáním dalšího znaku funkce zkontroluje, zda má \textit{*lexem} dostatek místa. Pokud ne, realokuje jeho obsah s dvojnásobnou velikostí a tu zapíše do \textit{lex\_size}. \textit{char *p} je pomocný pointer. Při realokaci \textit{*lexem} na něm zjistíme, zda realokace proběhla úspěšně, a při předávání stringu do tokenu do něj alokujeme adekvátní velikost stringu. Alokovanou paměť následně předáme do atributu \textit{*s} tokenu.
+
+\subsubsection{Postupná úprava analyzátoru}
+První verze lexikálního analyzátoru fungovala tak, že se funkce zavolala zvlášť před ostatními analýzami a vytvořila jednostranně vázaný, který pak mohli procházet, ale pro splnění podmínky syntaxí řízené analýzy jsme ho změnili na vracení jednotlivých tokenů. V kódu můžete najít některé pozůstatky této verze, např. while cyklus pod inicializací. Pokud prvek neubíral funkčnosti, ponechali jsme ho.
+
+\subsubsection{Určování tokenu}
+Funkce \textit{get\_token()} rozhoduje o tokenu podle příchozího znaku. Tento znak vloží do velkého switche.\newline
+Na začátku switche najdeme bílé znaky, které analyzátor přeskočí. Komentáře se rovněž přeskakují, jen se nacházejí níže.\newline
+Následují jednoznačné tokeny. Jinak řečeno, tokeny vyžadující pouze 1-2 znaky.\newline
+\newline
+\newline
+\newline
+\newline
+Pokud funkce najde EOF, pošle token \textit{end} pro oznámení konce souboru.\newline
+
+%funkce \textit{\textbf{get\_next\_token()}} Rozhraní (\textit{scanner}) načítající \newline \textit{\textbf{delete\_token()}} která
 
 \subsubsection{Vysvětlení konečného automatu}
 \begin{itemize}
@@ -117,7 +135,7 @@ funkce \textit{\textbf{get\_next\_token()}} Rozhraní (\textit{scanner}) načít
     \item Některé přechody mají šipku oběma směry. To znamená, že se při správném znaku lze vrátit do předchozího stavu.
     \item Pokud automat dojde do konečného stavu a dostane znak neodpovídající žádnému z jeho přechodů, znak vrátí na vstup a odešle token odpovídající aktuálnímu konečnému stavu s případným obsahem (číslo/string).
     \item Pokud automat dojde do běžného stavu a dostane znak neodpovídající žádnému z jeho přechodů, dochází k chybě číslo 1, chyba v lexému, a program končí.
-    \item Automat začíná velkým stavem start vlevo uprostřed. Vlevo nahoře se nachází oblast tokenů tvořených 1-2 znaky. Vpravo nahoře jsou klíčová slova a identifikároty proměnných a funkcí. Vpravo uprostřed jsou víceřádkové stringy. Vpravo dole jsou jednořádkové stringy
+    \item Automat začíná velkým stavem \textit{start} vlevo uprostřed. Vlevo nahoře se nachází oblast tokenů tvořených 1-2 znaky. Vpravo nahoře jsou klíčová slova a identifikároty proměnných a funkcí. Vpravo uprostřed jsou víceřádkové stringy. Vpravo dole jsou jednořádkové stringy
 \end{itemize}
 
 \newpage
@@ -128,7 +146,6 @@ funkce \textit{\textbf{get\_next\_token()}} Rozhraní (\textit{scanner}) načít
         \caption{Diagram konečného automatu}
     \end{center}
 \end{figure}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Implementace překladače (Syntaktická analýza)}
