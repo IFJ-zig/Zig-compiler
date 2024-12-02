@@ -4,7 +4,8 @@
 *********************************************/
 #include "syntax_an.h"
 
-#define ENABLE_CODEGEN true
+//Debug flag for disabling codegen so it doesn't spam the console
+#define ENABLE_CODEGEN false
 
 Token token;
 bool tokenWasGiven = 0;
@@ -136,9 +137,10 @@ int seekHeaders() {
 					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				data_type(NULL);
+				bool isNullable = false;
+				data_type(&isNullable);
 
-				statusCode = assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+				statusCode = assignFunctionParameter(fnSymbol, paramID, token, isNullable);
 				if (statusCode != 0) {
 					return statusCode;
 				}
@@ -196,7 +198,7 @@ int seekHeaders() {
 	}
 	if (getSymbol("main") == NULL) {
 		fprintf(stderr, "Error: Main function is not defined\n");
-		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR; //TODO: Is this the correct error code?
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
 	fprintf(stderr, "Headers OK\n");
 	fprintf(stderr, "---------------- END SEEK HEADERS ----------------\n\n\n");
@@ -209,7 +211,6 @@ int program() {
 	if (statusCode != 0)
 		return statusCode;
 
-	// TODO: SOME CODE GENERATION STUFF
 	while (1) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -354,53 +355,44 @@ void loadIFJ24() {
 	fnSymbol = getSymbol("ifj.write");
 	assignFunctionParameter(fnSymbol, (Token){.s = "value", .kw = id}, (Token){.kw = dtflt}, false);
 	fnSymbol->params[0]->type = ANYTYPE; //Anytype is allowed, we don't have a keyword for that however, so a little hack because, because this is happens only once in the entire program
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.readstr", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readstr");
 	fnSymbol->returnType = STRING;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.readi32", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readi32");
 	fnSymbol->returnType = INT;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.readf64", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.readf64");
 	fnSymbol->returnType = FLOAT;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.string", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.string");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.concat", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.concat");
 	assignFunctionParameter(fnSymbol, (Token){.s = "str1", .kw = id}, (Token){.kw = dtstr}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "str2", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = STRING;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.length", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.length");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = INT;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.i2f", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.i2f");
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = FLOAT;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.f2i", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.f2i");
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtflt}, false);
 	fnSymbol->returnType = INT;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.substring", FUNCTION, false, true);
 	fnSymbol = getSymbol("ifj.substring");
@@ -408,27 +400,23 @@ void loadIFJ24() {
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "j", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = STRING;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.ord", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.ord");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s", .kw = id}, (Token){.kw = dtstr}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = INT;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.chr", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.chr");
 	assignFunctionParameter(fnSymbol, (Token){.s = "i", .kw = id}, (Token){.kw = dtint}, false);
 	fnSymbol->returnType = STRING;
-	fprintf(stderr, "\n");
 
 	defineSymbol("ifj.strcmp", FUNCTION, false, false);
 	fnSymbol = getSymbol("ifj.strcmp");
 	assignFunctionParameter(fnSymbol, (Token){.s = "s1", .kw = id}, (Token){.kw = dtstr}, false);
 	assignFunctionParameter(fnSymbol, (Token){.s = "s2", .kw = id}, (Token){.kw = dtstr}, false);
 	fnSymbol->returnType = INT;
-	fprintf(stderr, "\n");
 	fprintf(stderr, "Done loading IFJ24 functions\n\n");
 }
 
@@ -506,7 +494,6 @@ int function_analysis() {
 		}
 	}
 
-	// TODO: SEMANTHIC CHECKS FOR RETURN STATEMENT
 	statusCode = exitScope();
 	if(statusCode != 0){
 		return statusCode;
@@ -556,10 +543,11 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = data_type(NULL);
+		bool isNullable = false;
+		statusCode = data_type(&isNullable);
 		if (statusCode != 0)
 			return statusCode;
-		statusCode = processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+		statusCode = processParam(paramID, token, isNullable);
 		if (statusCode != 0) 
 			return statusCode;
 		getSymbol(paramID.s)->isChanged = true;
@@ -647,7 +635,7 @@ int code() {
 				return statusCode;
 			break;
 		case id:
-			statusCode = call_or_assignment(); //TODO: assignment done, call is missing
+			statusCode = call_or_assignment();
 			if (statusCode != 0)
 				return statusCode;
 			break;
