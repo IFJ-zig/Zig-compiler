@@ -66,6 +66,7 @@ int defineSymbol(char *name, varType type, bool isConst, bool isNullable) {
 	symbol->params = NULL;
 	symbol->hasReturn = false;
 	symbol->depth = getCurrentDepth(list);
+	symbol->isMutable = true;
 	fprintf(stderr, "Symbol '%s' defined at depth %d, isConst=%s, isNullable=%s, type=%s\n", name, getCurrentDepth(list), isConst ? "true" : "false", isNullable ? "true" : "false", type == INT ? "INT" : type == FLOAT ? "FLOAT"
 																																																   : type == STRING      ? "STRING"
 																																																   : type == FUNCTION    ? "FUNCTION"
@@ -132,7 +133,6 @@ bool isValidParamType(KeyWord kw) {
 }
 
 
-//This function creates a memore leak, because the symbols created for params are never freed, fix before final version TODO
 int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable) {
 	fprintf(stderr, "  ┕Function %s has a parameter %s of type %s isNullable=%s\n", function->key, paramName.s, getTokenName(paramType), isNullable ? "true" : "false");
 	function->paramCount++;
@@ -144,6 +144,7 @@ int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType
 	param->isConst = false;
 	param->isDefined = false;
 	param->depth = -1;
+	param->isMutable = false;
 	function->params[function->paramCount - 1] = param;
 	if(!strcmp(function->key, "main")){
 		fprintf(stderr, "Error: main must not take any parameters!\n");

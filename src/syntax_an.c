@@ -4,6 +4,7 @@
 *********************************************/
 #include "syntax_an.h"
 
+#define ENABLE_CODEGEN true
 
 Token token;
 bool tokenWasGiven = 0;
@@ -48,8 +49,10 @@ int syntax_analyzer() {
 	statusCode = program();
 	if (statusCode != 0)
 		return statusCode;
-	printHeader();
-	codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
+	if(ENABLE_CODEGEN){
+		printHeader();
+		codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
+	}
   	ast_destroy(astRoot);
 	semanticDestroy();
 	return 0;
@@ -548,6 +551,7 @@ int param_list() {
 			return statusCode;
 		getSymbol(paramID.s)->isChanged = true;
 		getSymbol(paramID.s)->isUsed = false;
+		getSymbol(paramID.s)->isMutable = false;
 		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
 																																		   : "STRING",
 				getSymbol(paramID.s)->depth);
@@ -997,6 +1001,10 @@ int variable_definition(bool isConst) {
 int call_or_assignment() {
 	int statusCode;
 	symbol_t *sym = getSymbol(token.s);
+	if(!sym->isMutable){
+		fprintf(stderr, "Error: Parameter %s is not mutable\n", sym->key);
+		return REDEFINITION_ERROR;
+	}
 	sym->isChanged = true;
 	fprintf(stderr, "ID: %s\n", token.s);
 	if (sym == NULL) {
