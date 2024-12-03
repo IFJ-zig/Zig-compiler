@@ -1,3 +1,10 @@
+/********************************************
+* Projekt: Implementace překladače imperativního jazyka IFJ24
+* Tvůrci: Tadeáš Horák, xhorakt00
+*********************************************/
+
+//This header file contains the error codes used in the compiler
+
 #ifndef ERROR_CODES_H
 #define ERROR_CODES_H
 
