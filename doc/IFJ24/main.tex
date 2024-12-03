@@ -158,107 +158,79 @@ Pokud funkce najde EOF, pošle token \textit{end} pro oznámení konce souboru.\
 \newpage
 \rhead{\bfseries Implementace překladače (Syntaktická analýza)}
 \subsection{Syntaktická analýza}
-\subsubsection{Parser}
-Syntaktická  \cite{FITPUB8538}. Načtení \textit{\textbf{next\_token()}}. uvolnění \textit{get\_next\_token()} načtení 
 
-\subsubsection{Rozhraní mezi parserem a zpracováním výrazů (psa)}
-Rozhraní \textit{\textbf{psa()}}. zapouzdřena \textit{expression()}. Jako parametr
+Syntaktická analýza je implementována v souboru \texttt{syntax\_an.c} (s odpovídajícím hlavičkovým souborem \texttt{syntax\_an.h}) a je realizována pomocí rekurzivního sestupu na základě LL gramatiky. Tento soubor obsahuje klíčovou funkci překladače, \textit{syntax\_analyzer()}, která provádí veškeré potřebné operace před a po syntaktické analýze.
+
+Proces začíná voláním funkce \textit{headers()}, která načte počáteční pravidlo (import) a následně zpracovává hlavičky funkcí. Tyto hlavičky jsou uloženy do symbolické tabulky, zatímco těla funkcí jsou během prvního průchodu ignorována. Po načtení hlaviček se vstupní proud resetuje na začátek souboru pomocí funkce \textit{rewind\_stdin()}.
+
+Následuje druhý průchod, zahájený voláním funkce \textit{program()}, který provádí podrobnou analýzu celého programu. V tomto kroku se také provádí sémantická kontrola a vytváří se abstraktní syntaktický strom (AST). AST je generován pomocí funkcí, které vytvářejí jednotlivé uzly a propojují je do hierarchické struktury. Po dokončení syntaktické analýzy je AST předán do fáze generace kódu.
+
+Tokeny jsou načítány lexikálním analyzátorem prostřednictvím funkce \textit{read\_token()}, která volá funkci \textit{get\_token()}. Tato funkce slouží jako rozhraní mezi lexikální a syntaktickou analýzou. Parser zpracovává všechny části LL gramatiky s výjimkou výrazů. Výrazy jsou předávány metodě precedenční syntaktické analýzy, která je samostatně vyhodnocuje.
+
+\subsubsection{Přechod mezi rekurzivním sestupem a precedenční analýzou}
+Přechod mezi rekurzivním sestupem a precedenční analýzou je realizován voláním funkce \textit{expressionParser(bool tokenRead, ast\_node\_exp\_t **resultPointer)} ve souboru \texttt{expression\_parser.c}. Tato funkce je volána na místech, kde se očekává výraz, například za symbolem \texttt{=}. Parametr \texttt{tokenRead} indikuje, zda byl první token již přečten, a parametr \texttt{resultPointer} slouží jako ukazatel, kam je uložen výsledný strom výrazu.
 
 \vspace{4cm}
-
-\begin{figure}[ht!]
-\begin{center}
-\begin{tikzpicture}[square/.style={regular polygon,regular polygon sides=4}]
-        \node at (0,0) [square, draw] {PARSER};
-        \node at (12,0) [square, draw] {Zpracování výrazů};
-        \draw (1.4,1) -- node[above]{psa()} (9.45,1);
-        \draw (1.4,-1) -- node[above]{next\_token()} (9.45,-1);
-\end{tikzpicture}
-\caption{Rozhraní mezi parserem a zpracováním výrazů}
-\end{center}
-\end{figure}
 
 \newpage
 
 \subsubsection{LL gramatika}
 
 \begin{enumerate}
-    \item <prog> → require “ifj21” <main\_b>
-    \item[]
-    \item <main\_b> → function id (<params>) <ret\_func\_types> <stats> end <main\_b>
-    \item <main\_b> → global id : function (<arg\_def\_types>) <ret\_def\_types> <main\_b>
-    \item <main\_b> → id (<args>) <main\_b>
-    \item <main\_b> → $\varepsilon$
-    \item[]
-    \item <stats> → local id : <type> <assign> <stats>
-    \item <stats> → if exp then <stats> else <stats> end <stats>
-    \item <stats> → while exp do <stats> end <stats>
-    \item <stats> → return <ret\_vals> <stats>
-    \item <stats> → id <id\_func> <stats>
-    \item <stats> → $\varepsilon$
-    \item[]
-    \item <id\_func> → <n\_ids> = <as\_vals>
-    \item <id\_func> → (<args>)
-    \item[]
-    \item <params> → id : <type> <n\_params>
-    \item <params> → $\varepsilon$
-    \item <n\_params> → , id : <type> <n\_params>
-    \item <n\_params> → $\varepsilon$
-    \item[]
-    \item <n\_ids> → , id <n\_ids>
-    \item <n\_ids> → $\varepsilon$
-    \item[]
-    \item <vals> → exp <n\_vals>
-    \item <n\_vals> → , exp <n\_vals>
-    \item <n\_vals> → $\varepsilon$
-    \item[]
-    \item <as\_vals> → <vals>
-    \item <as\_vals> → id (<args>)
-    \item[]
-    \item <ret\_vals> → <vals>
-    \item <ret\_vals> → $\varepsilon$
-    \item[]
-    \item <assign> → = <assign\_val>
-    \item <assign> → $\varepsilon$
-    \item[]
-    \item <assign\_val> → exp
-    \item <assign\_val> → id (<args>)
-    \item[]
-    \item <term> → id
-    \item <term> → <const>
-    \item[]
-    \item <args> → <term> <n\_args>
-    \item[]
-    \item <args> → $\varepsilon$
-    \item <n\_args> → , <term> <n\_args>
-    \item <n\_args> → $\varepsilon$
-    \item[]
-    \item <arg\_def\_types> → <func\_def\_types>
-    \item <arg\_def\_types> → $\varepsilon$
-    \item[]
-    \item <ret\_func\_types> → : <func\_types>
-    \item <ret\_func\_types> → $\varepsilon$
-    \item[]
-    \item <ret\_def\_types> → : <func\_def\_types>
-    \item <ret\_def\_types> → $\varepsilon$
-    \item[]
-    \item <func\_types> → <type>  <n\_func\_types>
-    \item <n\_func\_types> → , <type>  <n\_func\_types>
-    \item <n\_func\_types> → $\varepsilon$
-    \item[]
-    \item <func\_def\_types> → <type>  <n\_func\_def\_types>
-    \item <n\_func\_def\_types> → , <type>  <n\_func\_def\_types>
-    \item <n\_func\_def\_types> → $\varepsilon$
-    \item[]
-    \item <type> → integer
-    \item <type> → number
-    \item <type> → string
-    \item <type> → nil
-    \item[]
-    \item <const> → int\_value
-    \item <const> → double\_value
-    \item <const> → string\_value
-    \item <const> → nil
+    \item Program → Import Function\_list
+    \item Import → \texttt{const} \texttt{ifj} \texttt{equal} \texttt{at} \texttt{lbrace} \texttt{text} \texttt{rbrace} \texttt{semicolon}
+    \item Function\_list → Function\_analysis Function\_next
+    \item Function\_next → \texttt{end}
+    \item Function\_next → Function\_list
+    \item Function\_analysis → \texttt{pub} \texttt{fn} \texttt{id} \texttt{lbrace} Param\_def \texttt{rbrace} Return\_type \texttt{lblock} Code\_list \texttt{rblock}
+    \item Param\_def → eps
+    \item Param\_def → Param Param\_list
+    \item Param\_list → \texttt{comma} Param\_def
+    \item Param\_list → eps
+    \item Param → \texttt{id} \texttt{colon} Var\_type
+    \item Return\_type → Data\_type
+    \item Return\_type → \texttt{void}
+    \item Var\_type → Data\_type\_optional Data\_type
+    \item Data\_type → \texttt{i32}
+    \item Data\_type → \texttt{f64}
+    \item Data\_type → \texttt{u8}
+    \item Data\_type\_optional → \texttt{question}
+    \item Data\_type\_optional → eps
+    \item Code\_list → Code Code\_list
+    \item Code\_list → eps
+    \item Code → Variable\_definition
+    \item Code → Call\_or\_assignment
+    \item Code → If\_else
+    \item Code → While\_syntax
+    \item Code → Return\_syntax
+    \item Code → Empty\_variable
+    \item Code → Library\_function
+    \item Variable\_definition → Rewrite\_type \texttt{id} Variable\_definition\_type \texttt{equal} \texttt{exp}
+    \item Rewrite\_type → \texttt{var}
+    \item Rewrite\_type → \texttt{const}
+    \item Variable\_definition\_type → \texttt{colon} Var\_type
+    \item Variable\_definition\_type → eps
+    \item Empty\_variable → \texttt{underscore} \texttt{equal} \texttt{exp}
+    \item Library\_function → \texttt{ifj} \texttt{dot} Function\_call
+    \item Return\_syntax → \texttt{return} Return\_syntax\_next
+    \item Return\_syntax\_next → \texttt{semicolon}
+    \item Return\_syntax\_next → \texttt{exp} \texttt{semicolon}
+    \item Unwrapped → eps
+    \item Unwrapped → \texttt{pipe} \texttt{id} \texttt{pipe}
+    \item If\_else → \texttt{if} \texttt{lbrace} \texttt{exp} \texttt{rbrace} Unwrapped \texttt{lblock} Code\_list \texttt{rblock} \texttt{else} \texttt{lblock} Code\_list \texttt{rblock}
+    \item While\_syntax → \texttt{while} \texttt{lbrace} \texttt{exp} \texttt{rbrace} Unwrapped \texttt{lblock} Code\_list \texttt{rblock}
+    \item Call\_or\_assignment → \texttt{id} Call\_or\_assignment\_next
+    \item Call\_or\_assignment\_next → Function\_call
+    \item Call\_or\_assignment\_next → Assignment
+    \item Function\_call → \texttt{lbrace} Parse\_Params \texttt{rbrace} \texttt{semicolon}
+    \item Parse\_Params → eps
+    \item Parse\_Params → Term\_list Parse\_Params
+    \item Term\_list → Term \texttt{comma}
+    \item Term → \texttt{id}
+    \item Term → \texttt{num}
+    \item Term → \texttt{decim}
+    \item Term → \texttt{text}
+    \item Assignment → \texttt{equal} \texttt{exp}
 \end{enumerate}
 
 \vspace{1cm}
@@ -269,7 +241,7 @@ Poznámka: "exp" - označení pro výraz
 \subsubsection{LL tabulka}
 \begin{figure}[ht!]
 \begin{center}
-  \includegraphics[angle=90,origin=c, width=0.59\textwidth, trim={0 2.5cm 0 2.5cm},clip]{images/LL_table_1.pdf}
+  \includegraphics[angle=90,origin=c, width=0.52\textwidth]{images/LL_table_1.pdf}
   \caption{LL tabulka, část 1}
 \end{center}
 \end{figure}
@@ -277,22 +249,24 @@ Poznámka: "exp" - označení pro výraz
 
 \newpage
 
-\begin{figure}[ht!]
-\begin{center}
-  \includegraphics[angle=90,origin=c, width=0.59\textwidth, trim={0 2.5cm 0 2.5cm},clip]{images/LL_table_2.pdf}
-  \caption{LL tabulka, část 2}
-\end{center}
-\end{figure}
-
-\newpage
-
 \subsubsection{Zpracování výrazů}
-Zpracování \textit{psa.c (.h)} prováděno \cite{FITPUB8538}. Nejprve \textit{psa\_table\_symbol\_enum} načten \textit{\textbf{get\_index\_enum()}} funkce
+Precedenční analýza začíná inicializací zásobníku, do kterého je nejprve vložen ukončující terminál. Následně jsou postupně čteny tokeny, přičemž funkce \textit{getOperation()} vyhodnocuje operaci na základě vrcholu zásobníku a aktuálně čteného tokenu. V případě operace \texttt{<} je nad nejvrchnější terminál umístěna zarážka \texttt{<} a čtený token je vložen na vrchol zásobníku. Při operaci \texttt{=} je čtený terminál jednoduše vložen na vrchol zásobníku. Pokud nastane operace \texttt{>}, dochází k pokusu o redukci voláním funkce \textit{tryToMatchRule(t\_Stack *stack)}. Pokud se najde shoda s některým z pravidel gramatiky, probíhá redukce, která zároveň generuje abstraktní syntaktický strom.
+
+Redukce je realizována pomocí funkcí:
+\begin{itemize}
+    \item \textit{createUnaryExp(t\_Stack *stack)} pro vytvoření unárního výrazu,
+    \item \textit{createBinaryExp(t\_Stack *stack)} pro vytvoření binárního výrazu,
+    \item \textit{createValueExp(t\_Stack *stack)} pro vytvoření výrazu s hodnotou, nebo id,
+    \item \textit{reduceBracketNonTerminal(t\_Stack *stack)} pro redukci v případě (E).
+\end{itemize}
+
+Pokud funkce \texttt{getOperation()} vrátí hodnotu \texttt{0}, znamená to chybu, a funkce \texttt{expressionParser(bool tokenRead, ast\_node\_exp\_t **resultPointer)} skončí syntaktickou chybou. V případě, že výsledkem operace je \texttt{1}, provede se kontrola, zda zásobník odpovídá očekávanému stavu \texttt{\$E\$}. Pokud ano, je abstraktní syntaktický strom vložen do ukazatele \texttt{**resultPointer}.
+
 
 \subsubsection{Precedenční tabulka}
 \begin{figure}[ht!]
 \begin{center}
-  \includegraphics[width=1\textwidth, trim={0 2.5cm 0 0},clip]{images/precedence_table.pdf}
+  \includegraphics[width=1\textwidth]{images/precedence_table.pdf}
   \caption{Precedenční tabulka}
 \end{center}
 \end{figure}
@@ -302,21 +276,22 @@ Zpracování \textit{psa.c (.h)} prováděno \cite{FITPUB8538}. Nejprve \textit{
 \subsubsection{Gramatika pro výrazy}
 
 \begin{enumerate}
-    \item E → i
-    \item E → $\#$E
-    \item E → (E)
-    \item E → E $..$ E
-    \item E → E $+$ E
-    \item E → E $-$ E
-    \item E → E $*$ E
-    \item E → E $/$ E
-    \item E → E $//$ E
-    \item E → E $=$ E
-    \item E → E $\sim=$ E
-    \item E → E $<=$ E
-    \item E → E $>=$ E
-    \item E → E $<$ E
-    \item E → E $>$ E
+    \item $E \to E + E$
+    \item $E \to E * E$
+    \item $E \to (E)$
+    \item $E \to \text{id}$
+    \item $E \to \text{num}$
+    \item $E \to \text{float}$
+    \item $E \to \text{string}$
+    \item $E \to E - E$
+    \item $E \to E / E$
+    \item $E \to E > E$
+    \item $E \to E < E$
+    \item $E \to E \neq E$
+    \item $E \to E \geq E$
+    \item $E \to E \leq E$
+    \item $E \to E == E$
+    \item $E \to -E$
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
