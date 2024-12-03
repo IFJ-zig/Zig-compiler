@@ -68,7 +68,7 @@
 \newpage
 \tableofcontents
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Práce v týmu}
 \section{Práce v týmu}
@@ -100,7 +100,15 @@
     \end{minipage}
 \end{itemize}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\subsection{Průběh práce}
+efcvrtvrtvrtv
+\subsection{Sdílení kódu}
+efcvrtvrtvrtv
+\subsection{Komunikace}
+efcvrtvrtvrtv
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Implementace překladače (Lexikální analýza)}
 \section{Implementace překladače}
@@ -120,19 +128,18 @@ První verze lexikálního analyzátoru fungovala tak, že se funkce zavolala zv
 Funkce \textit{get\_token()} rozhoduje o tokenu podle příchozího znaku. Tento znak vloží do velkého switche.\newline
 Na začátku switche najdeme bílé znaky, které analyzátor přeskočí. Komentáře se rovněž přeskakují, jen se nacházejí níže.\newline
 Následují jednoznačné tokeny. Jinak řečeno, tokeny vyžadující pouze 1-2 znaky.\newline
-\newline
-\newline
-\newline
-\newline
+Víceřádkové stringy se poznají podle dvou obrácených po sobě jdoucích lomítek "\textbackslash\textbackslash" a posílají se stejně jako řádkové, v atributu tokenu \textit{*s} s atributem \textit{kw} nastaveným na \textit{text}. Rozdíl je v jejich tvorbě. Do stringu se přidá vše, co se nachází za "\textbackslash\textbackslash", včetně konce řádku '\textbackslash n'. Samotná lomítka se neposílají. Pokud se na dalším řádku, po bílých znacích, nachází další "\textbackslash\textbackslash", proces se opakuje, jinak se poslední '\textbackslash n' smaže a token se pošle.\newline
+Jednořádkové stringy se poznají podle dvojitých uvozovek ". Pokud následují dvě " po sobě, jedná se o prázdný string a může se tedy ihned poslat token s \textit{text}. V \textit{*s} se pošle pouze '\textbackslash0'. Pokud následují znaky, přidají se do odevzdávaného stringu. Pokud cyklus narazí na obrácené lomítko '\textbackslash' vyzkouší, zda se jedná o escape sekvenci. Pokud ne, dojde k chybě 1. Pokud následuje 'x', zkontroluje se, zda následující dva znaky odpovídají zápisu hexadecimálního čísla. Pokud ano, hodnota se převede na znak, který se přidá do stringu, jinak nastává chyba 1. Druhé " ukončí nabírání znaků a pošle se token. String se posílá bez ohraničujících ".\newline
+Mezi celými a desetinnými čísly rozlišujeme podle přítomnosti tečky nebo exponentu. Čísla začínají jako celá po příchodu číslovky, tedy znak 0 až 9. Pokud jako první přijde 0 a následují další číslice, jedná se o chybu 1. Pokud po číslovkách následuje '.' nebo 'e' číslo je jednoznačně desetinné. Po '.' a alespoň jedné číslovce může stále přijít 'e'. Po 'e' musí také následovat alespoň jedna číslovka. Před ní se může objevit '+' nebo '-'. Pokud přijatý znak už není jeden z jmenovaných, string se převede na číslo, vloží se do atributu \textit{i} pro celá a \textit{f} pro desetinná čísla. Pro jistotu se číslo pošle i jako string v \textit{*s}.\newline
+Identifikátory a klíčová slova začínají buď písmeny nebo podtržítkem '\_'. Pokud za '\_' nenásledují písmena, čísla ani '\_', jedná se o prázdnou proměnnou a odevzdá se její token. V opačném případě se do řetězce pomocí cyklu vezmou všechny zmíněné znaky. Aby se snížila režie, porovná se první znak řetězce s prvními znaky všech možných klíčových slov. Tam, kde se shodují, se řetězec porovná s konkrétním klíčovým slovem, díky čemuž se vynechají porovnávání s ostatními. Pokud se řetězec shoduje s celým slovem, vyšle se jeho token, jinak se vyšle token \textit{id}, s řetězcem v \textit{*s}.\newline
 Pokud funkce najde EOF, pošle token \textit{end} pro oznámení konce souboru.\newline
-
-%funkce \textit{\textbf{get\_next\_token()}} Rozhraní (\textit{scanner}) načítající \newline \textit{\textbf{delete\_token()}} která
 
 \subsubsection{Vysvětlení konečného automatu}
 \begin{itemize}
     \item Ovály s jednoduchým okrajem jsou obyčejné stavy a ovály s dvojitým okrajem jsou stavy konečné.
     \item Pro přehlednost jsou některé přechody mezi stavy spojeny do jedné čáry. Pokud tomu tak je, symbol, který přechodu náleží, je vyobrazen tak, aby se nedaly zaměnit. Buď u jednotlivých přechodů, nebo u přechodů se stejným znakem směřujících do stejného stavu. 
     \item Některé přechody mají šipku oběma směry. To znamená, že se při správném znaku lze vrátit do předchozího stavu.
+    \item U hledání identifikátorů automat zůstává ve stavu \textit{id}, dokud řetězec neodpovídá celému klíčovému slovu. Poté přejde do odpovídajícího stavu. Pokud ale řetězec pokračuje vrací se do \textit{id}, kde už zůstává.
     \item Pokud automat dojde do konečného stavu a dostane znak neodpovídající žádnému z jeho přechodů, znak vrátí na vstup a odešle token odpovídající aktuálnímu konečnému stavu s případným obsahem (číslo/string).
     \item Pokud automat dojde do běžného stavu a dostane znak neodpovídající žádnému z jeho přechodů, dochází k chybě číslo 1, chyba v lexému, a program končí.
     \item Automat začíná velkým stavem \textit{start} vlevo uprostřed. Vlevo nahoře se nachází oblast tokenů tvořených 1-2 znaky. Vpravo nahoře jsou klíčová slova a identifikároty proměnných a funkcí. Vpravo uprostřed jsou víceřádkové stringy. Vpravo dole jsou jednořádkové stringy
@@ -146,7 +153,7 @@ Pokud funkce najde EOF, pošle token \textit{end} pro oznámení konce souboru.\
         \caption{Diagram konečného automatu}
     \end{center}
 \end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Implementace překladače (Syntaktická analýza)}
 \subsection{Syntaktická analýza}
@@ -487,8 +494,14 @@ Datový \textit{string\_t} implementován
 \subsubsection{token\_t}
 Datový \textit{token\_t} implementován
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
+\rhead{\bfseries Závěr}
+\section{Závěr}
+srtvsrnzmuzmetvsfverv
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \rhead{\bfseries Reference}
 \bibliographystyle{plain}
 \bibliography{reference.bib}
