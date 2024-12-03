@@ -1,6 +1,6 @@
 /********************************************
 * Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Tadeáš Horák, xhorakt00
+* Tvůrci: Tadeáš Horák - xhorakt00, Adam Vožda - xvozdaa00
 *********************************************/
 
 #include "ast.h"
@@ -17,8 +17,8 @@ void ast_init(ast_default_node_t *astRoot) {
 	astRoot->activeNode = NULL;
 }
 
-void printIndent(int depth) {
-	for (int i = 0; i < depth * 4; i++) { // Each depth level indented by 4 spaces
+void printIndent(int indentSize) {
+	for (int i = 0; i < indentSize * 4; i++) { // Each depth level indented by 4 spaces
         fputc(' ', stderr);
     }
 }

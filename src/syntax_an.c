@@ -1,15 +1,16 @@
 /********************************************
 * Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Adam Vožda, xvozdaa00
+* Tvůrci: Adam Vožda - xvozdaa00, Tadeáš Horák - xhorakt00
 *********************************************/
 #include "syntax_an.h"
 
+//Debug flag for disabling codegen so it doesn't spam the console
 #define ENABLE_CODEGEN true
 
 Token token;
 bool tokenWasGiven = 0;
 ast_default_node_t *astRoot;
-symbol_t *currentFunction;
+symbol_t *currentFunction;	//Pointer to the current function in the symtable, used for checking the return statement
 
 int read_token() {
 	token = get_token();
@@ -136,9 +137,10 @@ int seekHeaders() {
 					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				data_type(NULL);
+				bool isNullable = false;
+				data_type(&isNullable);
 
-				statusCode = assignFunctionParameter(fnSymbol, paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+				statusCode = assignFunctionParameter(fnSymbol, paramID, token, isNullable);
 				if (statusCode != 0) {
 					return statusCode;
 				}
@@ -196,7 +198,7 @@ int seekHeaders() {
 	}
 	if (getSymbol("main") == NULL) {
 		fprintf(stderr, "Error: Main function is not defined\n");
-		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR; //TODO: Is this the correct error code?
+		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
 	fprintf(stderr, "Headers OK\n");
 	fprintf(stderr, "---------------- END SEEK HEADERS ----------------\n\n\n");
@@ -209,7 +211,6 @@ int program() {
 	if (statusCode != 0)
 		return statusCode;
 
-	// TODO: SOME CODE GENERATION STUFF
 	while (1) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -493,7 +494,6 @@ int function_analysis() {
 		}
 	}
 
-	// TODO: SEMANTHIC CHECKS FOR RETURN STATEMENT
 	statusCode = exitScope();
 	if(statusCode != 0){
 		return statusCode;
@@ -519,7 +519,6 @@ int param_list() {
 	}
 
 	while (token.kw != rbracket) {
-		fprintf(stderr, "PARAM LIST\n");
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -543,18 +542,17 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = data_type(NULL);
+		bool isNullable = false;
+		statusCode = data_type(&isNullable);
 		if (statusCode != 0)
 			return statusCode;
-		statusCode = processParam(paramID, token, false); //TODO: isNullable is hardcoded to false for now, code doesn't support optionals yet. This MUST be changed before final version!
+		statusCode = processParam(paramID, token, isNullable);
 		if (statusCode != 0) 
 			return statusCode;
 		getSymbol(paramID.s)->isChanged = true;
 		getSymbol(paramID.s)->isUsed = false;
 		getSymbol(paramID.s)->isMutable = false;
-		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
-																																		   : "STRING",
-				getSymbol(paramID.s)->depth);
+		
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -634,7 +632,7 @@ int code() {
 				return statusCode;
 			break;
 		case id:
-			statusCode = call_or_assignment(); //TODO: assignment done, call is missing
+			statusCode = call_or_assignment();
 			if (statusCode != 0)
 				return statusCode;
 			break;
@@ -722,10 +720,12 @@ int if_else() {
 	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
 	ast_insert(astRoot->activeNode, ifElseNode);
 	statusCode = expressionParser(false, &ifElseNode->data_t.ifElse->conditionExp);
-	if (statusCode != 0) {
+	if (statusCode != 0)
 		return statusCode;
-	}
-	ast_printExp(ifElseNode->data_t.ifElse->conditionExp, 0);
+	
+	fprintf(stderr, "    ---------- START PRINT IF CONDITION ----------\n");
+	ast_printExp(ifElseNode->data_t.ifElse->conditionExp, 1);
+	fprintf(stderr, "    ----------- END PRINT IF CONDITION -----------\n\n");
 	statusCode = isValidIfExpression(ifElseNode->data_t.ifElse->conditionExp);
 	if (statusCode != 0) {
 		fprintf(stderr, "Error: Invalid if condition\n");
@@ -920,10 +920,10 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0) {
 		return statusCode;
 	}
-	bool typeDefined = false;
+	bool explicitTypeDefinition = false;
 	bool isDefined = false;
 	if (token.kw == colon) { //Nice definition with variable type
-		typeDefined = true;
+		explicitTypeDefinition = true;
 		isDefined = true;
 		statusCode = data_type(isNullable);
 		if (statusCode != 0)
@@ -967,9 +967,13 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Incompatible types in expression\n");
 		return statusCode;
 	}
-	if(nullKWInExpr(varAssignNode->expression) && !typeDefined){
+	if(nullKWInExpr(varAssignNode->expression) && !explicitTypeDefinition){
 		fprintf(stderr, "Error: Cannot define symbol %s with null\n", varID.s);
 		return TYPE_INFERENCE_ERROR;
+	}
+	if(nullableInExpr(varAssignNode->expression) && !getSymbol(varID.s)->isNullable){
+		fprintf(stderr, "Info: Changing variable %s to nullable\n", varID.s);
+		getSymbol(varID.s)->isNullable = true;
 	}
 
 	symbol_t *sym = getSymbol(varID.s);	
@@ -996,8 +1000,6 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Variable %s is not nullable\n", sym->key);
 		return TYPE_COMPATIBILITY_ERROR;
 	}
-	int a = 5;
-	fprintf(stderr, "a = %d\n", a);
 	fprintf(stderr, "Variable definition done\n\n");
 	return 0;
 };
@@ -1159,6 +1161,15 @@ int while_syntax() {
 
 	if (statusCode != 0)
 		return statusCode;
+
+	fprintf(stderr, "    -------- START PRINT WHILE CONDITION ---------\n");
+	ast_printExp(whileNode->data_t.While->conditionExp, 1);
+	fprintf(stderr, "    --------- END PRINT WHILE CONDITION ----------\n\n");
+	statusCode = isValidIfExpression(whileNode->data_t.While->conditionExp);
+	if (statusCode != 0) {
+		fprintf(stderr, "Error: Invalid if condition\n");
+		return statusCode;
+	}
 	if (token.kw == vertical_bar) {
 		statusCode = read_token();
 		if (statusCode != 0) {

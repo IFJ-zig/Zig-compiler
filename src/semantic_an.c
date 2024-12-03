@@ -1,6 +1,6 @@
 /********************************************
 * Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Tadeáš Horák, xhorakt00
+* Tvůrci: Tadeáš Horák - xhorakt00
 *********************************************/
 
 #include "semantic_an.h"
@@ -110,7 +110,6 @@ int assignSymbol(symbol_t *symbol, varType type) {
 	return 0;
 }
 
-//Entering function, get 3 tokens from which extract paramName and paramType, this functions expects to already be shifted into the function scope
 int processParam(Token paramName, Token paramType, bool isNullable) {
 	if (!isValidParamType(paramType.kw)) {
 		fprintf(stderr, "Error: %s is not a valid parameter type\n", paramType.s);
@@ -123,7 +122,7 @@ int processParam(Token paramName, Token paramType, bool isNullable) {
 		type = FLOAT;
 	if (paramType.kw == dtstr)
 		type = STRING;
-	return defineSymbol(paramName.s, type, false, isNullable); //Function can also return a nullable thing, figure this out later
+	return defineSymbol(paramName.s, type, false, isNullable);
 }
 
 bool isValidParamType(KeyWord kw) {
@@ -134,7 +133,7 @@ bool isValidParamType(KeyWord kw) {
 
 
 int assignFunctionParameter(symbol_t *function, Token paramName, Token paramType, bool isNullable) {
-	fprintf(stderr, "  ┕Function %s has a parameter %s of type %s isNullable=%s\n", function->key, paramName.s, getTokenName(paramType), isNullable ? "true" : "false");
+	fprintf(stderr, "    ┕Function %s has a parameter %s of type %s isNullable=%s\n", function->key, paramName.s, getTokenName(paramType), isNullable ? "true" : "false");
 	function->paramCount++;
 	function->params = realloc(function->params, function->paramCount * sizeof(symbol_t *));
 	symbol_t *param = malloc(sizeof(symbol_t));
