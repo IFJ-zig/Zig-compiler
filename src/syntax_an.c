@@ -1,6 +1,6 @@
 /********************************************
 * Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Adam Vožda, xvozdaa00
+* Tvůrci: Adam Vožda - xvozdaa00, Tadeáš Horák - xhorakt00
 *********************************************/
 #include "syntax_an.h"
 
