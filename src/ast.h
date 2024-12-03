@@ -15,6 +15,9 @@
 #include "symtable.h" //varType
 #include "tokens.h"   //Token
 
+/**
+ * @brief Enum for the type of the AST node
+ */
 typedef enum
 {
 	AST_NODE_FN_DEF,
@@ -28,7 +31,9 @@ typedef enum
 	AST_NODE_DEFAULT, //Default node for the AST
 } ast_node_type;
 
-
+/**
+ * @brief Struct for the function definition node
+ */
 typedef struct ast_node_fn_def
 {
 	ast_node_type type;
@@ -37,7 +42,9 @@ typedef struct ast_node_fn_def
 	symbol_t *fnSymbol;
 } ast_node_fn_def_t;
 
-
+/**
+ * @brief Struct for the function call node
+ */
 typedef struct ast_node_fn_call
 {
 	ast_node_type type;
@@ -46,7 +53,9 @@ typedef struct ast_node_fn_call
 	unsigned int argCount;
 } ast_node_fn_call_t;
 
-
+/**
+ * @brief Struct for the function return node
+ */
 typedef struct ast_node_fn_return
 {
 	ast_node_type type;
@@ -56,6 +65,9 @@ typedef struct ast_node_fn_return
 } ast_node_fn_return_t;
 
 
+/**
+ * @brief Struct for the expression node
+ */
 typedef struct ast_node_exp
 {
 	ast_node_type type;
@@ -77,6 +89,9 @@ typedef struct ast_node_exp
 } ast_node_exp_t;
 
 
+/**
+ * @brief Struct for the variable assignment node
+ */
 typedef struct ast_node_var_assign
 {
 	ast_node_type type;
@@ -85,6 +100,9 @@ typedef struct ast_node_var_assign
 } ast_node_var_assign_t;
 
 
+/**
+ * @brief Struct for the variable definition node
+ */
 typedef struct ast_node_var_def
 {
 	ast_node_type type;
@@ -93,6 +111,9 @@ typedef struct ast_node_var_def
 } ast_node_var_def_t;
 
 
+/**
+ * @brief Struct for the if-else node
+ */
 typedef struct ast_node_if_else
 {
 	symbol_t *noNullPayload;
@@ -106,6 +127,9 @@ typedef struct ast_node_if_else
 } ast_node_if_else_t;
 
 
+/**
+ * @brief Struct for the while node
+ */
 typedef struct ast_node_while
 {
 	ast_node_type type;
@@ -116,6 +140,9 @@ typedef struct ast_node_while
 } ast_node_while_t;
 
 
+/**
+ * @brief Struct for the default and root node
+ */
 typedef struct ast_default_node
 {
 	ast_node_type type;
