@@ -170,7 +170,7 @@ int headers() {
 		if (statusCode != 0) {
 			return statusCode;
 		}
-		if (isValidReturnType(token.kw)) {
+		if (!data_type(NULL, true)) {
 			fnSymbol->returnType = kwToVarType(token.kw); //Save the return type of the function
 			if (strcmp(fnSymbol->key, "main") == 0 && fnSymbol->returnType != VOID) {
 				fprintf(stderr, "Error: Main function must return void\n");
