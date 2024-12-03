@@ -166,10 +166,7 @@ int headers() {
 			fprintf(stderr, "Error: Expected ')' after param list in function header, got %s\n", getTokenName(token));
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		statusCode = read_token();
-		if (statusCode != 0) {
-			return statusCode;
-		}
+
 		if (!data_type(NULL, true)) {
 			fnSymbol->returnType = kwToVarType(token.kw); //Save the return type of the function
 			if (strcmp(fnSymbol->key, "main") == 0 && fnSymbol->returnType != VOID) {
@@ -586,8 +583,10 @@ int data_type(bool *isNullable, bool canBeVoid) {
 			return statusCode;
 		}
 	}
+
 	//check if its []u8
 	if (token.kw == square_brackets) {
+
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
