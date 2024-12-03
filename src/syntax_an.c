@@ -5,7 +5,7 @@
 #include "syntax_an.h"
 
 //Debug flag for disabling codegen so it doesn't spam the console
-#define ENABLE_CODEGEN false
+#define ENABLE_CODEGEN true
 
 Token token;
 bool tokenWasGiven = 0;
