@@ -7,8 +7,8 @@ Compiler for imperative language Zig. Built using C.
 ## Team Members
 
 - **xbohatd00**: Responsible for IFJcode24 code generator.
-- **xvozdaa00**: Responsible for Syntactic analysis.
-- **xhorakt00**: Responsible for Semantic analysis.
+- **xvozdaa00**: Responsible for Syntactic analysis and AST generation.
+- **xhorakt00**: Responsible for Semantic analysis and AST library.
 - **xpuchn02**: Responsible for Lexical analysis.
 
 ## Grading Breakdown

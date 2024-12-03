@@ -1,6 +1,6 @@
 /********************************************
 * Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Tadeáš Horák, xhorakt00
+* Tvůrci: Tadeáš Horák - xhorakt00, Adam Vožda - xvozdaa00
 *********************************************/
 
 #include "ast.h"
@@ -17,8 +17,8 @@ void ast_init(ast_default_node_t *astRoot) {
 	astRoot->activeNode = NULL;
 }
 
-void printIndent(int depth) {
-	for (int i = 0; i < depth * 4; i++) { // Each depth level indented by 4 spaces
+void printIndent(int indentSize) {
+	for (int i = 0; i < indentSize * 4; i++) { // Each depth level indented by 4 spaces
         fputc(' ', stderr);
     }
 }
@@ -168,6 +168,130 @@ void ast_print(ast_default_node_t *astRoot, int depth) {
 		}
 	}
 }
+
+void ast_destroyExp(ast_node_exp_t *expNode) {
+	if (expNode == NULL) {
+		fprintf(stderr, "Expression is NULL!\n");
+		return;
+	}
+	if (expNode->data_t.binary_op.left != NULL) {
+		ast_destroyExp(expNode->data_t.binary_op.left);
+	}
+	if (expNode->data_t.binary_op.right != NULL) {
+		ast_destroyExp(expNode->data_t.binary_op.right);
+	}
+	if (expNode->data_t.unary_op.exp != NULL) {
+		ast_destroyExp(expNode->data_t.unary_op.exp);
+	}
+	if (expNode->data_t.fnCall != NULL) {
+		for (unsigned int i = 0; i < expNode->data_t.fnCall->argCount; i++) {
+			ast_destroyExp(expNode->data_t.fnCall->args[i]);
+		}
+		free(expNode->data_t.fnCall->fnSymbol);
+		free(expNode->data_t.fnCall->args);
+		free(expNode->data_t.fnCall);
+	}
+	free(expNode->token);
+	free(expNode);
+}
+
+void ast_destroy(ast_default_node_t *astRoot){
+	if (astRoot->type == AST_NODE_DEFAULT) {
+		for (unsigned int i = 0; i < astRoot->data_t.body_t.nodeCount; i++) {
+			ast_destroy(astRoot->data_t.body_t.nodes[i]);
+		}
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_FN_DEF) {
+		for (unsigned int i = 0; i < astRoot->data_t.fnDef->bodyCount; i++) {
+			ast_destroy(astRoot->data_t.fnDef->body[i]);
+		}
+		free((char *)astRoot->data_t.fnDef->fnSymbol->key);
+		free(astRoot->data_t.fnDef->fnSymbol);
+		free(astRoot->data_t.fnDef->body);
+		free(astRoot->data_t.fnDef);
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_FN_CALL) {
+		for(unsigned int i = 0; i < astRoot->data_t.fnCall->argCount; i++){
+			ast_destroyExp(astRoot->data_t.fnCall->args[i]);
+		}
+		free((char *)astRoot->data_t.fnCall->fnSymbol->key);
+		free(astRoot->data_t.fnCall->fnSymbol);
+		free(astRoot->data_t.fnCall->args);
+		free(astRoot->data_t.fnCall);
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_FN_RETURN) {
+		if(astRoot->data_t.fnReturn->expression != NULL) {
+			ast_destroyExp(astRoot->data_t.fnReturn->expression);
+		}
+		free(astRoot->data_t.fnReturn);
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_EXP) {
+		ast_destroyExp(astRoot->data_t.exp);
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_VAR_DEF) {
+		free((char *)astRoot->data_t.varDef->symbol->key);
+		free(astRoot->data_t.varDef->symbol);
+		if(astRoot->data_t.varDef->assignment != NULL) {
+			free((char *)astRoot->data_t.varDef->assignment->symbol->key);
+			free(astRoot->data_t.varDef->assignment->symbol);
+			if(astRoot->data_t.varDef->assignment->expression != NULL) {
+				ast_destroyExp(astRoot->data_t.varDef->assignment->expression);
+			}
+			free(astRoot->data_t.varDef->assignment);
+		}
+		free(astRoot->data_t.varDef);
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_VAR_ASSIGN) {
+		if(astRoot->data_t.varAssign->expression != NULL) {
+			ast_destroyExp(astRoot->data_t.varAssign->expression);
+		}
+		free((char *)astRoot->data_t.varAssign->symbol->key);
+		free(astRoot->data_t.varAssign->symbol);
+		free(astRoot->data_t.varAssign);
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_IF_ELSE) {
+		if(astRoot->data_t.ifElse->ifCount != 0){
+			for (unsigned int i = 0; i < astRoot->data_t.ifElse->ifCount; i++) {
+				ast_destroy(astRoot->data_t.ifElse->ifBlock[i]);
+			}
+		}
+		if(astRoot->data_t.ifElse->elseCount != 0){
+			for (unsigned int i = 0; i < astRoot->data_t.ifElse->elseCount; i++) {
+				ast_destroy(astRoot->data_t.ifElse->elseBlock[i]);
+			}
+		}
+		free(astRoot->data_t.ifElse->ifBlock);
+		free(astRoot->data_t.ifElse->elseBlock);
+		if(astRoot->data_t.ifElse->noNullPayload != NULL){
+			free((char *)astRoot->data_t.ifElse->noNullPayload->key);
+			free(astRoot->data_t.ifElse->noNullPayload);
+		}
+		ast_destroyExp(astRoot->data_t.ifElse->conditionExp);
+		free(astRoot->data_t.ifElse);
+		free(astRoot);
+	} 
+	else if (astRoot->type == AST_NODE_WHILE) {
+		for (unsigned int i = 0; i < astRoot->data_t.While->blockCount; i++) {
+			ast_destroy(astRoot->data_t.While->block[i]);
+		}
+		free(astRoot->data_t.While->block);
+		if(astRoot->data_t.While->noNullPayload != NULL){
+			free((char *)astRoot->data_t.While->noNullPayload->key);
+			free(astRoot->data_t.While->noNullPayload);
+		}
+		ast_destroyExp(astRoot->data_t.While->conditionExp);
+		free(astRoot->data_t.While);
+		free(astRoot);
+	}
+}
+
 
 void ast_insert(ast_default_node_t *astRoot, ast_default_node_t *node) {
 	switch (astRoot->type) {

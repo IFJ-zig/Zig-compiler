@@ -1,18 +1,16 @@
-/**
- *  Project: IFJ24 Language compiler
- *	
- *	This file contains implementation of functions used for recursive descendance syntax analysis
- *  @file  syntax_an.c
- *  @author Adam Vožda, xvozdaa00
- *  @brief Implementation file for recursive descendance syntax analysis
- */
-
+/********************************************
+* Projekt: Implementace překladače imperativního jazyka IFJ24
+* Tvůrci: Adam Vožda - xvozdaa00, Tadeáš Horák - xhorakt00
+*********************************************/
 #include "syntax_an.h"
 
+//Debug flag for disabling codegen so it doesn't spam the console
+#define ENABLE_CODEGEN true
 
 Token token;
 bool tokenWasGiven = 0;
 ast_default_node_t *astRoot;
+symbol_t *currentFunction; //Pointer to the current function in the symtable, used for checking the return statement
 
 int read_token() {
 	token = get_token();
@@ -52,8 +50,12 @@ int syntax_analyzer() {
 	statusCode = program();
 	if (statusCode != 0)
 		return statusCode;
-	printHeader();
-	codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
+	if (ENABLE_CODEGEN) {
+		printHeader();
+		codebody(astRoot->data_t.body_t.nodes, astRoot->data_t.body_t.nodeCount);
+	}
+	ast_destroy(astRoot);
+	semanticDestroy();
 	return 0;
 };
 
@@ -93,10 +95,13 @@ int headers() {
 		} else {
 			fnName = token.s;
 		}
-		// Save the name of functions into the symtable at depth 0
-		if (defineSymbol(fnName, FUNCTION, false, false) == REDEFINITION_ERROR) {
+		//Save the name of functions into the symtable at depth 0
+		int statusCode = defineSymbol(fnName, FUNCTION, false, false);
+		if (statusCode == REDEFINITION_ERROR) {
 			fprintf(stderr, "Error: Function %s is already defined\n", token.s);
 			return REDEFINITION_ERROR;
+		} else if (statusCode != 0) {
+			return statusCode;
 		}
 		symbol_t *fnSymbol = getSymbol(fnName);
 		if (token.kw == _main) {
@@ -129,9 +134,13 @@ int headers() {
 					fprintf(stderr, "Error: Expected ':' after parameter id, got %s\n", getTokenName(token));
 					return SYNTACTIC_ANALYSIS_ERROR;
 				}
-				data_type(NULL, false);
+				bool isNullable = false;
+				data_type(&isNullable, false);
 
-				assignFunctionParameter(fnSymbol, paramID, token, false);
+				statusCode = assignFunctionParameter(fnSymbol, paramID, token, isNullable);
+				if (statusCode != 0) {
+					return statusCode;
+				}
 				statusCode = read_token();
 				if (statusCode != 0) {
 					return statusCode;
@@ -157,8 +166,16 @@ int headers() {
 			fprintf(stderr, "Error: Expected ')' after param list in function header, got %s\n", getTokenName(token));
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
-		if (!data_type(NULL, true)) {
-			fnSymbol->returnType = kwToVarType(token.kw); // Save the return type of the function
+		statusCode = read_token();
+		if (statusCode != 0) {
+			return statusCode;
+		}
+		if (isValidReturnType(token.kw)) {
+			fnSymbol->returnType = kwToVarType(token.kw); //Save the return type of the function
+			if (strcmp(fnSymbol->key, "main") == 0 && fnSymbol->returnType != VOID) {
+				fprintf(stderr, "Error: Main function must return void\n");
+				return PARAM_ERROR;
+			}
 		} else {
 			fprintf(stderr, "Error: Invalid return type of function %s\n", fnSymbol->key);
 			return SYNTACTIC_ANALYSIS_ERROR;
@@ -181,6 +198,7 @@ int headers() {
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
 	}
 	fprintf(stderr, "Headers OK\n");
+	fprintf(stderr, "---------------- END SEEK HEADERS ----------------\n\n\n");
 	return 0;
 };
 
@@ -201,9 +219,9 @@ int program() {
 				return statusCode;
 			fprintf(stderr, "\n");
 		} else if (token.kw == end) {
-			fprintf(stderr, "------------- BEGIN AST PRINT -------------\n");
+			fprintf(stderr, "---------------- BEGIN AST PRINT -----------------\n");
 			ast_print(astRoot, 0);
-			fprintf(stderr, "------------- END AST PRINT -------------\n\n");
+			fprintf(stderr, "----------------- END AST PRINT ------------------\n\n");
 			fprintf(stderr, "Compilation successfully finished \n");
 			return 0;
 		} else {
@@ -400,6 +418,7 @@ void loadIFJ24() {
 }
 
 int function_analysis() {
+	fprintf(stderr, "------------- START FUNCTION ANALYSIS ------------\n");
 	enterScope();
 	int statusCode = 0;
 
@@ -426,9 +445,9 @@ int function_analysis() {
 		fnName = token.s;
 	}
 
-	fprintf(stderr, "Analysis ID: %s\n", fnName);
-
-	//The function name should already be in the symtable at depth 0 since it was done in headers, lets just check if it's still there
+	fprintf(stderr, "Analysing function: %s\n", fnName);
+	currentFunction = getSymbol(fnName);
+	//The function name should already be in the symtable at depth 0 since it was done in seekHeaders, lets just check if it's still there
 	if (getSymbol(fnName) == NULL) {
 		fprintf(stderr, "Error: Function %s is not defined, this function should've been defined in headers!\n", fnName);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
@@ -471,7 +490,16 @@ int function_analysis() {
 			return statusCode;
 		}
 	}
-	exitScope();
+
+	statusCode = exitScope();
+	if (statusCode != 0) {
+		return statusCode;
+	}
+	if (currentFunction->hasReturn == false && currentFunction->returnType != VOID) {
+		fprintf(stderr, "Error: Function %s does not have a return statement\n", currentFunction->key);
+		return RETURN_EXPRESSION_ERROR;
+	}
+	fprintf(stderr, "-------------- END FUNCTION ANALYSIS -------------\n\n");
 	return 0;
 }
 
@@ -488,7 +516,6 @@ int param_list() {
 	}
 
 	while (token.kw != rbracket) {
-		fprintf(stderr, "PARAM LIST\n");
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -512,13 +539,17 @@ int param_list() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 
-		statusCode = data_type(NULL, false);
+		bool isNullable = false;
+		statusCode = data_type(&isNullable, false);
 		if (statusCode != 0)
 			return statusCode;
-		processParam(paramID, token, false);
-		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
-																																		   : "STRING",
-				getSymbol(paramID.s)->depth);
+		statusCode = processParam(paramID, token, isNullable);
+		if (statusCode != 0)
+			return statusCode;
+		getSymbol(paramID.s)->isChanged = true;
+		getSymbol(paramID.s)->isUsed = false;
+		getSymbol(paramID.s)->isMutable = false;
+
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -545,8 +576,7 @@ int data_type(bool *isNullable, bool canBeVoid) {
 	}
 
 	if (isNullable != NULL)
-		*isNullable = true;
-	//check if its optional
+		*isNullable = false;
 	if (token.kw == question_mark) {
 		if (isNullable != NULL)
 			*isNullable = true;
@@ -655,21 +685,57 @@ int empty_variable() {
 		fprintf(stderr, "Error: Expected = after _\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	statusCode = expressionParser(false, NULL);
+	symbol_t *virtualSymbol = malloc(sizeof(symbol_t));
+	if (virtualSymbol == NULL) {
+		fprintf(stderr, "Error: Memory allocation failed\n");
+		return INTERNAL_COMPILER_ERROR;
+	}
+	virtualSymbol->key = "_";
+	virtualSymbol->type = UNDEFINED;
+	virtualSymbol->depth = -1;
+	virtualSymbol->isConst = false;
+	virtualSymbol->isNullable = false;
+	virtualSymbol->isDefined = false;
+	virtualSymbol->paramCount = 0;
+	virtualSymbol->params = NULL;
+	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(virtualSymbol, NULL);
+	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
+
+	varType expDataType = UNDEFINED;
+	statusCode = checkExprTypesCompatibility(varAssignNode->expression, &expDataType);
+	if (statusCode != 0) {
+		fprintf(stderr, "Error: Incompatible types in expression\n");
+		return statusCode;
+	}
+	if (nullableInExpr(varAssignNode->expression)) {
+		fprintf(stderr, "Error: Expression contains nullable\n");
+		return TYPE_COMPATIBILITY_ERROR;
+	}
+	free((char *)varAssignNode->symbol->key);
+	free(varAssignNode->symbol);
+	free(varAssignNode);
+	free(virtualSymbol);
+
 
 	return 0;
 }
 
 int if_else() {
 	int statusCode;
-	enterScope();
 	ast_default_node_t *ifElseNode = ast_createIfElseNode(NULL);
 	ast_insert(astRoot->activeNode, ifElseNode);
 	statusCode = expressionParser(false, &ifElseNode->data_t.ifElse->conditionExp);
+	if (statusCode != 0)
+		return statusCode;
 
+	fprintf(stderr, "    ---------- START PRINT IF CONDITION ----------\n");
+	ast_printExp(ifElseNode->data_t.ifElse->conditionExp, 1);
+	fprintf(stderr, "    ----------- END PRINT IF CONDITION -----------\n\n");
+	statusCode = isValidIfExpression(ifElseNode->data_t.ifElse->conditionExp);
 	if (statusCode != 0) {
+		fprintf(stderr, "Error: Invalid if condition\n");
 		return statusCode;
 	}
 	// Check if there is an attempt to unwrap the value
@@ -684,6 +750,11 @@ int if_else() {
 			return SYNTACTIC_ANALYSIS_ERROR;
 		}
 		statusCode = defineSymbol(token.s, ifElseNode->data_t.ifElse->conditionExp->dataType, false, false); //Unwrapped value (payload)
+		getSymbol(token.s)->isChanged = true;
+		getSymbol(token.s)->isUsed = false;
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		ifElseNode->data_t.ifElse->noNullPayload = malloc(sizeof(symbol_t));
 		if (ifElseNode->data_t.ifElse->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
@@ -734,7 +805,8 @@ int if_else() {
 			return statusCode;
 		}
 	}
-	exitScope(); //Exit the scope of the if statement has to be here since we can't have the unwrapped value reach the else block
+	if (ifElseNode->data_t.ifElse->noNullPayload != NULL)
+		undefineSymbol((char *)ifElseNode->data_t.ifElse->noNullPayload->key);
 	statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -743,7 +815,6 @@ int if_else() {
 		fprintf(stderr, "Error: Expected 'else' after if block\n");
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
-	enterScope();
 	statusCode = read_token();
 	if (statusCode != 0) {
 		return statusCode;
@@ -767,7 +838,6 @@ int if_else() {
 			return statusCode;
 		}
 	}
-	exitScope();
 
 	return 0;
 }
@@ -780,12 +850,23 @@ int return_syntax() {
 	ast_default_node_t *returnNode = ast_createFnReturnNode(NULL, VOID, NULL);
 	ast_insert(astRoot->activeNode, returnNode);
 	if (token.kw == next) {
+		if (currentFunction->returnType != VOID) {
+			fprintf(stderr, "Error: Function %s is not void, it must return a value\n", currentFunction->key);
+			return RETURN_EXPRESSION_ERROR;
+		}
 		return 0;
 	}
-
 	statusCode = expressionParser(true, &returnNode->data_t.fnReturn->expression);
 	if (statusCode != 0)
 		return statusCode;
+
+	if (currentFunction->returnType == VOID && returnNode->data_t.fnReturn->expression != NULL) {
+		fprintf(stderr, "Error: Function %s is void, it cannot return any value\n", currentFunction->key);
+		return RETURN_EXPRESSION_ERROR;
+	}
+	if (returnNode->data_t.fnReturn->expression->dataType != currentFunction->returnType)
+		return PARAM_ERROR;
+	currentFunction->hasReturn = true;
 
 	return 0;
 }
@@ -847,14 +928,15 @@ int variable_definition(bool isConst) {
 	if (statusCode != 0) {
 		return statusCode;
 	}
+	bool explicitTypeDefinition = false;
 	bool isDefined = false;
-	//Definition with variable type
-	if (token.kw == colon) {
+	if (token.kw == colon) { //Nice definition with variable type
+		explicitTypeDefinition = true;
 		isDefined = true;
 		statusCode = data_type(isNullable, false);
 		if (statusCode != 0)
 			return statusCode;
-		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, isNullable);
+		statusCode = defineSymbol(varID.s, kwToVarType(token.kw), isConst, *isNullable);
 		if (statusCode != 0) {
 			return statusCode;
 		}
@@ -869,13 +951,12 @@ int variable_definition(bool isConst) {
 		return SYNTACTIC_ANALYSIS_ERROR;
 	}
 	if (!isDefined)
-		statusCode = defineSymbol(varID.s, INT, isConst, *isNullable);
+		statusCode = defineSymbol(varID.s, UNDEFINED, isConst, *isNullable);
 	if (statusCode != 0) {
 		free(isNullable);
 		return statusCode;
 	}
 	free(isNullable);
-
 	ast_node_var_assign_t *varAssignNode = ast_createVarAssignNode(getSymbol(varID.s), NULL);
 	ast_default_node_t *varDefNode = ast_createVarDefNode(getSymbol(varID.s), varAssignNode);
 	ast_insert(astRoot->activeNode, varDefNode);
@@ -883,13 +964,62 @@ int variable_definition(bool isConst) {
 	statusCode = expressionParser(false, &varAssignNode->expression);
 	if (statusCode != 0)
 		return statusCode;
+	if (varAssignNode->expression->dataType == STRING) {
+		fprintf(stderr, "Error: Cannot define string without ifj.string!\n");
+		return TYPE_INFERENCE_ERROR;
+	}
 
+	varType expDataType = UNDEFINED;
+	statusCode = checkExprTypesCompatibility(varAssignNode->expression, &expDataType);
+	if (statusCode != 0) {
+		fprintf(stderr, "Error: Incompatible types in expression\n");
+		return statusCode;
+	}
+	if (nullKWInExpr(varAssignNode->expression) && !explicitTypeDefinition) {
+		fprintf(stderr, "Error: Cannot define symbol %s with null\n", varID.s);
+		return TYPE_INFERENCE_ERROR;
+	}
+	if (nullableInExpr(varAssignNode->expression) && !getSymbol(varID.s)->isNullable) {
+		fprintf(stderr, "Info: Changing variable %s to nullable\n", varID.s);
+		getSymbol(varID.s)->isNullable = true;
+	}
+
+	symbol_t *sym = getSymbol(varID.s);
+	sym->isUsed = false; //Definition is not usage
+
+	varType dataType;
+	if (varAssignNode->expression->dataType == FUNCTION) {
+		dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;
+		sym->isNullable = varAssignNode->expression->data_t.fnCall->fnSymbol->isNullable;
+		statusCode = assignSymbol(sym, varAssignNode->expression->data_t.fnCall->fnSymbol->returnType);
+		if (sym->isNullable)
+			fprintf(stderr, "Variable %s is nullable\n", sym->key);
+	} else {
+		dataType = varAssignNode->expression->dataType;
+		statusCode = assignSymbol(sym, varAssignNode->expression->dataType);
+	}
+	if (statusCode != 0) {
+		fprintf(stderr, "Error: Variable %s type=%d incompatible!\n", sym->key, sym->type);
+		fprintf(stderr, "Error: Variable %d incompatible!\n", dataType);
+		return statusCode;
+	}
+	if (nullableInExpr(varAssignNode->expression) && !sym->isNullable) {
+		fprintf(stderr, "Error: Variable %s is not nullable\n", sym->key);
+		return TYPE_COMPATIBILITY_ERROR;
+	}
+	fprintf(stderr, "Variable definition done\n\n");
 	return 0;
 };
+
 int call_or_assignment() {
 	int statusCode;
 	symbol_t *sym = getSymbol(token.s);
-	//Check if id is defined
+	if (!sym->isMutable) {
+		fprintf(stderr, "Error: Parameter %s is not mutable\n", sym->key);
+		return REDEFINITION_ERROR;
+	}
+	sym->isChanged = true;
+	fprintf(stderr, "Assignment/call ID: %s\n", token.s);
 	if (sym == NULL) {
 		fprintf(stderr, "Error: Variable %s has not been defined\n", token.s);
 		return UNDEFINED_FUNCTION_OR_VARIABLE_ERROR;
@@ -913,9 +1043,30 @@ int call_or_assignment() {
 		ast_default_node_t *defaultNode = ast_wrapVarAssignNode(varAssignNode);
 		ast_insert(astRoot->activeNode, defaultNode);
 
+
 		int statusCode = expressionParser(false, &varAssignNode->expression);
 		if (statusCode != 0)
 			return statusCode;
+		if (varAssignNode->expression->dataType == STRING) {
+			fprintf(stderr, "Error: Cannot assign string without ifj.string!\n");
+			return TYPE_COMPATIBILITY_ERROR;
+		}
+
+		if (nullableInExpr(varAssignNode->expression) && !sym->isNullable)
+			return TYPE_COMPATIBILITY_ERROR;
+
+		varType dataType;
+		if (varAssignNode->expression->dataType == FUNCTION)
+			dataType = varAssignNode->expression->data_t.fnCall->fnSymbol->returnType;
+		else
+			dataType = varAssignNode->expression->dataType;
+
+		statusCode = assignSymbol(sym, dataType);
+		if (statusCode != 0) {
+			fprintf(stderr, "Error: Variable %s type=%d incompatible!\n", sym->key, sym->type);
+			fprintf(stderr, "Error: Variable %d incompatible!\n", dataType);
+			return statusCode;
+		}
 	}
 
 	return 0;
@@ -1012,14 +1163,21 @@ int parse_params(ast_default_node_t *fnCallNode) {
 
 int while_syntax() {
 	int statusCode;
-	enterScope();
 	ast_default_node_t *whileNode = ast_createWhileNode(NULL);
 	ast_insert(astRoot->activeNode, whileNode);
 	statusCode = expressionParser(false, &whileNode->data_t.While->conditionExp);
 
 	if (statusCode != 0)
 		return statusCode;
-	//Check if there is an attempt to unwrap the value
+
+	fprintf(stderr, "    -------- START PRINT WHILE CONDITION ---------\n");
+	ast_printExp(whileNode->data_t.While->conditionExp, 1);
+	fprintf(stderr, "    --------- END PRINT WHILE CONDITION ----------\n\n");
+	statusCode = isValidIfExpression(whileNode->data_t.While->conditionExp);
+	if (statusCode != 0) {
+		fprintf(stderr, "Error: Invalid if condition\n");
+		return statusCode;
+	}
 	if (token.kw == vertical_bar) {
 		statusCode = read_token();
 		if (statusCode != 0) {
@@ -1031,6 +1189,11 @@ int while_syntax() {
 		}
 
 		statusCode = defineSymbol(token.s, whileNode->data_t.While->conditionExp->dataType, false, false); //Unwrapped value (payload)
+		getSymbol(token.s)->isChanged = true;
+		getSymbol(token.s)->isUsed = false;
+		if (statusCode != 0) {
+			return statusCode;
+		}
 		whileNode->data_t.While->noNullPayload = malloc(sizeof(symbol_t));
 		if (whileNode->data_t.While->noNullPayload == NULL) {
 			fprintf(stderr, "Error: Memory allocation failed\n");
@@ -1080,6 +1243,5 @@ int while_syntax() {
 			return statusCode;
 		}
 	}
-	exitScope();
 	return 0;
 }

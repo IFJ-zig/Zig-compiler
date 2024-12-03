@@ -360,6 +360,7 @@ int tryToMatchRule(t_Stack *stack) {
 					}
 					if (temp->type == PRECEDENT_LESS) {
 						statusCode = createBinaryExp(stack);
+						//fprintf(stderr, "%d\n", stackTop(stack)->node->token->kw);
 						if (statusCode != 0) {
 							return statusCode;
 						}
