@@ -10,7 +10,7 @@
 Token token;
 bool tokenWasGiven = 0;
 ast_default_node_t *astRoot;
-symbol_t *currentFunction;
+symbol_t *currentFunction;	//Pointer to the current function in the symtable, used for checking the return statement
 
 int read_token() {
 	token = get_token();
@@ -519,7 +519,6 @@ int param_list() {
 	}
 
 	while (token.kw != rbracket) {
-		fprintf(stderr, "PARAM LIST\n");
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -553,9 +552,7 @@ int param_list() {
 		getSymbol(paramID.s)->isChanged = true;
 		getSymbol(paramID.s)->isUsed = false;
 		getSymbol(paramID.s)->isMutable = false;
-		fprintf(stderr, "Param %s of type %s loaded into symtable at depth %d\n", paramID.s, token.kw == dtint ? "INT" : token.kw == dtflt ? "FLOAT"
-																																		   : "STRING",
-				getSymbol(paramID.s)->depth);
+		
 		statusCode = read_token();
 		if (statusCode != 0) {
 			free(token.s);
@@ -1003,8 +1000,6 @@ int variable_definition(bool isConst) {
 		fprintf(stderr, "Error: Variable %s is not nullable\n", sym->key);
 		return TYPE_COMPATIBILITY_ERROR;
 	}
-	int a = 5;
-	fprintf(stderr, "a = %d\n", a);
 	fprintf(stderr, "Variable definition done\n\n");
 	return 0;
 };
