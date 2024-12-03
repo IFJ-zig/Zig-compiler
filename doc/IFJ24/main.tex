@@ -78,13 +78,13 @@
         \item Daniel Bohata
         \begin{itemize}
         \item[-] Vedení
-        \item[-] Návrh AST
+        \item[-] Návrh ASS
         \item[-] Generace kódu 
         \end{itemize}
         \item Tadeáš Horák
         \begin{itemize}
-        \item[-] Návrh AST
-        \item[-] Implementace AST
+        \item[-] Návrh ASS
+        \item[-] Implementace ASS
         \item[-] Sémantická analýza
         \end{itemize}
         \item Ivo Puchnar
@@ -94,7 +94,7 @@
         \end{itemize}
         \item Adam Vožda
         \begin{itemize}
-        \item[-] Implementace AST
+        \item[-] Implementace ASS
         \item[-] Syntaktická analýza
         \end{itemize}
     \end{minipage}
@@ -420,24 +420,15 @@ Sémantický \textit{parser.c} Zmíněný
 Psa provádí \textit{\textbf{get\_type()}} Při redukci 
 
 \subsection{Generování kódu}
-\subsubsection{Vlastní generování kódu}
-případů \textit{scale} přidávána
+Generování kódu funguje na základě průchodu abstraktního syntaktického stromu. Při průchodu se pomocí funkce \textit{printf()} vytváří spustitelný mezikód v instrukční sadě IFJcode24 na standardní výstup. Zdrojový kód pro generování kódu se nachází v souborech \textit{codegen.c} a \textit{codegen.h}.
+\subsubsection{Části generátoru}
+Generátor je tvořen ze dvou částí - tisknutí hlavičky a tisknutí mezikódu na základě vstupu.
 
-\subsubsection{Rozhraní generátoru kódu}
-rozhraní \textit{codeGen\_ ... ()} a ve tvaru \textit{generate\_ ... ()}. Každá v souboru \textit{code\_generator.c (.h)}.
+\subsubsection{Tisknutí hlavičky}
+Vytisknutí správné hlavičky zajišťuje funkce \textit{printHeaders()}. Tato funkce nejdříve vytiskne povinné záhlaví pro mezikód - \textit{.IFJcode24}. Poté vytiskne skok do funkce main, kterou musí každý vstupní program obsahovat. Následně vytiskne definici jedinné globální proměnné \textit{GF@\_\%} a definice vestavěných funkcí jazyka IFJ24. Definice vestavěných funkcí byly nejdříve napsány a otestovány v pomocném souboru který nebyl odevzdán. Pro názvy proměnných ve vestavěných funkcích je využit znak '\%' na konci, aby nemohlo dojít ke kolizi s proměnnými vytvářenými ve vstupním programu, jelikož znak '\%' není v názvu proměnných povolen.
 
-\vspace{0.75cm}
-
-\begin{figure}[ht!]
-\begin{center}
-\begin{tikzpicture}[square/.style={regular polygon,regular polygon sides=4}]
-        \node at (0,0) [square, draw] {PARSER, PSA};
-        \node at (12,0) [square, draw] {Generátor kódu};
-        \draw [line width=0.75mm] (2.15,0) -- node[above]{codeGen\_ ... (), generate \_ ... ()} (9.8,0);
-\end{tikzpicture}
-\caption{Rozhraní mezi parserem, psa a generátorem kódu}
-\end{center}
-\end{figure}
+\subsubsection{Generování na základě vstupu}
+Tato část generování závisí na průchodu abstraktním syntaktickým stromem vytvořeným v předchozích částech. První volanou funkcí je funkce \textit{codebody()}, která prochází tělo(: funkce, while cyklu, if-else) a volá příslušné podpůrné funkce. Jelikož je vstupní program tvořen z funkcí (i main je funkce), začíná se generováním definic funkcí. Nejdříve se vytiskne nezměněné jméno funkce pomocí instrukce \textit{LABEL}. Jako první se v každé funkci vytvoří rámec pomocí \textit{CREATEFRAME}, posune se na zásobník pomocí \textit{PUSHFRAME} a následně se nadefinují parametry a návratová hodnota. Poté se zavolá funkce \textit{defAllVars()}, která projde tělo funkce do hloubky(= i do těl cyklů a if-else) a nadefinuje všechny použité proměnné, aby nemohlo dojít ke kolizi kvůli redefinicím. Následně se začne vyhodnocovat samotné tělo uložené v ASS. Pokud funkce \textit{codebody()} narazí na uzel přiřazení, např. \textit{x = 2 + 3}, nejdříve se pravá strana převede do polské notace, tzn. \textit{23+}, a za využití zásobníku je vyhodnocena. Výsledek je následně pomocí instrukce \textit{POPS} uložen do proměnné x. Pokud \textit{codebody()} narazí na uzel volání funkce, vloží se na zásobník argumenty funkce a poté se funkce zavolá pomocí instrukce \textit{CALL}. Pokud \textit{codebody()} narazí na while cyklus nebo if-else vytiskne se \textit{LABEL WHILE\%d}, resp. \textit{LABEL IF\%d}, kde \%d značí číslo určené pomocí globální proměnné \textit{labelCounter}, a to aby bylo možné odlišit vnořené cykly a if-else klauzule. Následně se vytiskne kontrola podmínky a podmíněný skok na \textit{LABEL WHILEEND\%d}, resp. \textit{LABEL ELSE\%d}, pokud nebude podmínka splněna. Následně se zavolá funkce \textit{codebody()} nad tělem while cyklu, resp. if-u. Pokud se jednalo o while cyklus, vytiskne se po tělu cyklu skok na začátek cyklu a \textit{LABEL WHILEEND\%d}. Tímto končí while cyklus. Pokud se jednalo o if, vytiskne se skok za else na \textit{LABEL IFEND\%d} a začátek else \textit{LABEL ELSE\%d}. Pokud se jednalo o if klauzuli i s else částí, zavolá se \textit{codebody()} nad tělem else. Nakonec se vytiskne \textit{LABEL IFEND\%d}. Tímto končí if-else klauzule. Pokud \textit{codebody()} narazí na return, uloží jeho výsledek do \textit{LF@retval\%}. Na konci funkce se vytiskne instrukce \textit{POPFRAME} a \textit{RETURN}, resp. \textit{EXIT 0} pokud se jednalo o funkci main. Návratová hodnota se následně dá najít jako \textit{TF@retval\%}. Tento proces se provede pro každou funkci ve vstupním zdrojovém kódu.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
