@@ -1,7 +1,11 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Tadeáš Horák - xhorakt00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of functions used for the symtable
+ *  @file  symtable.c
+ *  @author Tadeáš Horák, xhorakt00
+ *  @brief Implementation file for symtable
+ */
 
 //This file is for keeping track of variable names, function names etc
 //It does so by creating a DLL list with multiple hash tables sorted by their depth

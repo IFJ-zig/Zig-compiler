@@ -1,7 +1,12 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Tadeáš Horák - xhorakt00, Adam Vožda - xvozdaa00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of functions used for abstract syntax tree
+ *  @file  ast.c
+ *  @author Tadeáš Horák, xhorakt00
+ *  @author Adam Vožda, xvozdaa00
+ *  @brief Implementation file for abstract syntax tree
+ */
 
 #include "ast.h"
 

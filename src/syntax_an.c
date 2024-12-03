@@ -1,7 +1,12 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Adam Vožda - xvozdaa00, Tadeáš Horák - xhorakt00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of functions used for syntax analysis
+ *  @file  syntax_an.c
+ *  @author Adam Vožda, xvozdaa00
+ *  @author Tadeáš Horák, xhorakt00
+ *  @brief Implementation file for syntax analysis
+ */
 #include "syntax_an.h"
 
 //Debug flag for disabling codegen so it doesn't spam the console

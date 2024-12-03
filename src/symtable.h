@@ -1,7 +1,11 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Tadeáš Horák - xhorakt00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains declaration of functions used for the symtable and the declaration of the symbol
+ *  @file  symtable.h
+ *  @author Tadeáš Horák, xhorakt00
+ *  @brief Declaration file for symtable
+ */
 
 //Upravený 2. příklad z IJC
 //Tadeáš Horák xhorakt00

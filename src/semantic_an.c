@@ -1,7 +1,11 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Tadeáš Horák - xhorakt00
-*********************************************/
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of functions used for semantic analysis
+ *  @file  semantic_an.c
+ *  @author Tadeáš Horák, xhorakt00
+ *  @brief Implementation file for semantic analysis
+ */
 
 #include "semantic_an.h"
 
