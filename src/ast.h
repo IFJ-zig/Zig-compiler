@@ -4,6 +4,7 @@
  *	This file contains declaration of functions used for abstract syntax tree and its nodes
  *  @file  ast.h
  *  @author Tadeáš Horák, xhorakt00
+ *  @author Daniel Bohata, xbohatd00
  *  @brief Declaration file for abstract syntax tree
  */
 
