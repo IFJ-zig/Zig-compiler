@@ -366,17 +366,15 @@ Druhá tabulka se vytváří při vstupu do analýzy funkce a zaniká při ukon�
 \caption{Diagram dvousměrně vázaného seznamu tabulek symbolů}
 \end{center}
 \end{figure}
+\vspace{4cm}
+
+\rhead{\bfseries Implementace překladače (Sémantická analýza)}
+\subsection{Sémantická analýza}
+Sémantická analýza je prováděna zároveň se syntaktickou analýzou v \textit{syntax\_an.c}. Pomocné funkce pro kontrolu sémantiky jsou implementovány v \textit{semantic\_an.c} a definovány v \textit{semantic\_an.h}. Sémantická analýza vrací chybové kódy podle zadání.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\rhead{\bfseries Implementace překladače (Sémantická analýza)}
-\subsection{Sémantická analýza}
-\subsubsection{Parser}
-Sémantický \textit{parser.c} Zmíněný
-
-\subsubsection{Zpracování výrazů}
-Psa provádí \textit{\textbf{get\_type()}} Při redukci 
-
 \subsection{Generování kódu}
 Generování kódu funguje na základě průchodu abstraktního syntaktického stromu. Při průchodu se pomocí funkce \textit{printf()} vytváří spustitelný mezikód v instrukční sadě IFJcode24 na standardní výstup. Zdrojový kód pro generování kódu se nachází v souborech \textit{codegen.c} a \textit{codegen.h}.
 \subsubsection{Části generátoru}
