@@ -111,20 +111,19 @@ Seznámení týmu proběhlo osobně. Následná komunikace probíhala hlavně p�
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Implementace překladače (Lexikální analýza)}
-\section{Implementace překladače}
-\subsection{Lexikální analýza}
+\section{Lexikální analýza}
 Lexikální analýza se provádí funkcí \textit{get\_token()}, která je definována v souboru \textit{Lexem\_an.c}. Její pomocné struktury a funkce jsou definovány v souborech \textit{tokens.h, .c}.\newline
 Syntaktická analýza zavolá \textit{get\_token()}, který vrací strukturu \textit{Token}. Druh tokenu se určuje podle atributu \textit{KeyWord kw}. V atributech \textit{int i, double f, char *s} se předávají hodnoty tokenů pro identifikátory, čísla a stringy.\newline
 Lexikální analyzátor jsem vytvořil z lexikálních analyzátorů, které jsem udělal pro projekty posledních dvou let.
 
-\subsubsection{Inicializace}
+\subsection{Inicializace}
 Na začátku se zavedou proměnné a alokuje paměť.\newline
 Proměnné \textit{int n} a \textit{double d} slouží k předání celých a desetinných čísel do tokenů. \textit{Token new} drží strukturu \textit{Token}, kterou funkce po úpravách lexikální analýzou vrací. \textit{char letter} si pamatuje poslední znak ze vstupu. Pokud funkce končí a poslední znak se nevyužil, vrací ho zpět na vstup. \textit{size\_t lex\_size} udržuje aktuální maximální alokovanou délku \textit{char *lexem}. Při spuštění funkce začíná na 8. \textit{char *lexem} je dynamicky alokovaný string pro uchovávání dlouhých lexémů. Před přidáním dalšího znaku funkce zkontroluje, zda má \textit{*lexem} dostatek místa. Pokud ne, realokuje jeho obsah s dvojnásobnou velikostí a tu zapíše do \textit{lex\_size}. \textit{char *p} je pomocný pointer. Při realokaci \textit{*lexem} na něm zjistíme, zda realokace proběhla úspěšně, a při předávání stringu do tokenu do něj alokujeme adekvátní velikost stringu. Alokovanou paměť následně předáme do atributu \textit{*s} tokenu.
 
-\subsubsection{Postupná úprava analyzátoru}
+\subsection{Postupná úprava analyzátoru}
 První verze lexikálního analyzátoru fungovala tak, že se funkce zavolala zvlášť před ostatními analýzami a vytvořila jednostranně vázaný, který pak mohli procházet, ale pro splnění podmínky syntaxí řízené analýzy jsme ho změnili na vracení jednotlivých tokenů. V kódu můžete najít některé pozůstatky této verze, např. while cyklus pod inicializací. Pokud prvek neubíral funkčnosti, ponechali jsme ho.
 
-\subsubsection{Určování tokenu}
+\subsection{Určování tokenu}
 Funkce \textit{get\_token()} rozhoduje o tokenu podle příchozího znaku. Tento znak vloží do velkého switche.\newline
 Na začátku switche najdeme bílé znaky, které analyzátor přeskočí. Komentáře se rovněž přeskakují, jen se nacházejí níže.\newline
 Následují jednoznačné tokeny. Jinak řečeno, tokeny vyžadující pouze 1-2 znaky.\newline
@@ -134,7 +133,7 @@ Mezi celými a desetinnými čísly rozlišujeme podle přítomnosti tečky nebo
 Identifikátory a klíčová slova začínají buď písmeny nebo podtržítkem '\_'. Pokud za '\_' nenásledují písmena, čísla ani '\_', jedná se o prázdnou proměnnou a odevzdá se její token. V opačném případě se do řetězce pomocí cyklu vezmou všechny zmíněné znaky. Aby se snížila režie, porovná se první znak řetězce s prvními znaky všech možných klíčových slov. Tam, kde se shodují, se řetězec porovná s konkrétním klíčovým slovem, díky čemuž se vynechají porovnávání s ostatními. Pokud se řetězec shoduje s celým slovem, vyšle se jeho token, jinak se vyšle token \textit{id}, s řetězcem v \textit{*s}.\newline
 Pokud funkce najde EOF, pošle token \textit{end} pro oznámení konce souboru.\newline
 
-\subsubsection{Vysvětlení konečného automatu}
+\subsection{Vysvětlení konečného automatu}
 \begin{itemize}
     \item Ovály s jednoduchým okrajem jsou obyčejné stavy a ovály s dvojitým okrajem jsou stavy konečné.
     \item Pro přehlednost jsou některé přechody mezi stavy spojeny do jedné čáry. Pokud tomu tak je, symbol, který přechodu náleží, je vyobrazen tak, aby se nedaly zaměnit. Buď u jednotlivých přechodů, nebo u přechodů se stejným znakem směřujících do stejného stavu. 
@@ -146,7 +145,7 @@ Pokud funkce najde EOF, pošle token \textit{end} pro oznámení konce souboru.\
 \end{itemize}
 
 \newpage
-\subsubsection{Diagram konečného automatu}
+\subsection{Diagram konečného automatu}
 \begin{figure}[ht!]
     \begin{center}
         \includegraphics[origin=c, width=0.8\textwidth]{images/FSM_IFJ24.drawio.png}
@@ -157,7 +156,7 @@ Pokud funkce najde EOF, pošle token \textit{end} pro oznámení konce souboru.\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Implementace překladače (Syntaktická analýza)}
-\subsection{Syntaktická analýza}
+\section{Syntaktická analýza}
 
 Syntaktická analýza je implementována v souboru \texttt{syntax\_an.c} (s odpovídajícím hlavičkovým souborem \texttt{syntax\_an.h}) a je realizována pomocí rekurzivního sestupu na základě LL gramatiky. Tento soubor obsahuje klíčovou funkci překladače, \textit{syntax\_analyzer()}, která provádí veškeré potřebné operace před a po syntaktické analýze.
 
@@ -167,14 +166,14 @@ Následuje druhý průchod, zahájený voláním funkce \textit{program()}, kter
 
 Tokeny jsou načítány lexikálním analyzátorem prostřednictvím funkce \textit{read\_token()}, která volá funkci \textit{get\_token()}. Tato funkce slouží jako rozhraní mezi lexikální a syntaktickou analýzou. Parser zpracovává všechny části LL gramatiky s výjimkou výrazů. Výrazy jsou předávány metodě precedenční syntaktické analýzy, která je samostatně vyhodnocuje.
 
-\subsubsection{Přechod mezi rekurzivním sestupem a precedenční analýzou}
+\subsection{Přechod mezi rekurzivním sestupem a precedenční analýzou}
 Přechod mezi rekurzivním sestupem a precedenční analýzou je realizován voláním funkce \textit{expressionParser(bool tokenRead, ast\_node\_exp\_t **resultPointer)} ve souboru \texttt{expression\_parser.c}. Tato funkce je volána na místech, kde se očekává výraz, například za symbolem \texttt{=}. Parametr \texttt{tokenRead} indikuje, zda byl první token již přečten, a parametr \texttt{resultPointer} slouží jako ukazatel, kam je uložen výsledný strom výrazu.
 
 \vspace{4cm}
 
 \newpage
 
-\subsubsection{LL gramatika}
+\subsection{LL gramatika}
 
 \begin{enumerate}
     \item Program → Import Function\_list
@@ -238,7 +237,7 @@ Poznámka: "exp" - označení pro výraz
 
 \newpage
 
-\subsubsection{LL tabulka}
+\subsection{LL tabulka}
 \begin{figure}[ht!]
 \begin{center}
   \includegraphics[angle=90,origin=c, width=0.52\textwidth]{images/LL_table_1.pdf}
@@ -249,7 +248,7 @@ Poznámka: "exp" - označení pro výraz
 
 \newpage
 
-\subsubsection{Zpracování výrazů}
+\subsection{Zpracování výrazů}
 Precedenční analýza začíná inicializací zásobníku, do kterého je nejprve vložen ukončující terminál. Následně jsou postupně čteny tokeny, přičemž funkce \textit{getOperation()} vyhodnocuje operaci na základě vrcholu zásobníku a aktuálně čteného tokenu. V případě operace \texttt{<} je nad nejvrchnější terminál umístěna zarážka \texttt{<} a čtený token je vložen na vrchol zásobníku. Při operaci \texttt{=} je čtený terminál jednoduše vložen na vrchol zásobníku. Pokud nastane operace \texttt{>}, dochází k pokusu o redukci voláním funkce \textit{tryToMatchRule(t\_Stack *stack)}. Pokud se najde shoda s některým z pravidel gramatiky, probíhá redukce, která zároveň generuje abstraktní syntaktický strom.
 
 Redukce je realizována pomocí funkcí:
@@ -263,7 +262,7 @@ Redukce je realizována pomocí funkcí:
 Pokud funkce \texttt{getOperation()} vrátí hodnotu \texttt{0}, znamená to chybu, a funkce \texttt{expressionParser(bool tokenRead, ast\_node\_exp\_t **resultPointer)} skončí syntaktickou chybou. V případě, že výsledkem operace je \texttt{1}, provede se kontrola, zda zásobník odpovídá očekávanému stavu \texttt{\$E\$}. Pokud ano, je abstraktní syntaktický strom vložen do ukazatele \texttt{**resultPointer}.
 
 
-\subsubsection{Precedenční tabulka}
+\subsection{Precedenční tabulka}
 \begin{figure}[ht!]
 \begin{center}
   \includegraphics[width=1\textwidth]{images/precedence_table.pdf}
@@ -273,7 +272,7 @@ Pokud funkce \texttt{getOperation()} vrátí hodnotu \texttt{0}, znamená to chy
 
 \newpage
 
-\subsubsection{Gramatika pro výrazy}
+\subsection{Gramatika pro výrazy}
 
 \begin{enumerate}
     \item $E \to E + E$
@@ -297,11 +296,11 @@ Pokud funkce \texttt{getOperation()} vrátí hodnotu \texttt{0}, znamená to chy
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Implementace překladače (Tabulka symbolů)}
-\subsection{Tabulka symbolů}
+\section{Tabulka symbolů}
 Dle výběru varianty zadání TRP-izp je tabulka symbolů implementována tabulkou s rozptýlenými položkami s implicitním zřetězením položek. Ta je implementována v souboru \textit{symtable.c (.h)}. 
 \\Na tabulce symbolů jsme začali pracovat dříve než byl zadán druhý projekt z předmětu IAL, a kvůli tomu jsme nemohli využít vzor z něj. Proto jsme rozhodli místo implementace z projektu IAL upravit a použít implementaci tabulky s rozptýlenými položkami z druhého projektu z předmětu IJC.
 
-\subsubsection{Návrh tabulky symbolů}
+\subsection{Návrh tabulky symbolů}
 Prvek v tabulce symbolů obsahuje následující elementy:
 
 \vspace{1cm}
@@ -340,7 +339,7 @@ Prvek v tabulce symbolů obsahuje následující elementy:
 
 \newpage
 
-\subsubsection{Uložení tabulek symbolů do DLL seznamu}
+\subsection{Uložení tabulek symbolů do DLL seznamu}
 V \textit{symtable.h} je kromě tabulky symbolů definován i seznam \textit{htabs\_l }, který obsahuje odkaz na první a poslední tabulku symbolů. Dvousměrně vázaný lineární seznam je pro odevzdávaný projekt redundantní, ale na začátku projektu jsme počítali s implementací generátoru kódu bez vytváření abstraktního syntaktického stromu, kde byl dvousměrně vázaný seznam vhodnější.\\
 \newline
 V odevzdávaném projektu existují zároveň nanejvýš dvě tabulky symbolů. První se vytváří na začátku syntaktické analýzy při analýze hlaviček funkcí a ukládají se do ní informace o funkcích. 
@@ -369,24 +368,29 @@ Druhá tabulka se vytváří při vstupu do analýzy funkce a zaniká při ukon�
 \vspace{4cm}
 
 \rhead{\bfseries Implementace překladače (Sémantická analýza)}
-\subsection{Sémantická analýza}
+\section{Sémantická analýza}
 Sémantická analýza je prováděna zároveň se syntaktickou analýzou v \textit{syntax\_an.c}. Pomocné funkce pro kontrolu sémantiky jsou implementovány v \textit{semantic\_an.c} a definovány v \textit{semantic\_an.h}. Sémantická analýza vrací chybové kódy podle zadání.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\subsection{Generování kódu}
-Generování kódu funguje na základě průchodu abstraktního syntaktického stromu. Při průchodu se pomocí funkce \textit{printf()} vytváří spustitelný mezikód v instrukční sadě IFJcode24 na standardní výstup. Zdrojový kód pro generování kódu se nachází v souborech \textit{codegen.c} a \textit{codegen.h}.
-\subsubsection{Části generátoru}
-Generátor je tvořen ze dvou částí - tisknutí hlavičky a tisknutí mezikódu na základě vstupu.
+\rhead{\bfseries Generování kódu}
+\section{Generování kódu}
+Generování kódu funguje na základě průchodu abstraktního syntaktického stromu. Při průchodu se pomocí funkce \textit{printf()} vytváří spustitelný mezikód v instrukční sadě IFJcode24 na standardní výstup. Zdrojový kód pro generování kódu se nachází v souborech \textit{codegen.c} a \textit{codegen.h}. Generátor je tvořen ze dvou částí - tisknutí hlavičky a tisknutí mezikódu na základě vstupu.
 
-\subsubsection{Tisknutí hlavičky}
+\subsection{Tisknutí hlavičky}
 Vytisknutí správné hlavičky zajišťuje funkce \textit{printHeaders()}. Tato funkce nejdříve vytiskne povinné záhlaví pro mezikód - \textit{.IFJcode24}. Poté vytiskne skok do funkce main, kterou musí každý vstupní program obsahovat. Následně vytiskne definici jedinné globální proměnné \textit{GF@\_\%} a definice vestavěných funkcí jazyka IFJ24. Definice vestavěných funkcí byly nejdříve napsány a otestovány v pomocném souboru který nebyl odevzdán. Pro názvy proměnných ve vestavěných funkcích je využit znak '\%' na konci, aby nemohlo dojít ke kolizi s proměnnými vytvářenými ve vstupním programu, jelikož znak '\%' není v názvu proměnných povolen.
 
-\subsubsection{Generování na základě vstupu}
-Tato část generování závisí na průchodu abstraktním syntaktickým stromem vytvořeným v předchozích částech. První volanou funkcí je funkce \textit{codebody()}, která prochází tělo(: funkce, while cyklu, if-else) a volá příslušné podpůrné funkce. Jelikož je vstupní program tvořen z funkcí (i main je funkce), začíná se generováním definic funkcí. Nejdříve se vytiskne nezměněné jméno funkce pomocí instrukce \textit{LABEL}. Jako první se v každé funkci vytvoří rámec pomocí \textit{CREATEFRAME}, posune se na zásobník pomocí \textit{PUSHFRAME} a následně se nadefinují parametry a návratová hodnota. Poté se zavolá funkce \textit{defAllVars()}, která projde tělo funkce do hloubky(= i do těl cyklů a if-else) a nadefinuje všechny použité proměnné, aby nemohlo dojít ke kolizi kvůli redefinicím. Následně se začne vyhodnocovat samotné tělo uložené v ASS. Pokud funkce \textit{codebody()} narazí na uzel přiřazení, např. \textit{x = 2 + 3}, nejdříve se pravá strana převede do polské notace, tzn. \textit{23+}, a za využití zásobníku je vyhodnocena. Výsledek je následně pomocí instrukce \textit{POPS} uložen do proměnné x. Pokud \textit{codebody()} narazí na uzel volání funkce, vloží se na zásobník argumenty funkce a poté se funkce zavolá pomocí instrukce \textit{CALL}. Pokud \textit{codebody()} narazí na while cyklus nebo if-else vytiskne se \textit{LABEL WHILE\%d}, resp. \textit{LABEL IF\%d}, kde \%d značí číslo určené pomocí globální proměnné \textit{labelCounter}, a to aby bylo možné odlišit vnořené cykly a if-else klauzule. Následně se vytiskne kontrola podmínky a podmíněný skok na \textit{LABEL WHILEEND\%d}, resp. \textit{LABEL ELSE\%d}, pokud nebude podmínka splněna. Následně se zavolá funkce \textit{codebody()} nad tělem while cyklu, resp. if-u. Pokud se jednalo o while cyklus, vytiskne se po tělu cyklu skok na začátek cyklu a \textit{LABEL WHILEEND\%d}. Tímto končí while cyklus. Pokud se jednalo o if, vytiskne se skok za else na \textit{LABEL IFEND\%d} a začátek else \textit{LABEL ELSE\%d}. Pokud se jednalo o if klauzuli i s else částí, zavolá se \textit{codebody()} nad tělem else. Nakonec se vytiskne \textit{LABEL IFEND\%d}. Tímto končí if-else klauzule. Pokud \textit{codebody()} narazí na return, uloží jeho výsledek do \textit{LF@retval\%}. Na konci funkce se vytiskne instrukce \textit{POPFRAME} a \textit{RETURN}, resp. \textit{EXIT 0} pokud se jednalo o funkci main. Návratová hodnota se následně dá najít jako \textit{TF@retval\%}. Tento proces se provede pro každou funkci ve vstupním zdrojovém kódu.
+\subsection{Generování na základě vstupu}
+Tato část generování závisí na průchodu abstraktním syntaktickým stromem vytvořeným v předchozích částech. První volanou funkcí je funkce \textit{codebody()}, která prochází tělo(: funkce, while cyklu, if-else) a volá příslušné podpůrné funkce. Jelikož je vstupní program tvořen z funkcí (i main je funkce), začíná se generováním definic funkcí.
+\subsubsection{Začátek generování funkcí}
+Nejdříve se vytiskne nezměněné jméno funkce pomocí instrukce \textit{LABEL}. Jako první se v každé funkci vytvoří rámec pomocí \textit{CREATEFRAME}, posune se na zásobník pomocí \textit{PUSHFRAME} a následně se nadefinují parametry a návratová hodnota. Poté se zavolá funkce \textit{defAllVars()}, která projde tělo funkce do hloubky(= i do těl cyklů a if-else) a nadefinuje všechny použité proměnné, aby nemohlo dojít ke kolizi kvůli redefinicím. Následně se začne vyhodnocovat samotné tělo uložené v ASS. 
+\subsubsection{Generování těla funkce}
+Tělo funkce prochází funkce \textit{codebody()}. Pokud narazí na uzel přiřazení, např. \textit{x = 2 + 3}, nejdříve se pravá strana převede do polské notace, tzn. \textit{23+}, a za využití zásobníku je vyhodnocena. Výsledek je následně pomocí instrukce \textit{POPS} uložen do proměnné x. Pokud \textit{codebody()} narazí na uzel volání funkce, vloží se na zásobník argumenty funkce a poté se funkce zavolá pomocí instrukce \textit{CALL}. Pokud \textit{codebody()} narazí na while cyklus nebo if-else vytiskne se \textit{LABEL WHILE\%d}, resp. \textit{LABEL IF\%d}, kde \%d značí číslo určené pomocí globální proměnné \textit{labelCounter}, a to aby bylo možné odlišit vnořené cykly a if-else klauzule. Následně se vytiskne kontrola podmínky a podmíněný skok na \textit{LABEL WHILEEND\%d}, resp. \textit{LABEL ELSE\%d}, pokud nebude podmínka splněna. Následně se zavolá funkce \textit{codebody()} nad tělem while cyklu, resp. if-u. Pokud se jednalo o while cyklus, vytiskne se po tělu cyklu skok na začátek cyklu a \textit{LABEL WHILEEND\%d}. Tímto končí while cyklus. Pokud se jednalo o if, vytiskne se skok za else na \textit{LABEL IFEND\%d} a začátek else \textit{LABEL ELSE\%d}. Pokud se jednalo o if klauzuli i s else částí, zavolá se \textit{codebody()} nad tělem else. Nakonec se vytiskne \textit{LABEL IFEND\%d}. Tímto končí if-else klauzule.
+\subsubsection{Konec funkce}
+Pokud \textit{codebody()} narazí na return, uloží jeho výsledek do \textit{LF@retval\%}. Na konci funkce se vytiskne instrukce \textit{POPFRAME} a \textit{RETURN}, resp. \textit{EXIT 0} pokud se jednalo o funkci main. Návratová hodnota se následně dá najít jako \textit{TF@retval\%}. Tento proces se provede pro každou funkci ve vstupním zdrojovém kódu.
 
-\subsection{GNU Make}
+\section{GNU Make}
 Další požadavek projektu bylo vytvoření souboru \textit{Makefile} pro přeložení projektu pomocí příkazu \texttt{make}. Pro kompilaci používáme kompilátor \textit{gcc} s \textit{gnu99} standardem jazyka C. Kompilátor je taky nastavený, aby přerušil překlad při jakékoliv chybě a optimalizace jsou vypnuté.\\
 Nástroj GNU Make lze také využít k vytvoření zabaleného archivu pro odevzdání pomocí příkazu \texttt{make zip}.
 
@@ -424,11 +428,5 @@ Funkce mohou být volány ve výrazech. Nepodařilo se nám však zavést výraz
 
 \section{Závěr}
 Projekt ze začátku působil velice rozsáhle, ale látku jsme vstřebávali pozvolna a postupně jsme stavěli naše řešení. Znalosti jsme čerpali především z přednášek IFJ a IAL. Nejasnosti ze zadání jsme doplňovali z diskuzního fóra a otázkami na ostatní studenty na Discordu. Jelikož se většina týmu již znala, neměli jsme problém spolupracovat. Správnost řešení jsme ověřovali pokusným odevzdáním a automatickými testy. Projekt jsme stihli vypracovat s jistým předstihem, což nám umožnilo vypracovat tuto dokumentaci. Z projektu jsme si odnesli zkušenosti nejen z programování, ale také z týmové práce a hospodaření s časem.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
-\rhead{\bfseries Reference}
-\bibliographystyle{plain}
-\bibliography{reference.bib}
 
 \end{document}
