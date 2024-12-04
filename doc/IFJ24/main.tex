@@ -419,6 +419,69 @@ Uzel \textit{ast\_node\_exp} ukládá binární strom vytvořený v expression p
 \subsection{Dynamické pole}
 Dynamické pole je použito při generaci kódu pro uchování již definovaných proměnných \textit{array\_vars\_t} a pro řazení exp uzlů v post orderu \textit{array\_items\_t}. Obsahuje pole ukazatelů na ukládané hodnoty, maximální kapacitu a počet momentálně uložených položek.
 
+\subsection{Zásobník}
+Zásobník je implementován jako propojený seznam. Obsahuje následující struktury:
+
+\begin{itemize}
+    \item \textbf{\texttt{t\_Stack}}: Struktura reprezentující zásobník.
+    \begin{itemize}
+        \item \texttt{struct StackItem *top} - ukazatel na vrchol zásobníku.
+        \item \texttt{int size} - aktuální počet položek v zásobníku.
+    \end{itemize}
+    \item \textbf{\texttt{t\_StackItem}}: Struktura reprezentující jednu položku v zásobníku.
+    \begin{itemize}
+        \item \texttt{stackElementType type} - typ položky (\texttt{TERMINAL}, \texttt{NON\_TERMINAL}, \texttt{PRECEDENT\_LESS}).
+        \item \texttt{Token *token} - ukazatel na token, který položka obsahuje.
+        \item \texttt{struct StackItem *next} - ukazatel na následující položku v zásobníku.
+        \item \texttt{struct StackItem *prev} - ukazatel na předchozí položku v zásobníku.
+        \item \texttt{ast\_node\_exp\_t *node} - ukazatel na AST uzel asociovaný s touto položkou.
+    \end{itemize}
+\end{itemize}
+
+Funkce pro práci se zásobníkem:
+
+\begin{itemize}
+    \item \textit{void stackInit(t\_Stack *stack)}
+    \begin{itemize}
+        \item Inicializuje prázdný zásobník.
+    \end{itemize}
+
+    \item \textit{int stackPush(t\_Stack *stack, stackElementType type, Token *tkn, ast\_node\_exp\_t *node)}
+    \begin{itemize}
+        \item Přidá novou položku na vrchol zásobníku.
+        \item Vrací \texttt{0} při úspěchu nebo \texttt{INTERNAL\_COMPILER\_ERROR} při chybě alokace paměti.
+    \end{itemize}
+
+    \item \textit{void stackPop(t\_Stack *stack)}
+    \begin{itemize}
+        \item Odstraní položku z vrcholu zásobníku.
+    \end{itemize}
+
+    \item \textit{t\_StackItem *stackTop(t\_Stack *stack)}
+    \begin{itemize}
+        \item Vrací ukazatel na položku na vrcholu zásobníku bez jejího odstranění.
+    \end{itemize}
+
+    \item \textit{void stackClear(t\_Stack *stack)}
+    \begin{itemize}
+        \item Odstraní všechny položky ze zásobníku.
+    \end{itemize}
+
+    \item \textit{int stackPushPrecedentLess(t\_Stack *stack)}
+    \begin{itemize}
+        \item Vloží položku typu \texttt{PRECEDENT\_LESS} za nejbližší \texttt{TERMINAL} položku.
+        \item Vrací \texttt{0} při úspěchu, \texttt{INTERNAL\_COMPILER\_ERROR} při chybě alokace paměti nebo \texttt{SYNTACTIC\_ANALYSIS\_ERROR}, pokud \texttt{TERMINAL} neexistuje.
+    \end{itemize}
+
+    \item \texttt{t\_StackItem *topTerminal(t\_Stack *stack)}
+    \begin{itemize}
+        \item Vrací ukazatel na nejbližší položku typu \texttt{TERMINAL} v zásobníku, počínaje od vrcholu.
+    \end{itemize}
+\end{itemize}
+
+Tento zásobník je klíčovou součástí při implementaci syntaktické precedenční analýzy, kde slouží k ukládání a manipulaci s elementy jako jsou terminály, neterminály a speciální položky pro precedenční analýzu.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Rozšíření a závěr}
