@@ -162,7 +162,7 @@ Syntaktická analýza je implementována v souboru \texttt{syntax\_an.c} (s odpo
 
 Proces začíná voláním funkce \textit{headers()}, která načte počáteční pravidlo (import) a následně zpracovává hlavičky funkcí. Tyto hlavičky jsou uloženy do symbolické tabulky, zatímco těla funkcí jsou během prvního průchodu ignorována. Po načtení hlaviček se vstupní proud resetuje na začátek souboru pomocí funkce \textit{rewind\_stdin()}.
 
-Následuje druhý průchod, zahájený voláním funkce \textit{program()}, který provádí podrobnou analýzu celého programu. V tomto kroku se také provádí sémantická kontrola a vytváří se abstraktní syntaktický strom (AST). AST je generován pomocí funkcí, které vytvářejí jednotlivé uzly a propojují je do hierarchické struktury. Po dokončení syntaktické analýzy je AST předán do fáze generace kódu.
+Následuje druhý průchod, zahájený voláním funkce \textit{program()}, který provádí podrobnou analýzu celého programu. V tomto kroku se také provádí sémantická kontrola a vytváří se abstraktní syntaktický strom (ASS). ASS je generován pomocí funkcí, které vytvářejí jednotlivé uzly a propojují je do hierarchické struktury. Po dokončení syntaktické analýzy je ASS předán do fáze generace kódu.
 
 Tokeny jsou načítány lexikálním analyzátorem prostřednictvím funkce \textit{read\_token()}, která volá funkci \textit{get\_token()}. Tato funkce slouží jako rozhraní mezi lexikální a syntaktickou analýzou. Parser zpracovává všechny části LL gramatiky s výjimkou výrazů. Výrazy jsou předávány metodě precedenční syntaktické analýzy, která je samostatně vyhodnocuje.
 
@@ -434,7 +434,7 @@ Zásobník je implementován jako propojený seznam. Obsahuje následující str
         \item \texttt{Token *token} - ukazatel na token, který položka obsahuje.
         \item \texttt{struct StackItem *next} - ukazatel na následující položku v zásobníku.
         \item \texttt{struct StackItem *prev} - ukazatel na předchozí položku v zásobníku.
-        \item \texttt{ast\_node\_exp\_t *node} - ukazatel na AST uzel asociovaný s touto položkou.
+        \item \texttt{ast\_node\_exp\_t *node} - ukazatel na ASS uzel asociovaný s touto položkou.
     \end{itemize}
 \end{itemize}
 
