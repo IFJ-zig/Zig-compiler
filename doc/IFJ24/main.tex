@@ -389,38 +389,32 @@ Tato část generování závisí na průchodu abstraktním syntaktickým strome
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Datové struktury a datové typy}
-\section{Datové struktury a datové typy}
-\subsection{Datové struktury}
+\section{Datové struktury}
 
-\subsubsection{Zásobník symbolů (zpracování výrazů)}
-Zásobník \textit{symstack.c (.h)}. Zmíněný \textit{\textbf{symbol\_stack\_insert\_after\_top\_terminal()}}. Funkce
+\subsection{Abstraktní syntaktický strom (ASS)}
+Abstraktní syntaktický strom, zkráceně ASS, je struktura, kterou vytváříme během syntaktické analýzy a využíváme pro generaci kódu. Jedná se o systém navzájem propojených uzlů. Kořenový uzel je typu \textit{ast\_default\_node} a obsahuje uzly definic funkcí \textit{ast\_node\_fn\_def} a jejich počet. Ty obsahují informaci o funkci s tělo definující funkci. Tělo funkce je pole \textit{ast\_default\_node} ukazujících na uzly níže definované. 
+\subsubsection{ast\_node\_fn\_call}
+Uzel \textit{ast\_node\_fn\_call} znamená volání funkce. Uchovává informaci o názvu funkce a argumentech s kterými byla volána.
+\subsubsection{ast\_node\_fn\_returm}
+Uzel \textit{ast\_node\_fn\_return} znamená návrat z funkce. Uchovává informace o návratovém typu a návratové hodnotě uložené v \textit{ast\_node\_exp}.
+\subsubsection{ast\_node\_var\_assign}
+Uzel \textit{ast\_node\_var\_assign} udává přiřazení do proměnné. Uchovává název proměnné a hodnotu v \textit{ast\_node\_exp}, která se do ní má vložit.
+\subsubsection{ast\_node\_var\_def}
+Uzel \textit{ast\_node\_var\_def} udává deklaraci proměnné a uchovává název proměnné. Dále pok1ud došlo i k přiřazení do proměnné, uloží jej v \textit{ast\_node\_var\_assign}.\
+\subsubsection{ast\_node\_if\_else}
+Uzel \textit{ast\_node\_if\_else} udává if-else klauzuli. Uchovává informaci jestli se jedná o if akceptující hodnotu null a tělo a délku těla if i else částí. 
+\subsubsection{ast\_node\_while}
+Uzel \textit{ast\_node\_while} znamená while cyklus. Uchovává informaci jestli se jedná o if akceptující hodnotu null a tělo a délku těla while cyklu.
+\subsubsection{ast\_node\_exp}
+Uzel \textit{ast\_node\_exp} ukládá binární strom vytvořený v expression parseru. Navíc má dva speciální ukazatele - v případě volání funkce a v případě znaménka mínus, např. -2.
 
-\subsubsection{Zásobník parametrů (parser)}
-Zásobník \textit{paramstack.c (.h)}
-
-\subsubsection{Binární vyhledávací strom (tabulka symbolů)}
-Binární \textit{symtable.c (.h)}. Jeho \cite{pruvodce2017}. Při 
-
-\subsubsection{Jednosměrně vázaný seznam (tabulka symbolů)}
-Jednosměrně \textit{sym\_linked\_list.c (.h)}. Jako
-
-\subsubsection{Jednosměrně vázaný seznam (identifikátory)}
-Jednosměrně \textit{ids\_list.c (.h)}. Jeho 
-
-\subsubsection{Obousměrně vázaný seznam (generování kódu)}
-Obousměrně \textit{dll.c (.h)}. Slouží \textit{\textbf{DLL\_InsertLast()}}, pomocí \textit{\textbf{DLL\_PrintAll()}}
-
-\subsection{Datové typy}
-\subsubsection{string\_t}
-Datový \textit{string\_t} implementován
-
-\subsubsection{token\_t}
-Datový \textit{token\_t} implementován
+\subsection{Dynamické pole}
+Dynamické pole je použito při generaci kódu pro uchování již definovaných proměnných \textit{array\_vars\_t} a pro řazení exp uzlů v post orderu \textit{array\_items\_t}. Obsahuje pole ukazatelů na ukládané hodnoty, maximální kapacitu a počet momentálně uložených položek.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Rozšíření a závěr}
-\section{FUNEXP}
+\section{Rozšíření}
 Naše řešení částečně implementuje rozšíření FUNEXP.\newline
 Funkce mohou být volány ve výrazech. Nepodařilo se nám však zavést výrazy jako parametry funkcí, jelikož to syntaktická analýza nepovoluje.
 
