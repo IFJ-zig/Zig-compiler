@@ -5,8 +5,8 @@
 #############################################################
 
 # Directories
-SOURCE_DIR      = src
-BUILD_DIR       = build
+SOURCE_DIR      =
+BUILD_DIR       = 
 
 # Compiler settings
 CC              = gcc
@@ -37,7 +37,7 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
 
 #Documentation
 zip:
-	zip -j xbohatd00 Makefile rozdeleni dokumentace.pdf src/*
+	zip -j xbohatd00 Makefile rozdeleni rozsireni dokumentace.pdf src/*
 
 # Cleanup
 clean:
