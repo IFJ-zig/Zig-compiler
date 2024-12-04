@@ -1,9 +1,13 @@
-/********************************************
-* Projekt: Implementace překladače imperativního jazyka IFJ24
-* Tvůrci: Ivo Puchnar, xpuchn02
-*********************************************/
-#include "tokens.h"
+/**
+ *  Project: IFJ24 Language compiler
+ *	
+ *	This file contains implementation of support functions used for lexical analysis
+ *  @file  Lexem_an.c
+ *  @author Ivo Puchnar, xpuchn02
+ *  @brief Implementation file for lexical analysis
+ */
 
+#include "tokens.h"
 #include "errors_enum.h"
 
 Token *allocateToken(Token tkn) {
@@ -17,9 +21,11 @@ Token *allocateToken(Token tkn) {
 
 	// Ensure independent copy of the string
 	if (tkn.s != NULL) {
-		T->s = strdup(tkn.s); // strdup allocates memory and copies the string
+		// strdup allocates memory and copies the string
+		T->s = strdup(tkn.s);
+		// Clean up allocated memory if strdup fails
 		if (T->s == NULL) {
-			free(T); // Clean up allocated memory if strdup fails
+			free(T);
 			exit(INTERNAL_COMPILER_ERROR);
 		}
 	} else {
