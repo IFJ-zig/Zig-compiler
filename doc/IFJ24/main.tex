@@ -78,13 +78,13 @@
         \item Daniel Bohata
         \begin{itemize}
         \item[-] Vedení
-        \item[-] Návrh AST
+        \item[-] Návrh ASS
         \item[-] Generace kódu 
         \end{itemize}
         \item Tadeáš Horák
         \begin{itemize}
-        \item[-] Návrh AST
-        \item[-] Implementace AST
+        \item[-] Návrh ASS
+        \item[-] Implementace ASS
         \item[-] Sémantická analýza
         \end{itemize}
         \item Ivo Puchnar
@@ -94,7 +94,7 @@
         \end{itemize}
         \item Adam Vožda
         \begin{itemize}
-        \item[-] Implementace AST
+        \item[-] Implementace ASS
         \item[-] Syntaktická analýza
         \end{itemize}
     \end{minipage}
@@ -298,7 +298,8 @@ Pokud funkce \texttt{getOperation()} vrátí hodnotu \texttt{0}, znamená to chy
 \newpage
 \rhead{\bfseries Implementace překladače (Tabulka symbolů)}
 \subsection{Tabulka symbolů}
-Dle výběru varianty zadání \rom{1} je tabulka symbolů implementována binárním vyhledávacím stromem. Ten je implementován v souboru \textit{symtable.c (.h)}.
+Dle výběru varianty zadání TRP-izp je tabulka symbolů implementována tabulkou s rozptýlenými položkami s implicitním zřetězením položek. Ta je implementována v souboru \textit{symtable.c (.h)}. 
+\\Na tabulce symbolů jsme začali pracovat dříve než byl zadán druhý projekt z předmětu IAL, a kvůli tomu jsme nemohli využít vzor z něj. Proto jsme rozhodli místo implementace z projektu IAL upravit a použít implementaci tabulky s rozptýlenými položkami z druhého projektu z předmětu IJC.
 
 \subsubsection{Návrh tabulky symbolů}
 Prvek v tabulce symbolů obsahuje následující elementy:
@@ -307,44 +308,44 @@ Prvek v tabulce symbolů obsahuje následující elementy:
 
 \begin{itemize}
     \begin{minipage}{0.3\linewidth}   
-    \item declared
-    \item defined
-    \item data\_type
-    \item params\_count
-    \item params\_type\_count
-    \item returns\_def\_count
-    \item returns\_count    
-    \item first\_param
-    \item first\_type\_param
-    \item first\_def\_ret
-    \item first\_ret
+    \item key
+    \item depth
+    \item type
+    \item returnType
+    \item params
+    \item paramCound
+    \item hasReturn
+    \item isConst    
+    \item isNullable
+    \item isDefined
+    \item isUsed
+    \item isMutable
     \end{minipage}
     \begin{minipage}{0.65\linewidth}   
-    \item[-] proměnná/funkce byla deklarována
-    \item[-] proměnná/funkce byla definována
+    \item[-] název symbolu
+    \item[-] hloubka zanoření symbolu
     \item[-] datový typ proměnné
-    \item[-] počet parametrů definice funkce
-    \item[-] počet parametrů deklarace funkce
-    \item[-] počet návratových typů definice funkce
-    \item[-] počet návratových typů deklarace funkce    
-    \item[-] ukazatel na první parametr definice funkce
-    \item[-] ukazatel na první parametr deklarace funkce
-    \item[-] ukazatel na první návratový typ definice funkce
-    \item[-] ukazatel na první návratový typ deklarace funkce
+    \item[-] datový typ, který funkce vrací
+    \item[-] ukazatel na pole parametrů funkce
+    \item[-] počet parametrů
+    \item[-] funkce má v těle return    
+    \item[-] Symbol je typu const
+    \item[-] Symbol může vracet NULL
+    \item[-] Symbol byl definován
+    \item[-] Symbol byl použit
+    \item[-] Symbol může být měněn
     \end{minipage}
 \end{itemize}
 
-\vspace{1cm}
-
-Všechny \textit{symData\_t}. Při inicializaci
-
-Jako element
 
 \newpage
 
-\subsubsection{Uložení tabulek symbolů do jednosměrně vázaného seznamu}
-Jednotlivé \textit{sym\_linked\_list.c (.h)}. Tento
-
+\subsubsection{Uložení tabulek symbolů do DLL seznamu}
+V \textit{symtable.h} je kromě tabulky symbolů definován i seznam \textit{htabs\_l }, který obsahuje odkaz na první a poslední tabulku symbolů. Dvousměrně vázaný lineární seznam je pro odevzdávaný projekt redundantní, ale na začátku projektu jsme počítali s implementací generátoru kódu bez vytváření abstraktního syntaktického stromu, kde byl dvousměrně vázaný seznam vhodnější.\\
+\newline
+V odevzdávaném projektu existují zároveň nanejvýš dvě tabulky symbolů. První se vytváří na začátku syntaktické analýzy při analýze hlaviček funkcí a ukládají se do ní informace o funkcích. 
+\newline
+Druhá tabulka se vytváří při vstupu do analýzy funkce a zaniká při ukončení této analýzy.
 \vspace{4cm}
 
 \begin{figure}[ht!]
@@ -352,73 +353,28 @@ Jednotlivé \textit{sym\_linked\_list.c (.h)}. Tento
 \begin{tikzpicture}[list/.style={rectangle split, rectangle split parts=2,
     draw, rectangle split horizontal}, >=stealth, start chain]
 
-  \node[list,on chain] (A) {lok. tab. symb. *};
-  \node[list,on chain] (B) {lok. tab. symb. *};
-  \node[list,on chain] (C) {glob. tab. symb. *};
-  \node[on chain,draw,inner sep=6pt] (D) {};
-  \draw (D.north east) -- (D.south west);
-  \draw (D.north west) -- (D.south east);
-  \draw[*->] let \p1 = (A.two), \p2 = (A.center) in (\x1,\y2) -- (B);
+  \node[list,on chain] (A) {tabulka symbolů funkcí *};
+  \node[list,on chain] (B) {tabulka symbolů uvnitř funkce *};
+  \node[on chain,draw,inner sep=6pt] (C) {};
+  \draw (C.north east) -- (C.south west);
+  \draw (C.north west) -- (C.south east);
+  \draw[<->] let \p1 = (A.two), \p2 = (A.center) in (\x1,\y2) -- (B);
   \draw[*->] let \p1 = (B.two), \p2 = (B.center) in (\x1,\y2) -- (C);
-  \draw[*->] let \p1 = (C.two), \p2 = (C.center) in (\x1,\y2) -- (D);
 \end{tikzpicture}
 
-\tikzset{every tree node/.style={minimum width=2em,draw,circle},
-         blank/.style={draw=none},
-         edge from parent/.style=
-         {draw,edge from parent path={(\tikzparentnode) -- (\tikzchildnode)}},
-         level distance=1.5cm}
-\begin{tikzpicture}[sibling distance=25pt]
-\Tree
-[.ida     
-    [.idb ]
-    [.idc 
-    \edge[blank]; \node[blank]{};
-    \edge[]; [.idd
-         ]
-    ]
-]
-\end{tikzpicture}
-\begin{tikzpicture}[sibling distance=25pt]
-\Tree
-[.ide     
-    [.idf ]
-    [.idg 
-    \edge[blank]; \node[blank]{};
-    \edge[]; [.idh
-         ]
-    ]
-]
-\end{tikzpicture}
-\begin{tikzpicture}[sibling distance=30pt]
-\Tree
-[.i()      
-    [.j()  ]
-    [.k()  
-    \edge[blank]; \node[blank]{};
-    \edge[]; [.l()
-         ]
-    ]
-]
-\end{tikzpicture}
-\vspace{2cm}
 
-* - ukazatel na kořen binárního stromu reprezentujícího tabulku symbolů \newline
-
-\caption{Diagram jednosměrně vázaného seznamu}
+\caption{Diagram dvousměrně vázaného seznamu tabulek symbolů}
 \end{center}
 \end{figure}
+\vspace{4cm}
+
+\rhead{\bfseries Implementace překladače (Sémantická analýza)}
+\subsection{Sémantická analýza}
+Sémantická analýza je prováděna zároveň se syntaktickou analýzou v \textit{syntax\_an.c}. Pomocné funkce pro kontrolu sémantiky jsou implementovány v \textit{semantic\_an.c} a definovány v \textit{semantic\_an.h}. Sémantická analýza vrací chybové kódy podle zadání.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
-\rhead{\bfseries Implementace překladače (Sémantická analýza)}
-\subsection{Sémantická analýza}
-\subsubsection{Parser}
-Sémantický \textit{parser.c} Zmíněný
-
-\subsubsection{Zpracování výrazů}
-Psa provádí \textit{\textbf{get\_type()}} Při redukci 
-
 \subsection{Generování kódu}
 Generování kódu funguje na základě průchodu abstraktního syntaktického stromu. Při průchodu se pomocí funkce \textit{printf()} vytváří spustitelný mezikód v instrukční sadě IFJcode24 na standardní výstup. Zdrojový kód pro generování kódu se nachází v souborech \textit{codegen.c} a \textit{codegen.h}.
 \subsubsection{Části generátoru}
@@ -433,31 +389,38 @@ Tato část generování závisí na průchodu abstraktním syntaktickým strome
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Datové struktury a datové typy}
-\section{Datové struktury}
+\section{Datové struktury a datové typy}
+\subsection{Datové struktury}
 
-\subsection{Abstraktní syntaktický strom (ASS)}
-Abstraktní syntaktický strom, zkráceně ASS, je struktura, kterou vytváříme během syntaktické analýzy a využíváme pro generaci kódu. Jedná se o systém navzájem propojených uzlů. Kořenový uzel je typu \textit{ast\_default\_node} a obsahuje uzly definic funkcí \textit{ast\_node\_fn\_def} a jejich počet. Ty obsahují informaci o funkci s tělo definující funkci. Tělo funkce je pole \textit{ast\_default\_node} ukazujících na uzly níže definované. 
-\subsubsection{ast\_node\_fn\_call}
-Uzel \textit{ast\_node\_fn\_call} znamená volání funkce. Uchovává informaci o názvu funkce a argumentech s kterými byla volána.
-\subsubsection{ast\_node\_fn\_returm}
-Uzel \textit{ast\_node\_fn\_return} znamená návrat z funkce. Uchovává informace o návratovém typu a návratové hodnotě uložené v \textit{ast\_node\_exp}.
-\subsubsection{ast\_node\_var\_assign}
-Uzel \textit{ast\_node\_var\_assign} udává přiřazení do proměnné. Uchovává název proměnné a hodnotu v \textit{ast\_node\_exp}, která se do ní má vložit.
-\subsubsection{ast\_node\_var\_def}
-Uzel \textit{ast\_node\_var\_def} udává deklaraci proměnné a uchovává název proměnné. Dále pok1ud došlo i k přiřazení do proměnné, uloží jej v \textit{ast\_node\_var\_assign}.\
-\subsubsection{ast\_node\_if\_else}
-Uzel \textit{ast\_node\_if\_else} udává if-else klauzuli. Uchovává informaci jestli se jedná o if akceptující hodnotu null a tělo a délku těla if i else částí. 
-\subsubsection{ast\_node\_while}
-Uzel \textit{ast\_node\_while} znamená while cyklus. Uchovává informaci jestli se jedná o if akceptující hodnotu null a tělo a délku těla while cyklu.
-\subsubsection{ast\_node\_exp}
-Uzel \textit{ast\_node\_exp} ukládá binární strom vytvořený v expression parseru. Navíc má dva speciální ukazatele - v případě volání funkce a v případě znaménka mínus, např. -2.
+\subsubsection{Zásobník symbolů (zpracování výrazů)}
+Zásobník \textit{symstack.c (.h)}. Zmíněný \textit{\textbf{symbol\_stack\_insert\_after\_top\_terminal()}}. Funkce
 
-\subsection{Dynamické pole}
-Dynamické pole je použito při generaci kódu pro uchování již definovaných proměnných \textit{array\_vars\_t} a pro řazení exp uzlů v post orderu \textit{array\_items\_t}. Obsahuje pole ukazatelů na ukládané hodnoty, maximální kapacitu a počet momentálně uložených položek.
+\subsubsection{Zásobník parametrů (parser)}
+Zásobník \textit{paramstack.c (.h)}
+
+\subsubsection{Binární vyhledávací strom (tabulka symbolů)}
+Binární \textit{symtable.c (.h)}. Jeho \cite{pruvodce2017}. Při 
+
+\subsubsection{Jednosměrně vázaný seznam (tabulka symbolů)}
+Jednosměrně \textit{sym\_linked\_list.c (.h)}. Jako
+
+\subsubsection{Jednosměrně vázaný seznam (identifikátory)}
+Jednosměrně \textit{ids\_list.c (.h)}. Jeho 
+
+\subsubsection{Obousměrně vázaný seznam (generování kódu)}
+Obousměrně \textit{dll.c (.h)}. Slouží \textit{\textbf{DLL\_InsertLast()}}, pomocí \textit{\textbf{DLL\_PrintAll()}}
+
+\subsection{Datové typy}
+\subsubsection{string\_t}
+Datový \textit{string\_t} implementován
+
+\subsubsection{token\_t}
+Datový \textit{token\_t} implementován
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
 \rhead{\bfseries Rozšíření a závěr}
-\section{Rozšíření}
+\section{FUNEXP}
 Naše řešení částečně implementuje rozšíření FUNEXP.\newline
 Funkce mohou být volány ve výrazech. Nepodařilo se nám však zavést výrazy jako parametry funkcí, jelikož to syntaktická analýza nepovoluje.
 
