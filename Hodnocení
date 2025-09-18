@@ -1,0 +1,26 @@
+Vaše hodnocení části 1) (implementace): 12,89 bodů
+  Komentář hodnocení části 1): OK
+Vaše hodnocení části 2) (prémie): 0 bodů
+  Komentář hodnocení části 2): Bez komentáře.
+Vaše hodnocení části 3) (dokumentace): 4 bodů
+  Komentář hodnocení části 3): TS, SéA, term.
+
+SéA = obvykle málo konkrétní popis toho, co kontrolují.
+TS = chybí nějaká část popisu, nejčastěji podrobnější popis struktury tabulky (např. zda máte více tabulek nebo jednu).
+term. = nepřesná terminologie
+
+
+Procentuální hodnocení modulů překladače (NOVĚ přidán u každé kategorie testů i zaokrouhlený procentní poměr bodů ztracených kvůli špatnému návratovému kódu (včetně chybě při interpretaci vygenerovaného kódu) a neshodě ve výpisech při správném návratovém kódu):
+Lexikální analýza (detekce chyb): 94 % (198/210 mb, špatné kódy 5 %)
+Syntaktická analýza (detekce chyb): 92 % (246/267 mb, špatné kódy 7 %)
+Sémantická analýza (detekce chyb): 46 % (188/402 mb, špatné kódy 53 %)
+Interpretace přeloženého kódu (základní): 88 % (320/360 mb, špatné kódy 6 %, nesouhlasné výpisy 4 %)
+Interpretace přeloženého kódu (výrazy, vest. funkce): 62 % (107/170 mb, špatné kódy 26 %, nesouhlasné výpisy 10 %)
+Interpretace přeloženého kódu (komplexní): 28 % (122/421 mb, špatné kódy 55 %, nesouhlasné výpisy 15 %)
+ORELSE 0 % (0/50 mb, špatné kódy 100 %, nesouhlasné výpisy 0 %)
+UNREACHABLE 0 % (0/50 mb, špatné kódy 100 %, nesouhlasné výpisy 0 %)
+BOOLTHEN 0 % (0/100 mb, špatné kódy 100 %, nesouhlasné výpisy 0 %)
+FOR 0 % (0/25 mb, špatné kódy 100 %, nesouhlasné výpisy 0 %)
+FUNEXP 29 % (44/150 mb, špatné kódy 70 %, nesouhlasné výpisy 0 %)
+WHILE 0 % (0/100 mb, špatné kódy 100 %, nesouhlasné výpisy 0 %)
+Celkem bez rozšíření: 64 % (1181/1830 mb)
